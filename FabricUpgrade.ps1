@@ -112,9 +112,9 @@ function BuildResolutions()
     return $resolutions -join ","
 }
 
+# Add one Resolution to the Resolutions file.
 function AddResolution($linkedServiceType, $resolutionType, $linkedServiceName, $datasourceName)
 {
-
     if ($resolutionsFilename)
     {
         Write-Host
@@ -166,6 +166,8 @@ function AddResolution($linkedServiceType, $resolutionType, $linkedServiceName, 
     }    
 }
 
+# From the FabricUpgradeResponse, find the alerts that indicate a need to add a Resolution.
+# For each such alert, add _most_ of a Resolution to the Resolutions file.
 function UpdateResolutions($responsePayload)
 {
     $responseObject = ConvertFrom-Json $responsePayload
@@ -203,43 +205,13 @@ function PublicApiBaseUrl()
     return $publicApiBaseUrl
 }
 
-# For now, we must use the PowerBI WebApi endpoint.
-# Once the FabricUpgrader PublicApi is available, then we can use that and remove this method.
-function WebApiBaseUrl()
-{
-    # Compute where to send this request, based on $cluster.
-    $webApiBaseUrl = switch($cluster)
-    {
-        "daily" { "https://pbipdailyeus2euap-daily.pbidedicated.windows.net/webapi"}
-        "dxt" { "https://pbipdxtcuseuap1-dxt.pbidedicated.windows.net/webapi"}
-        "msit" { "https://pbipmsitwcus22-msit.pbidedicated.windows.net/webapi"}
-        default { "<exit>" }
-    }
-
-    if ($webApiBaseUrl.Equals("<exit>"))
-    {
-        Write-Host "Cannot connect to the cluster" $cluster
-        exit
-    }
-
-    return $webApiBaseUrl
-}
-
 # Build the URL that invokes the Fabric Upgrader.
 function UpgradePackageUrl()
 {
-    # For now, we use the PowerBI webapi endpoints, so build that URL.
-    # We computed the capacityId when we called QueryWorkspace, below.
-    return "$(WebApiBaseUrl)/capacities/$capacityId/workloads/DI/DiService/direct/workspaces/$workspace/fabricUpgrade/upgradePackage?api-version=2022-01-01-preview"
-    
-    # When the FabricUpgrade PublicAPI endpoints are working, then we will build the URL for that endpoint.
-    # TODO: This next line is almost certainly wrong. Find out how Public API exposes workload controllers, and fix it here.
-    # return "$(PublicApiUrl)/workspaces/$workspace/fabricUpgrade/upgradePackage"
+    return "$(PublicApiBaseUrl)/workspaces/$workspace/fabricUpgrade/upgradePackage"
 }
 
 # Find out information about the current workspace.
-# We currently need this because we need to extract the CapacityId to build the UpgradePackageUrl.
-# We will continue to want this, because we will use it to validate the workspace.
 function QueryWorkspace()
 {
     $workspaceResponse = Invoke-WebRequest `
@@ -299,6 +271,9 @@ function WriteUpgradeRequestToFile($payload)
 # Start validation of environment and parameters
 #############################################################################
 
+# We do not require the user to enter any of the command-line arguments before
+# we check to see if they have the correct PowerShell version.
+
 # Validate the current PowerShell version.
 # We require at least version 7.
 $powerShellVersion = $PSVersionTable.PSVersion.Major
@@ -350,6 +325,14 @@ if ($fabricToken.StartsWith("'")) { $fabricToken = $fabricToken.Substring(1) }
 if ($fabricToken.EndsWith("'")) { $fabricToken = $fabricToken.Substring(0, $fabricToken.Length-1) }
 $fabricToken = $fabricToken.Trim()
 
+# Validate the workspaceId and token.
+$queryWorkspaceResponse = QueryWorkspace
+if ($queryWorkspaceResponse.StatusCode -ne 200)
+{
+    Write-Host "Cannot query workspace: " $queryWorkspaceResponse
+    exit
+}
+
 $validModes = "Execute","WhatIf"
 while (!($validModes -contains $mode))
 {
@@ -385,17 +368,8 @@ $resolutionString = BuildResolutions
 # Start of Main
 #############################################################################
 
-# Validate the workspaceId and token, and extract the capacityId from a valid response.
-$queryWorkspaceResponse = QueryWorkspace
-if ($queryWorkspaceResponse.StatusCode -ne 200)
-{
-    Write-Host "Cannot query workspace: " $queryWorkspaceResponse
-    exit
-}
-
 $workspaceInfo = $queryWorkspaceResponse | Select-Object -ExpandProperty Content | ConvertFrom-Json
-$capacityId = $workspaceInfo.capacityId
-
+# Here, you can extract things like capacityId, etc., if you need them.
 
 if ([String]::IsNullOrWhiteSpace($upgradePackage))
 {
@@ -437,5 +411,11 @@ else
 
 Write-Host $upgradeResponse
 
-$upgradeResponsePayload = $upgradeResponse | Select-Object -ExpandProperty Content
-UpdateResolutions $upgradeResponsePayload
+if ($upgradeResponse.StatusCode -eq 400)
+{
+    # The alerts inside the message may contain descriptions of required Connection resolutions.
+    # Update the Resolutions file with "stub" versions and notify the user.
+    $upgradeResponsePayload = $upgradeResponse | Select-Object -ExpandProperty Content | ConvertFrom-Json
+    $upgradeResponseMessage = $upgradeResponsePayload.message
+    UpdateResolutions $upgradeResponseMessage
+}
