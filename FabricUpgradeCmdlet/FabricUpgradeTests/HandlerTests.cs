@@ -34,6 +34,7 @@ namespace FabricUpgradeTests
 
         [TestMethod]
         [DataRow("ConvertNotAZipFile")]
+        [DataRow("ConvertPipelineWithUnsupportedActivity")]
         [DataRow("ConvertEmptyPipeline")]
         [DataRow("ConvertPipelineWithWait")]
         public void ConvertToFabricPipeline_Test(
