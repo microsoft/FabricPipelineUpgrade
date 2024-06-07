@@ -1,0 +1,138 @@
+﻿{
+  "adfSupportFile": "CopyPipeline_Simple_support_live.zip",
+
+  "expectedResponse": {
+    "state": "Succeeded",
+    "alerts": [],
+    "result": {
+      "type": "AdfSupportFile",
+      "adfName": "datafactoryqaaogpkbmturm",
+      "pipelines": {
+        "CopyPipeline_Simple": {
+          "name": "CopyPipeline_Simple",
+          "properties": {
+            "activities": [
+              {
+                "name": "Copy data1",
+                "type": "Copy",
+                "dependsOn": [],
+                "policy": {
+                  "timeout": "0.12:00:00",
+                  "retry": 0,
+                  "retryIntervalInSeconds": 30,
+                  "secureOutput": false,
+                  "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                  "source": {
+                    "type": "BinarySource",
+                    "storeSettings": {
+                      "type": "AzureBlobStorageReadSettings",
+                      "recursive": true
+                    },
+                    "formatSettings": {
+                      "type": "BinaryReadSettings"
+                    }
+                  },
+                  "sink": {
+                    "type": "JsonSink",
+                    "storeSettings": {
+                      "type": "AzureBlobStorageWriteSettings",
+                      "copyBehavior": "PreserveHierarchy"
+                    },
+                    "formatSettings": {
+                      "type": "JsonWriteSettings"
+                    }
+                  },
+                  "enableStaging": false
+                },
+                "inputs": [
+                  {
+                    "referenceName": "Binary1",
+                    "type": "DatasetReference"
+                  }
+                ],
+                "outputs": [
+                  {
+                    "referenceName": "Json1",
+                    "type": "DatasetReference"
+                  }
+                ]
+              }
+            ],
+            "annotations": []
+          }
+        }
+      },
+      "datasets": {
+        "Binary1": {
+          "name": "Binary1",
+          "properties": {
+            "linkedServiceName": {
+              "referenceName": "AzureBlobStorage1",
+              "type": "LinkedServiceReference"
+            },
+            "annotations": [],
+            "type": "Binary",
+            "typeProperties": {
+              "location": {
+                "type": "AzureBlobStorageLocation",
+                "fileName": "ghi",
+                "folderPath": "def",
+                "container": "abc"
+              }
+            }
+          }
+        },
+        "Json1": {
+          "name": "Json1",
+          "properties": {
+            "linkedServiceName": {
+              "referenceName": "AzureBlobStorage2",
+              "type": "LinkedServiceReference"
+            },
+            "annotations": [],
+            "type": "Json",
+            "typeProperties": {
+              "location": {
+                "type": "AzureBlobStorageLocation",
+                "fileName": "ccc",
+                "folderPath": "bbb",
+                "container": "aaa"
+              }
+            },
+            "schema": {}
+          }
+        }
+      },
+      "linkedServices": {
+        "AzureBlobStorage1": {
+          "name": "AzureBlobStorage1",
+          "type": "Microsoft.DataFactory/factories/linkedservices",
+          "properties": {
+            "annotations": [],
+            "type": "AzureBlobStorage",
+            "typeProperties": {
+              "connectionString": "DefaultEndpointsProtocol=https;AccountName=01774ac0c88e4ab0ae4b6ae;EndpointSuffix=core.windows.net;",
+              "encryptedCredential": "ew0KICAiVmVyc2lvbiI6ICIyMDE3LTExLTMwIiwNCiAgIlByb3RlY3Rpb25Nb2RlIjogIktleSIsDQogICJTZWNyZXRDb250ZW50VHlwZSI6ICJQbGFpbnRleHQiLA0KICAiQ3JlZGVudGlhbElkIjogIkRBVEFGQUNUT1JZQEE1OEE5OEQ5LUFFODAtNDAxMy1CMjZFLUI1MjcyNzI3ODIyRV81Yjc4NjU2Ni1kYmE3LTRmZjctYTU2NC01NWRiMmM1YmU1ZGUiDQp9"
+            }
+          }
+        },
+        "AzureBlobStorage2": {
+          "name": "AzureBlobStorage2",
+          "type": "Microsoft.DataFactory/factories/linkedservices",
+          "properties": {
+            "annotations": [],
+            "type": "AzureBlobStorage",
+            "typeProperties": {
+              "connectionString": "DefaultEndpointsProtocol=https;AccountName=rodenkewblob;EndpointSuffix=core.windows.net;",
+              "encryptedCredential": "ew0KICAiVmVyc2lvbiI6ICIyMDE3LTExLTMwIiwNCiAgIlByb3RlY3Rpb25Nb2RlIjogIktleSIsDQogICJTZWNyZXRDb250ZW50VHlwZSI6ICJQbGFpbnRleHQiLA0KICAiQ3JlZGVudGlhbElkIjogIkRBVEFGQUNUT1JZQEE1OEE5OEQ5LUFFODAtNDAxMy1CMjZFLUI1MjcyNzI3ODIyRV9hN2FiNGU0NS1hMmY4LTQ2ODMtOTQ2OC05YTU3MDE1OWRjMzMiDQp9"
+            }
+          }
+        }
+      },
+      "triggers": {}
+    }
+  }
+}

@@ -1,0 +1,43 @@
+﻿{
+  "adfSupportFile": "EmptyPipeline_support_live.zip",
+
+  "expectedResponse": {
+    "state": "Succeeded",
+    "alerts": [],
+    "result": {
+      "type": "AdfSupportFile",
+      "adfName": "datafactoryqaaogpkbmturm",
+      "pipelines": {
+        "EmptyPipeline": {
+          "name": "EmptyPipeline",
+          "properties": {
+            "parameters": {
+              "StringParam1": {
+                "type": "string",
+                "defaultValue": "\"abc\""
+              },
+              "IntParam1": {
+                "type": "int",
+                "defaultValue": 7
+              }
+            },
+            "variables": {
+              "StringVar1": {
+                "type": "String",
+                "defaultValue": "\"xyz\""
+              },
+              "BoolVar1": {
+                "type": "Boolean",
+                "defaultValue": true
+              }
+            },
+            "annotations": []
+          }
+        }
+      },
+      "datasets": {},
+      "linkedServices": {},
+      "triggers": {}
+    }
+  }
+}

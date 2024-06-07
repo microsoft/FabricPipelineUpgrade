@@ -1,0 +1,14 @@
+﻿{
+  "adfSupportFile": "NotAZipFile.zip",
+
+  "expectedResponse": {
+    "state": "Failed",
+    "alerts": [
+      {
+        "severity": "Permanent",
+        "details": "Failed to unzip Upgrade Package."
+      }
+    ],
+    "result": {}
+  }
+}

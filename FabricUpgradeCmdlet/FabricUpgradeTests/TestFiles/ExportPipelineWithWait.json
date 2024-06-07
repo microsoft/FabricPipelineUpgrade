@@ -1,0 +1,47 @@
+﻿{
+  "pipeline": {
+    "state": "Succeeded",
+    "alerts": [
+      {
+        "severity": "Warning",
+        "details": "Look and see."
+      }
+    ],
+    "result": {
+      "name": "EmptyPipeline",
+      "properties": {
+        "description": "This is an empty pipeline",
+        "activities": []
+      }
+    }
+  },
+
+  "expectedResponse": {
+    "state": "Succeeded",
+    "alerts": [
+      {
+        "severity": "Warning",
+        "details": "Look and see."
+      }
+    ]
+  },
+
+  "expectedItems": [
+    {
+      "item": {
+        "type": "DataPipeline",
+        "workspaceId": "",
+        "id": "",
+        "displayName": "EmptyPipeline",
+        "description": "This is an empty pipeline"
+      },
+      "definition": {
+        "name": "EmptyPipeline",
+        "properties": {
+          "description": "This is an empty pipeline",
+          "activities": []
+        }
+      }
+    }
+  ]
+}

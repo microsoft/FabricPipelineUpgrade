@@ -1,0 +1,14 @@
+﻿{
+  "adfSupportFile": "NoSuchSupportFile.zip",
+
+  "expectedResponse": {
+    "state": "Failed",
+    "alerts": [
+      {
+        "severity": "Permanent",
+        "details": "Failed to load Support File './TestFiles/AdfSupportFiles/NoSuchSupportFile.zip'."
+      }
+    ],
+    "result": {}
+  }
+}
