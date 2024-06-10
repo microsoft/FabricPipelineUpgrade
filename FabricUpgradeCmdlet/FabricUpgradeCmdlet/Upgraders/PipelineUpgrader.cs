@@ -1,4 +1,5 @@
-﻿using FabricUpgradeCmdlet.UpgradeMachines;
+﻿using FabricUpgradeCmdlet.Models;
+using FabricUpgradeCmdlet.UpgradeMachines;
 using FabricUpgradeCmdlet.Upgraders.ActivityUpgraders;
 using FabricUpgradeCmdlet.Utilities;
 using Microsoft.Rest.Serialization;
@@ -22,7 +23,7 @@ namespace FabricUpgradeCmdlet.Upgraders
             IFabricUpgradeMachine machine)
             : base(pipelineToken, machine)
         {
-            this.UpgraderType = Upgrader.Type.DataPipeline;
+            this.UpgraderType = FabricUpgradeResourceTypes.DataPipeline;
             this.adfModel = AdfPipelineModel.FromJToken(pipelineToken);
             this.Name = this.adfModel.Name;
             this.Path = this.Name;
@@ -41,12 +42,23 @@ namespace FabricUpgradeCmdlet.Upgraders
                 foreach (var activity in activities)
                 {
                     Upgrader activityUpgrader = ActivityUpgrader.CreateActivityUpgrader(this.Name, activity, this.Machine);
-                    //this.AddDagEdgeTo(activityUpgrader);
                     activityUpgrader.Compile(alerts);
                     this.activityUpgraders.Add(activityUpgrader);
                 }
             }
         }
+
+        public override void PreLink(
+            List<Upgrader> allUpgraders,
+            AlertCollector alerts)
+        {
+            foreach (Upgrader activityUpgrader in this.activityUpgraders)
+            {
+                activityUpgrader.PreLink(allUpgraders, alerts);
+                this.DependsOn.AddRange(activityUpgrader.DependsOn);
+            }
+        }
+
         public override Symbol ResolveExportedSymbol(
             string symbolName,
             AlertCollector alerts)
@@ -56,9 +68,14 @@ namespace FabricUpgradeCmdlet.Upgraders
                 string name = this.AdfResourceToken.SelectToken("$.name")?.ToString();
                 return Symbol.ReadySymbol(name);
             }
-            if (symbolName == "pipeline")
+            
+            if (symbolName == "fabricResource")
             {
-                FabricPipelineModel fabricPipeline = new FabricPipelineModel()
+                PipelineExportInstruction exportInstruction = new PipelineExportInstruction(this.Name);
+
+                this.AddExportLinks(exportInstruction, alerts);
+
+                FabricPipelineModel pipeline = new FabricPipelineModel()
                 {
                     Name = this.adfModel.Name,
                     Properties = new FabricPipelineProperties()
@@ -70,20 +87,56 @@ namespace FabricUpgradeCmdlet.Upgraders
                     },
                 };
 
-                foreach (Upgrader activityUpgrader in this.activityUpgraders)
-                {
-                    Symbol activitySymbol = activityUpgrader.ResolveExportedSymbol("activity", alerts);
-                    if (activitySymbol.State != Symbol.SymbolState.Ready)
-                    {
-                        // TODO!
-                    }
-                    fabricPipeline.Properties.Activities.Add((JObject)activitySymbol.Value);
-                }
+                this.AddActivities(pipeline, alerts);
 
-                return Symbol.ReadySymbol(fabricPipeline.ToJObject());
+                exportInstruction.Pipeline = pipeline.ToJObject();
+
+                return Symbol.ReadySymbol(exportInstruction.ToJObject());
             }
 
             return base.ResolveExportedSymbol(symbolName, alerts);
+        }
+
+        private void AddExportLinks(
+            PipelineExportInstruction exportInstruction,
+            AlertCollector alerts)
+        {
+            int nActivity = 0;
+            foreach (Upgrader activityUpgrader in this.activityUpgraders)
+            {
+                Symbol resolutionSymbol = activityUpgrader.ResolveExportedSymbol("exportLinks", alerts);
+                if (resolutionSymbol.State != Symbol.SymbolState.Ready)
+                {
+                    // TODO!
+                }
+
+                if (resolutionSymbol.Value != null)
+                {
+                    foreach (JToken requiredResolution in (JArray)resolutionSymbol.Value)
+                    {
+                        FabricExportLink link = FabricExportLink.FromJToken(requiredResolution);
+                        link.To = $"properties.activities[{nActivity}].{link.To}";
+                        exportInstruction.Links.Add(link);
+                    }
+                }
+
+                nActivity++;
+            }
+        }
+
+        private void AddActivities(
+            FabricPipelineModel pipeline,
+            AlertCollector alerts)
+        {
+            foreach (Upgrader activityUpgrader in this.activityUpgraders)
+            {
+                Symbol activitySymbol = activityUpgrader.ResolveExportedSymbol("activity", alerts);
+                if (activitySymbol.State != Symbol.SymbolState.Ready)
+                {
+                    // TODO!
+                }
+                pipeline.Properties.Activities.Add((JObject)activitySymbol.Value);
+            }
         }
 
         protected class AdfPipelineModel
@@ -137,6 +190,5 @@ namespace FabricUpgradeCmdlet.Upgraders
             [JsonProperty(PropertyName = "variables")]
             public JObject Variables { get; set; }
         }
-
     }
 }

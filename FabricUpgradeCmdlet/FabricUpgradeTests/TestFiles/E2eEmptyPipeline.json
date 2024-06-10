@@ -1,0 +1,57 @@
+﻿{
+  "adfSupportFile": "EmptyPipeline_support_live.zip",
+
+  "expectedResponse": {
+    "state": "Succeeded",
+    "alerts": [],
+    "result": {
+      "EmptyPipeline": {
+        "type": "DataPipeline",
+        "workspaceId": "",
+        "id": 0,
+        "displayName": "EmptyPipeline",
+        "description": null
+      }
+    }
+  },
+
+  "expectedItems": [
+    {
+      "item": {
+        "type": "DataPipeline",
+        "workspaceId": "",
+        "id": "",
+        "displayName": "EmptyPipeline",
+        "description": null
+      },
+      "definition": {
+        "name": "EmptyPipeline",
+        "properties": {
+          "activities": [],
+          "parameters": {
+            "StringParam1": {
+              "type": "string",
+              "defaultValue": "\"abc\""
+            },
+            "IntParam1": {
+              "type": "int",
+              "defaultValue": 7
+            }
+          },
+          "variables": {
+            "StringVar1": {
+              "type": "String",
+              "defaultValue": "\"xyz\""
+            },
+            "BoolVar1": {
+              "type": "Boolean",
+              "defaultValue": true
+            }
+          }
+        },
+        "annotations": []
+      }
+    }
+  ]
+
+}

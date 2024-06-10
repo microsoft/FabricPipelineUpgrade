@@ -16,40 +16,46 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
     {
         public class ActivityTypes
         {
+            public const string ExecutePipeline = "ExecutePipeline";
             public const string WaitActivity = "Wait";
         }
 
         protected ActivityUpgrader(
+            string activityType,
             string parentPath,
-            JToken activityToken,
+            JToken adfActivityToken,
             IFabricUpgradeMachine machine)
-            : base(activityToken, machine)
+            : base(adfActivityToken, machine)
         {
-            this.AdfActivityModel = AdfPipelineActivityModel.Build(activityToken);
-            this.Name = AdfActivityModel.Name;
-            this.UpgraderType = Upgrader.Type.PipelineActivity;
+            this.ActivityType = activityType;
+            this.AdfModel = AdfPipelineActivityModel.Build(adfActivityToken);
+            this.Name = AdfModel.Name;
+            this.UpgraderType = FabricUpgradeResourceTypes.PipelineActivity;
             this.Path = parentPath + "/" + this.Name;
         }
 
-        protected AdfPipelineActivityModel AdfActivityModel { get; set; }
+        protected AdfPipelineActivityModel AdfModel { get; set; }
+
         protected string ActivityType { get; set; }
 
         /// <summary>
         /// A "factory" function that creates the appropriate Upgrader from the ADF Activity's Type.
         /// </summary>
         /// <param name="parentPath">The 'path' to the parent object.</param>
-        /// <param name="activityObject">The JObject that describes the ADF Activity.</param>
+        /// <param name="adfActivityToken">The JObject that describes the ADF Activity.</param>
         /// <param name="machine">The FabricUpgradeMachine that provides utilities to Upgraders.</param>
         /// <returns>A new Upgrader for that Activity type.</returns>
         public static ActivityUpgrader CreateActivityUpgrader(
             string parentPath,
-            JToken activityToken,
+            JToken adfActivityToken,
             IFabricUpgradeMachine machine)
         {
-            return AdfPipelineActivityModel.Build(activityToken).ActivityType switch
+            string activityType = AdfPipelineActivityModel.Build(adfActivityToken).ActivityType;
+            return activityType switch
             {
-                ActivityTypes.WaitActivity => new WaitActivityUpgrader(parentPath, activityToken, machine),
-                _ => new UnsupportedActivityUpgrader(parentPath, activityToken, machine),
+                ActivityTypes.ExecutePipeline => new ExecutePipelineActivityUpgrader(parentPath, adfActivityToken, machine),
+                ActivityTypes.WaitActivity => new WaitActivityUpgrader(parentPath, adfActivityToken, machine),
+                _ => new UnsupportedActivityUpgrader(parentPath, adfActivityToken, machine),
             };
         }
 
@@ -58,27 +64,37 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
             base.Compile(alerts);
         }
 
+        public override void PreLink(
+            List<Upgrader> allUpgraders,
+            AlertCollector alerts)
+        {
+            base.PreLink(allUpgraders, alerts);
+        }
+
         public override Symbol ResolveExportedSymbol(
             string symbolName,
             AlertCollector alerts)
         {
-            if (symbolName == "activity")
+            if (symbolName == "activity.common")
             {
+                // Create a Symbol whose Value is a JObject that contains all of the 
+                // common activity properties.
+
                 FabricPipelineActivityModel fabricModel = new FabricPipelineActivityModel()
                 {
                     Name = this.Name,
                     ActivityType = this.ActivityType,
-                    Description = this.AdfActivityModel.Description,
-                    DependsOn = this.AdfActivityModel.DependsOn,
-                    State = this.AdfActivityModel.State,
-                    OnInactiveMarkAs = this.AdfActivityModel.OnInactiveMarkAs,
-                    UserProperties = this.AdfActivityModel.UserProperties,
+                    Description = this.AdfModel.Description,
+                    DependsOn = this.AdfModel.DependsOn,
+                    State = this.AdfModel.State,
+                    OnInactiveMarkAs = this.AdfModel.OnInactiveMarkAs,
+                    UserProperties = this.AdfModel.UserProperties,
                 };
 
                 return Symbol.ReadySymbol(fabricModel.ToJToken());
 
             }
-            return Symbol.MissingSymbol();
+            return base.ResolveExportedSymbol(symbolName, alerts);
         }
 
         /// <summary>
@@ -115,7 +131,7 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
         }
 
         /// <summary>
-        /// The ADF Model for a Pipeline Activity.
+        /// The Fabric Model for a Pipeline Activity.
         /// </summary>
         protected class FabricPipelineActivityModel
         {

@@ -11,18 +11,30 @@ namespace FabricUpgradeCmdlet
     [Cmdlet(VerbsData.Import, "AdfSupportFile")]
     public class ImportAdfSupportFile : Cmdlet
     {
-        // Declare the parameters for the cmdlet.
-        [Parameter(Mandatory = true)]
-        public string Name
+        [Parameter(
+            Position = 0,
+            ValueFromPipeline = true,
+            ValueFromPipelineByPropertyName = true)]
+        [ValidateNotNullOrEmpty]
+        public string Progress
         {
-            get { return name; }
-            set { name = value; }
+            get { return progress; }
+            set { progress = value; }
         }
-        private string name;
+        private string progress;
+
+        [Alias("sf")]
+        [Parameter(Mandatory = true)]
+        public string Filename
+        {
+            get { return filename; }
+            set { filename = value; }
+        }
+        private string filename;
 
         protected override void ProcessRecord()
         {
-            WriteObject(new FabricUpgradeHandler().ImportAdfSupportFile(this.name).ToString());
+            WriteObject(new FabricUpgradeHandler().ImportAdfSupportFile(this.progress, this.filename).ToString());
         }
     }
 
@@ -162,10 +174,10 @@ namespace FabricUpgradeCmdlet
         [Parameter(Mandatory = true)]
         public string Workspace
         {
-            get { return workspace; }
-            set { this.workspace = value; }
+            get { return workspaceId; }
+            set { this.workspaceId = value; }
         }
-        private string workspace;
+        private string workspaceId;
 
         [Alias("ft")]
         [Parameter(Mandatory = true)]
@@ -181,7 +193,7 @@ namespace FabricUpgradeCmdlet
             string result = new FabricUpgradeHandler().ExportFabricPipelineAsync(
                 this.progress,
                 this.cluster,
-                this.workspace,
+                this.workspaceId,
                 this.fabricToken).Result.ToString();
 
             WriteObject(result);            
