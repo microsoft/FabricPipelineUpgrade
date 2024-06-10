@@ -68,6 +68,9 @@ namespace FabricUpgradeCmdlet.Models
         [JsonProperty(PropertyName = "alerts", Order = 20)]
         public List<FabricUpgradeAlert> Alerts { get; set; } = new List<FabricUpgradeAlert>();
 
+        [JsonProperty(PropertyName = "resolutions", Order = 30)]
+        public List<FabricUpgradeResolution> Resolutions { get; set; } = new List<FabricUpgradeResolution>();
+
         [JsonProperty(PropertyName = "result", Order = 40)]
         public JObject Result { get; set; } = new JObject();
 

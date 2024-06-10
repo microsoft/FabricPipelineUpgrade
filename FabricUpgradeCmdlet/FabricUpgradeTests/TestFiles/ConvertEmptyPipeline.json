@@ -4,6 +4,7 @@
   "expectedResponse": {
     "state": "Succeeded",
     "alerts": [],
+    "resolutions": [],
 
     "result": {
       "fabricResources": [

@@ -53,6 +53,27 @@ namespace FabricUpgradeTests
 
             Assert.AreEqual(testConfig.ExpectedResponse.State, runningProgress.State, runningProgress.ToString());
             Assert.AreEqual(testConfig.ExpectedResponse.Alerts.Count, runningProgress.Alerts.Count, runningProgress.ToString());
+            for (int nAlert = 0; nAlert <  testConfig.ExpectedResponse.Alerts.Count; nAlert++)
+            {
+                var expectedAlert = testConfig.ExpectedResponse.Alerts[nAlert].ToJToken();
+                var actualAlert = runningProgress.Alerts[nAlert].ToJToken();
+                var alertMismatches = this.DeepCompare(expectedAlert, actualAlert);
+                Assert.IsNull(
+                    alertMismatches,
+                    $"Alert[{nAlert}] MISMATCHES:\n{alertMismatches?.ToString(Formatting.Indented)}\n\nEXPECTED:\n{expectedAlert}\n\nACTUAL:\n{actualAlert}");
+            }
+
+            Assert.AreEqual(testConfig.ExpectedResponse.Resolutions.Count, runningProgress.Resolutions.Count, runningProgress.ToString());
+            for (int nResolution = 0; nResolution < testConfig.ExpectedResponse.Resolutions.Count; nResolution++)
+            {
+                var expectedResolution = testConfig.ExpectedResponse.Resolutions[nResolution].ToJToken();
+                var actualResolution = runningProgress.Resolutions[nResolution].ToJToken();
+                var alertMismatches = this.DeepCompare(expectedResolution, actualResolution);
+                Assert.IsNull(
+                    alertMismatches,
+                    $"Resolution[{nResolution}] MISMATCHES:\n{alertMismatches?.ToString(Formatting.Indented)}\n\nEXPECTED:\n{expectedResolution}\n\nACTUAL:\n{actualResolution}");
+            }
+
 
             JObject expectedResult = testConfig.ExpectedResponse.Result;
             JObject actualResult = runningProgress.Result;
@@ -81,7 +102,7 @@ namespace FabricUpgradeTests
 
                 Assert.IsNull(
                     mismatches,
-                    $"MISMATCHES:\n{mismatches?.ToString(Formatting.Indented)}\n\nEXPECTED:\n{eis}\n\nACTUAL:\n{ais}");
+                    $"Item[{nItem}] MISMATCHES:\n{mismatches?.ToString(Formatting.Indented)}\n\nEXPECTED:\n{eis}\n\nACTUAL:\n{ais}");
 
                 nItem++;
             }
@@ -107,9 +128,9 @@ namespace FabricUpgradeTests
             [JsonProperty(PropertyName = "expectedItems")]
             public JArray ExpectedItems { get; set; } = new JArray();
 
-            public static EndToEndTestConfig LoadFromFile(string testFileName)
+            public static EndToEndTestConfig LoadFromFile(string testFilename)
             {
-                string testConfig = File.ReadAllText("./TestFiles/" + testFileName + ".json");
+                string testConfig = File.ReadAllText("./TestFiles/" + testFilename + ".json");
                 return JsonConvert.DeserializeObject<EndToEndTestConfig>(testConfig);
             }
 

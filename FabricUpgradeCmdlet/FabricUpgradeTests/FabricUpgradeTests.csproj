@@ -34,5 +34,12 @@
     <None Update="TestFiles\AdfSupportFiles\*.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-  </ItemGroup>	
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="TestFiles\ResolutionFiles\*.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+	
 </Project>

@@ -3,7 +3,6 @@ using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using FabricUpgradeCmdlet.Models;
 using FabricUpgradeTests.Utilities;
-using System.Security.Policy;
 using FabricUpgradeTests.TestConfigModels;
 
 namespace FabricUpgradeTests
@@ -73,7 +72,7 @@ namespace FabricUpgradeTests
         }
 
         [TestMethod]
-        [DataRow("{\"state\":\"Failed\", \"alerts\": []}", "{\"state\":\"Failed\", \"alerts\": [], \"result\": {} }")]
+        [DataRow("{\"state\":\"Failed\", \"alerts\": []}", "{\"state\":\"Failed\", \"alerts\": [], \"resolutions\": [], \"result\": {} }")]
         public void ConvertToFabricPipeline_WithPreviousFailure_Test(
             string progress,
             string expectedResponse)
@@ -121,6 +120,36 @@ namespace FabricUpgradeTests
             Assert.IsNull(
                     mismatches,
                     $"MISMATCHES:\n{mismatches?.ToString(Formatting.Indented)}\n\nEXPECTED:\n{expectedResponse}\n\nACTUAL:\n{actualResponse}");
+        }
+
+        [TestMethod]
+        [DataRow("ImportResolutions_NoSuchFile")]
+        [DataRow("ImportResolutions_OneFileThenNoSuchFile")]
+        [DataRow("ImportResolutions_NoSuchFileThenOneFile")]
+        [DataRow("ImportResolutions_OneFile")]
+        [DataRow("ImportResolutions_TwoFiles")]
+        public void ImportFabricResolutions_Test(
+            string testFilename)
+        {
+            ResolutionTestConfig testConfig = ResolutionTestConfig.LoadFromFile(testFilename);
+
+            FabricUpgradeProgress runningProgress = testConfig.Progress;
+
+            foreach (string filename in testConfig.ResolutionFiles)
+            {
+                string fullFilename = "./TestFiles/ResolutionFiles/" + filename;
+
+                runningProgress = new FabricUpgradeHandler().ImportFabricResolutions(runningProgress?.ToString(), fullFilename);
+            }
+
+            var expectedResponse = testConfig.ExpectedProgress;
+            var actualResponse = runningProgress;
+
+            var mismatches = this.DeepCompare(expectedResponse.ToJObject(), actualResponse?.ToJObject());
+            Assert.IsNull(
+                    mismatches,
+                    $"MISMATCHES:\n{mismatches?.ToString(Formatting.Indented)}\n\nEXPECTED:\n{expectedResponse}\n\nACTUAL:\n{actualResponse}");
+
         }
 
         [TestMethod]
@@ -199,9 +228,9 @@ namespace FabricUpgradeTests
             [JsonProperty(PropertyName = "expectedResponse")]
             public JObject ExpectedResponse { get; set; }
 
-            public static ImportTestConfig LoadFromFile(string testFileName)
+            public static ImportTestConfig LoadFromFile(string testFilename)
             {
-                string test = File.ReadAllText("./TestFiles/" + testFileName + ".json");
+                string test = File.ReadAllText("./TestFiles/" + testFilename + ".json");
                 ImportTestConfig config = JsonConvert.DeserializeObject<ImportTestConfig>(test);
                 return config;
             }
@@ -215,12 +244,32 @@ namespace FabricUpgradeTests
             [JsonProperty(PropertyName = "expectedResponse")]
             public JObject expectedResponse { get; set; }
 
-            public static ImportTestConfig LoadFromFile(string testFileName)
+            public static ImportTestConfig LoadFromFile(string testFilename)
             {
-                string test = File.ReadAllText("./TestFiles/" + testFileName + ".json");
+                string test = File.ReadAllText("./TestFiles/" + testFilename + ".json");
                 ImportTestConfig config = JsonConvert.DeserializeObject<ImportTestConfig>(test);
                 return config;
             }
+        }
+
+        private class ResolutionTestConfig
+        {
+            [JsonProperty(PropertyName = "progress")]
+            public FabricUpgradeProgress Progress { get; set; }
+
+            [JsonProperty(PropertyName = "resolutionFiles")]
+            public List<string> ResolutionFiles { get; set; } = new List<string>();
+
+            [JsonProperty(PropertyName = "expectedProgress")]
+            public FabricUpgradeProgress ExpectedProgress { get; set; }
+
+            public static ResolutionTestConfig LoadFromFile(string testFilename)
+            {
+                string test = File.ReadAllText("./TestFiles/" + testFilename + ".json");
+                ResolutionTestConfig config = JsonConvert.DeserializeObject<ResolutionTestConfig>(test);
+                return config;
+            }
+
         }
 
         private class ExportTestConfig
@@ -240,9 +289,9 @@ namespace FabricUpgradeTests
             [JsonProperty(PropertyName = "expectedItems")]
             public JArray ExpectedItems { get; set; } = new JArray();
 
-            public static ExportTestConfig LoadFromFile(string testFileName)
+            public static ExportTestConfig LoadFromFile(string testFilename)
             {
-                string test = File.ReadAllText("./TestFiles/" + testFileName + ".json");
+                string test = File.ReadAllText("./TestFiles/" + testFilename + ".json");
                 ExportTestConfig config = JsonConvert.DeserializeObject<ExportTestConfig>(test);
                 return config;
             }

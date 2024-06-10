@@ -9,6 +9,7 @@
         "details": "Failed to load Support File './TestFiles/AdfSupportFiles/NoSuchSupportFile.zip'."
       }
     ],
+    "resolutions": [],
     "result": {}
   }
 }

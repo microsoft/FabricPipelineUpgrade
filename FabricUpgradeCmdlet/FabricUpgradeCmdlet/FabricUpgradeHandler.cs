@@ -112,6 +112,66 @@ namespace FabricUpgradeCmdlet
             });
         }
 
+        /// <summary>
+        /// Prepend the resolutions in the file to the resolutions we already have.
+        /// </summary>
+        /// <remarks>
+        /// Newer resolutions will take precendence over older resolutions.
+        /// </remarks>
+        /// <param name="progressString">The progress so far.</param>
+        /// <param name="resolutionsFilename">The filename to load.</param>
+        /// <returns></returns>
+        public FabricUpgradeProgress ImportFabricResolutions(
+            string progressString,
+            string resolutionsFilename)
+        {
+            FabricUpgradeProgress.FabricUpgradeState progressState = this.CheckProgress(progressString);
+            if (progressState != FabricUpgradeProgress.FabricUpgradeState.Succeeded)
+            {
+                return new FabricUpgradeProgress()
+                {
+                    State = progressState,
+                    Alerts = this.alerts.ToList(),
+                };
+            }
+
+            FabricUpgradeProgress progress = FabricUpgradeProgress.FromString(progressString);
+
+            string detailsIfFail = null;
+            try
+            {
+                detailsIfFail = $"Failed to load resolutions file '{resolutionsFilename}'.";
+                string resolutionsFileData = File.ReadAllText(resolutionsFilename);
+
+                detailsIfFail = $"Failed to parse contents of '{resolutionsFilename}'.";
+                List<FabricUpgradeResolution> newResolutions = JsonConvert.DeserializeObject<List<FabricUpgradeResolution>>(resolutionsFileData);
+
+                List<FabricUpgradeResolution> resolutions = newResolutions;
+                resolutions.AddRange(progress.Resolutions);
+
+                return new FabricUpgradeProgress()
+                {
+                    State = FabricUpgradeProgress.FabricUpgradeState.Succeeded,
+                    Alerts = this.alerts.ToList(),
+                    Resolutions = resolutions,
+                    Result = progress.Result,
+                };
+            }
+            catch (Exception)
+            {
+                return new FabricUpgradeProgress()
+                {
+                    State = FabricUpgradeProgress.FabricUpgradeState.Failed,
+                }
+                .WithAlert(
+                    new FabricUpgradeAlert()
+                    {
+                        Severity = FabricUpgradeAlert.FailureSeverity.Permanent,
+                        Details = detailsIfFail,
+                    });
+            }
+        }
+
         public async Task<FabricUpgradeProgress> ExportFabricPipelineAsync(
             string progressString,
             string cluster,
@@ -129,7 +189,6 @@ namespace FabricUpgradeCmdlet
             }
 
             FabricUpgradeProgress progress = FabricUpgradeProgress.FromString(progressString);
-
 
             FabricExportMachine machine = new FabricExportMachine(
                     progress.Result,

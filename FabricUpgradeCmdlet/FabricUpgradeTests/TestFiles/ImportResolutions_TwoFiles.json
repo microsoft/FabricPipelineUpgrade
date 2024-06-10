@@ -1,0 +1,39 @@
+﻿{
+  "resolutionFiles": [
+    "ResolutionsOne.json",
+    "ResolutionsTwo.json"
+  ],
+
+  "expectedProgress": {
+    "state": "Succeeded",
+    "alerts": [],
+
+    "resolutions": [
+      {
+        "comments": [
+          "Resolve the ADF 'AzureBlobStorage1' LinkedService to the Fabric 'rodenkewblob' Connection"
+        ],
+        "type": "LinkedServiceToConnection",
+        "key": "AzureBlobStorage1",
+        "value": "6363f9fe-a58e-4a23-a5a3-c14755571be3"
+      },
+      {
+        "type": "LinkedServiceToConnection",
+        "key": "AzureBlobStorage1",
+        "value": "5363f9fe-a58e-4a23-a5a3-c14755571be3"
+      },
+      {
+        "type": "LinkedServiceToConnection",
+        "key": "nosuch",
+        "value": "4363f9fe-a58e-4a23-a5a3-c14755571be3"
+      },
+      {
+        "type": "CredentialConnection",
+        "key": "user",
+        "value": "26f5b3d5-f9e8-4010-bb8a-50088d45dbd4"
+      }
+    ],
+
+    "result": {}
+  }
+}
