@@ -16,6 +16,7 @@ namespace FabricUpgradeTests
         [DataRow("ImportNotAZipFile")]
         [DataRow("ImportEmptyPipeline")]
         [DataRow("ImportPipelineWithExecutePipeline")]
+        [DataRow("ImportPipelineWithIf")]
         [DataRow("ImportPipelineWithCopy")]
         public void ImportAdfSupportFile_Test(
             string testConfigFilename)
@@ -47,6 +48,8 @@ namespace FabricUpgradeTests
         [DataRow("ConvertPipelineWithWait_NullWaitTime")]
 
         [DataRow("ConvertPipelineWithExecutePipeline")]
+
+        [DataRow("ConvertPipelineWithIf")]
         public void ConvertToFabricPipeline_Test(
             string testConfigFilename,
             string workspaceId = null) // we can set ws in param or in progress.

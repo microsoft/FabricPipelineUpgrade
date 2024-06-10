@@ -1,0 +1,137 @@
+﻿{
+  "adfSupportFile": "PipelineWithIf_support_live.zip",
+
+  "guidSubstitutions": [
+   
+    {
+      "comment": "Set the pipelineId of the ExecutePipeline activity to the Guid assigned to the WaitPipeline.",
+      "path": "[1].definition.properties.activities[0].typeProperties.ifFalseActivities[0].typeProperties.pipelineId",
+      "guidIndex": 0
+    },
+    {
+      "comment": "Set the workspaceId of the ExecutePipeline activity to the workspaceId (-1 means 'workspaceId').",
+      "path": "[1].definition.properties.activities[0].typeProperties.ifFalseActivities[0].typeProperties.workspaceId",
+      "guidIndex": -1
+    }
+  ],
+
+  "expectedResponse": {
+    "state": "Succeeded",
+    "alerts": [],
+    "result": {
+      "pipelineToInvoke": {
+        "type": "DataPipeline",
+        "workspaceId": "",
+        "id": 0,
+        "displayName": "pipelineToInvoke",
+        "description": null
+      },
+      "pipelineWithIf": {
+        "type": "DataPipeline",
+        "workspaceId": "",
+        "id": 1,
+        "displayName": "pipelineWithIf",
+        "description": null
+      }
+    }
+  },
+
+  "expectedItems": [
+    {
+      "item": {
+        "type": "DataPipeline",
+        "workspaceId": "",
+        "id": 0,
+        "displayName": "pipelineToInvoke",
+        "description": null
+      },
+      "definition": {
+        "name": "pipelineToInvoke",
+        "properties": {
+          "activities": [
+            {
+              "name": "Wait5Seconds",
+              "type": "Wait",
+              "description": "This activity waits 5 seconds",
+              "dependsOn": [],
+              "userProperties": [],
+              "typeProperties": {
+                "waitTimeInSeconds": 5
+              }
+            }
+          ],
+          "variables": {
+            "aaa": {
+              "type": "String"
+            }
+          }
+        },
+        "annotations": []
+      }
+    },
+    {
+      "item": {
+        "type": "DataPipeline",
+        "workspaceId": "",
+        "id": 1,
+        "displayName": "pipelineWithIf",
+        "description": null
+      },
+      "definition": {
+        "name": "pipelineWithIf",
+        "properties": {
+          "activities": [
+            {
+              "name": "WaitOrExecute",
+              "type": "Wait",
+              "description": "This activity checks a condition and either waits or invokes another pipeline",
+              "dependsOn": [],
+              "userProperties": [],
+              "typeProperties": {
+                "expression": {
+                  "value": "@equals(dayOfWeek(utcNow()), 1)",
+                  "type": "Expression"
+                },
+                "ifFalseActivities": [
+                  {
+                    "name": "ExecuteOtherPipeline",
+                    "type": "Wait",
+                    "description": "This activity invokes another pipeline",
+                    "dependsOn": [],
+                    "userProperties": [],
+                    "policy": {
+                      "secureInput": true
+                    },
+                    "typeProperties": {
+                      "waitOnCompletion": true,
+                      "parameters": null,
+                      "operationType": "InvokeFabricPipeline",
+                      "workspaceId": "00000000-0000-0000-0000-000000000000",
+                      "pipelineId": "00000000-0000-0000-0000-000000000000"
+                    },
+                    "externalReferences": {
+                      "connection": "00000000-0000-0000-0000-000000000000"
+                    }
+                  }
+                ],
+                "ifTrueActivities": [
+                  {
+                    "name": "Wait3Seconds",
+                    "type": "Wait",
+                    "description": "This activity waits 3 seconds",
+                    "dependsOn": [],
+                    "userProperties": [],
+                    "typeProperties": {
+                      "waitTimeInSeconds": 3
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "annotations": []
+      }
+    }
+  ]
+}

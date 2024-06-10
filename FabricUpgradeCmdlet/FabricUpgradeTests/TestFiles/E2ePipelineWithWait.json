@@ -19,8 +19,8 @@
     {
       "item": {
         "type": "DataPipeline",
-        "workspaceId": "760c88f8-2c83-4d65-b58a-5eeb2c17b393",
-        "id": "04982cfa-2095-47e0-a54a-d6c043f2526c",
+        "workspaceId": "",
+        "id": 0,
         "displayName": "WaitPipeline",
         "description": null
       },

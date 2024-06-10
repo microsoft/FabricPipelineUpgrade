@@ -74,8 +74,10 @@ namespace FabricUpgradeCmdlet.Upgraders
         // The FabricUpgradeMachine that this Upgrader uses to resolve symbols, access the PublicApi, etc.
         public IFabricUpgradeMachine Machine { get; private set; }
 
+        // Used in Sort()
         public List<Upgrader> DependsOn { get; set; } = new List<Upgrader>();
 
+        // Used in Sort()
         public enum UpgraderSortingState
         {
             Unsorted = 0,
@@ -83,6 +85,7 @@ namespace FabricUpgradeCmdlet.Upgraders
             Sorted = 2,
         }
 
+        // Used in Sort()
         public UpgraderSortingState SortingState { get; set; } = UpgraderSortingState.Unsorted;
         
 
@@ -91,6 +94,15 @@ namespace FabricUpgradeCmdlet.Upgraders
             // Note: In subclasses, this is where you will ensure that properties have valid values.
         }
 
+        /// <summary>
+        /// Build the dependencies between this Upgrader and others.
+        /// </summary>
+        /// <remarks>
+        /// This method populates this Upgrader's DependsOn list,
+        /// which is used later to sort the Upgraders.
+        /// </remarks>
+        /// <param name="allUpgraders">A list of all the upgraders</param>
+        /// <param name="alerts">Add any generated alerts to this collector.</param>
         public virtual void PreLink(
             List<Upgrader> allUpgraders,
             AlertCollector alerts)
@@ -147,6 +159,20 @@ namespace FabricUpgradeCmdlet.Upgraders
             return matchingUpgrader;
         }
 
+        /// <summary>
+        /// Populate the sortedUpgraders.
+        /// If Upgrader A depends on Upgrader B, then Upgrader B appears before Upgrader A in this list.
+        /// </summary>
+        /// <remarks>
+        /// When we Export the Fabric Resources, we need to export B before we export A, so that 
+        /// 1) We can populate A's links with B's Fabric Resource ID;
+        /// 2) Fabric will accept A (it will not accept A if all of its links are not correctly populated).
+        ///
+        /// This performs a topological sort (https://en.wikipedia.org/wiki/Topological_sorting).
+        /// </remarks>
+        /// <param name="sortedUpgraders">The list of Upgraders to populate.</param>
+        /// <param name="alerts">Add any generated alerts to this collector.</param>
+        /// <returns>Are we able to sort the Upgraders.</returns>
         public bool Sort(
             List<Upgrader> sortedUpgraders,
             AlertCollector alerts)

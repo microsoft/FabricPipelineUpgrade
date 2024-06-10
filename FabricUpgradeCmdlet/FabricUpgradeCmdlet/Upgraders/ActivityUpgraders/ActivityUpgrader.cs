@@ -17,6 +17,7 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
         public class ActivityTypes
         {
             public const string ExecutePipeline = "ExecutePipeline";
+            public const string IfCondition = "IfCondition";
             public const string WaitActivity = "Wait";
         }
 
@@ -54,6 +55,7 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
             return activityType switch
             {
                 ActivityTypes.ExecutePipeline => new ExecutePipelineActivityUpgrader(parentPath, adfActivityToken, machine),
+                ActivityTypes.IfCondition => new IfConditionActivityUpgrader(parentPath, adfActivityToken, machine),
                 ActivityTypes.WaitActivity => new WaitActivityUpgrader(parentPath, adfActivityToken, machine),
                 _ => new UnsupportedActivityUpgrader(parentPath, adfActivityToken, machine),
             };
@@ -95,6 +97,21 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
 
             }
             return base.ResolveExportedSymbol(symbolName, alerts);
+        }
+
+        protected void CheckRequiredAdfProperties(
+            List<string> requiredAdfProperties,
+            AlertCollector alerts)
+        {
+            foreach (var property in requiredAdfProperties)
+            {
+                JToken value = this.AdfResourceToken.SelectToken(property);
+                if (value == null)
+                {
+                    alerts.AddPermanentError($"{this.Path}.{property} must not be null.");
+                }
+            }
+
         }
 
         /// <summary>

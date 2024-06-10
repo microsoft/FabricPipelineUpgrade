@@ -1,0 +1,110 @@
+﻿{
+  "adfSupportFile": "PipelineWithIf_support_live.zip",
+
+  "expectedResponse": {
+    "state": "Succeeded",
+    "alerts": [],
+    "result": {
+      "fabricResources": [
+        {
+          "resourceName": "pipelineToInvoke",
+          "resourceType": "DataPipeline",
+          "link": [],
+          "export": {
+            "name": "pipelineToInvoke",
+            "properties": {
+              "activities": [
+                {
+                  "name": "Wait5Seconds",
+                  "type": "Wait",
+                  "description": "This activity waits 5 seconds",
+                  "dependsOn": [],
+                  "userProperties": [],
+                  "typeProperties": {
+                    "waitTimeInSeconds": 5
+                  }
+                }
+              ],
+              "variables": {
+                "aaa": {
+                  "type": "String"
+                }
+              }
+            },
+            "annotations": []
+          }
+        },
+        {
+          "resourceName": "pipelineWithIf",
+          "resourceType": "DataPipeline",
+          "link": [
+            {
+              "from": "DataPipeline:pipelineToInvoke",
+              "to": "properties.activities[0].typeProperties.ifFalseActivities[0].typeProperties.pipelineId"
+            },
+            {
+              "from": "$workspace",
+              "to": "properties.activities[0].typeProperties.ifFalseActivities[0].typeProperties.workspaceId"
+            }
+          ],
+          "export": {
+            "name": "pipelineWithIf",
+            "properties": {
+              "activities": [
+                {
+                  "name": "WaitOrExecute",
+                  "type": "Wait",
+                  "description": "This activity checks a condition and either waits or invokes another pipeline",
+                  "dependsOn": [],
+                  "userProperties": [],
+                  "typeProperties": {
+                    "expression": {
+                      "value": "@equals(dayOfWeek(utcNow()), 1)",
+                      "type": "Expression"
+                    },
+                    "ifFalseActivities": [
+                      {
+                        "name": "ExecuteOtherPipeline",
+                        "type": "Wait",
+                        "description": "This activity invokes another pipeline",
+                        "dependsOn": [],
+                        "userProperties": [],
+                        "policy": {
+                          "secureInput": true
+                        },
+                        "typeProperties": {
+                          "waitOnCompletion": true,
+                          "parameters": null,
+                          "operationType": "InvokeFabricPipeline",
+                          "workspaceId": "00000000-0000-0000-0000-000000000000",
+                          "pipelineId": "00000000-0000-0000-0000-000000000000"
+                        },
+                        "externalReferences": {
+                          "connection": "00000000-0000-0000-0000-000000000000"
+                        }
+                      }
+                    ],
+                    "ifTrueActivities": [
+                      {
+                        "name": "Wait3Seconds",
+                        "type": "Wait",
+                        "description": "This activity waits 3 seconds",
+                        "dependsOn": [],
+                        "userProperties": [],
+                        "typeProperties": {
+                          "waitTimeInSeconds": 3
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            "annotations": []
+          }
+        }
+      ]
+    }
+  }
+
+}
