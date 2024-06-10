@@ -1,0 +1,108 @@
+﻿{
+  "adfSupportFile": "PipelineWithWaitAndIf_support_live.zip",
+
+  "expectedResponse": {
+    "state": "Succeeded",
+    "alerts": [],
+    "result": {
+      "PipelineWithWaitAndIf": {
+        "type": "DataPipeline",
+        "workspaceId": "",
+        "id": 0,
+        "displayName": "PipelineWithWaitAndIf",
+        "description": null
+      }
+    }
+  },
+
+  "expectedItems": [
+    {
+      "item": {
+        "type": "DataPipeline",
+        "workspaceId": "c8c4d721-10c0-45d1-86cd-ed2678960ed9",
+        "id": "9b3501cc-dc07-4cf1-a5e5-28069cf9c620",
+        "displayName": "PipelineWithWaitAndIf",
+        "description": null
+      },
+      "definition": {
+        "name": "PipelineWithWaitAndIf",
+        "properties": {
+          "activities": [
+            {
+              "name": "If Condition1",
+              "type": "Wait",
+              "dependsOn": [
+                {
+                  "activity": "Wait11Seconds",
+                  "dependencyConditions": [
+                    "Succeeded"
+                  ]
+                }
+              ],
+              "userProperties": [],
+              "description": null,
+              "typeProperties": {
+                "expression": {
+                  "value": "@equals(dayOfWeek(utcNow()), 1)",
+                  "type": "Expression"
+                },
+                "ifFalseActivities": [
+                  {
+                    "name": "Wait1Second",
+                    "type": "Wait",
+                    "description": "This waits for 1 second",
+                    "dependsOn": [],
+                    "userProperties": [],
+                    "typeProperties": {
+                      "waitTimeInSeconds": 1
+                    }
+                  }
+                ],
+                "ifTrueActivities": [
+                  {
+                    "name": "Wait15Seconds",
+                    "type": "Wait",
+                    "dependsOn": [],
+                    "userProperties": [],
+                    "description": null,
+                    "typeProperties": {
+                      "waitTimeInSeconds": 5
+                    }
+                  },
+                  {
+                    "name": "Wait4Seconds",
+                    "type": "Wait",
+                    "dependsOn": [
+                      {
+                        "activity": "Wait15Seconds",
+                        "dependencyConditions": [
+                          "Succeeded"
+                        ]
+                      }
+                    ],
+                    "userProperties": [],
+                    "description": null,
+                    "typeProperties": {
+                      "waitTimeInSeconds": 4
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "name": "Wait11Seconds",
+              "type": "Wait",
+              "dependsOn": [],
+              "userProperties": [],
+              "description": null,
+              "typeProperties": {
+                "waitTimeInSeconds": 11
+              }
+            }
+          ]
+        },
+        "annotations": []
+      }
+    }
+  ]
+}

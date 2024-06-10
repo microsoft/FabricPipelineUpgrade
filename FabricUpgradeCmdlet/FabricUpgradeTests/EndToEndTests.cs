@@ -15,6 +15,8 @@ namespace FabricUpgradeTests
         [DataRow("E2eEmptyPipeline")]
         [DataRow("E2ePipelineWithWait")]
         [DataRow("E2ePipelineWithExecutePipeline")]
+        [DataRow("E2ePipelineWithIf")]
+        [DataRow("E2ePipelineWithWaitAndIf")]
         public async Task ExportFabricPipeline_TestAsync(
             string testConfigFilename)
         {
@@ -49,8 +51,8 @@ namespace FabricUpgradeTests
                 workspaceId.ToString(),
                 "123").ConfigureAwait(false);
 
-            Assert.AreEqual(testConfig.ExpectedResponse.State, runningProgress.State);
-            Assert.AreEqual(testConfig.ExpectedResponse.Alerts.Count, runningProgress.Alerts.Count);
+            Assert.AreEqual(testConfig.ExpectedResponse.State, runningProgress.State, runningProgress.ToString());
+            Assert.AreEqual(testConfig.ExpectedResponse.Alerts.Count, runningProgress.Alerts.Count, runningProgress.ToString());
 
             JObject expectedResult = testConfig.ExpectedResponse.Result;
             JObject actualResult = runningProgress.Result;

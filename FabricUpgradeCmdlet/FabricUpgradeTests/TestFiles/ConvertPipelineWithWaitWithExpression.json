@@ -2,14 +2,46 @@
   "adfSupportFile": "PipelineWithWaitWithExpression_support_live.zip",
 
   "expectedResponse": {
-    "state": "Failed",
-    "alerts": [
-      {
-        "severity": "Permanent",
-        "details": "Cannot process expression found at PipelineWithWaitWithExpression/Wait1/typeProperties.waitTimeInSeconds."
-      }
-    ],
-    "result": {}
+    "state": "Succeeded",
+    "alerts": [],
+    "result": {
+      "fabricResources": [
+        {
+          "resourceName": "PipelineWithWaitWithExpression",
+          "resourceType": "DataPipeline",
+          "link": [],
+          "export": {
+            "name": "PipelineWithWaitWithExpression",
+            "properties": {
+              "activities": [
+                {
+                  "name": "Wait1",
+                  "type": "Wait",
+                  "dependsOn": [],
+                  "userProperties": [],
+                  "description": null,
+                  "typeProperties": {
+                    "waitTimeInSeconds": {
+                      "value": "@pipeline().parameters.HowLong",
+                      "type": "Expression"
+                    }
+                  }
+                }
+              ],
+              "parameters": {
+                "HowLong": {
+                  "type": "int",
+                  "defaultValue": 1
+                }
+              }
+            },
+            "annotations": []
+          }
+        }
+      ]
+    }
   }
+
+
 
 }

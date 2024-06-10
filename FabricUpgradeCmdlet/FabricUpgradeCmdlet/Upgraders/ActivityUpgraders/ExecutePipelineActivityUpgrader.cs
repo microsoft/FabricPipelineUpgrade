@@ -13,7 +13,7 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
 {
     public class ExecutePipelineActivityUpgrader : ActivityUpgrader
     {
-        private List<string> requiredAdfProperties = new List<string>
+        private readonly List<string> requiredAdfProperties = new List<string>
         {
             "typeProperties.pipeline.referenceName",
         };
@@ -31,14 +31,7 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
         public override void Compile(AlertCollector alerts)
         {
             base.Compile(alerts);
-            foreach (var property in requiredAdfProperties)
-            {
-                JToken value = this.AdfResourceToken.SelectToken(property);
-                if (value == null)
-                {
-                    alerts.AddPermanentError("{this.Path}.{property} must not be null.");
-                }
-            }
+            this.CheckRequiredAdfProperties(this.requiredAdfProperties, alerts);
         }
 
         public override void PreLink(
@@ -98,13 +91,12 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
                 JObject fabricActivityObject = (JObject)activitySymbol.Value;
 
                 PropertyCopier copier = new PropertyCopier(this.Path, this.AdfResourceToken, fabricActivityObject, alerts);
-                copier.Copy("description");
 
+                copier.Copy("description");
                 copier.Copy("policy");
                 copier.Copy("typeProperties.waitOnCompletion");
                 copier.Copy("typeProperties.parameters");
                 copier.Set("typeProperties.operationType", "InvokeFabricPipeline");
-                copier.Set("typeProperties.workspaceId", Guid.Empty.ToString());
 
                 // These properties cannot be set until the Export operation phase.
                 // We include these properties in the "exportLinks" symbol.

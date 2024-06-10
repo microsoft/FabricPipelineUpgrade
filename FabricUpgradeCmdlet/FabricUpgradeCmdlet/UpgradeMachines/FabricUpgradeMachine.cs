@@ -184,7 +184,7 @@ namespace FabricUpgradeCmdlet.UpgradeMachines
         /// If any of the alerts is not just a Warning,
         /// then the Upgrade will not be able to complete.
         /// </remarks>
-        /// <param name="alerts">The current list of alerts.</param>
+        /// <param name="alerts">Add any generated alerts to this collector.</param>
         /// <returns>Whether this list of alerts indicates that the Upgrade can continue.</returns>
         private bool AlertsIndicateFailure()
         {
