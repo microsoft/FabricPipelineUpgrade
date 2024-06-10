@@ -6,6 +6,8 @@ using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
+using FabricUpgradeCmdlet.Utilities;
 
 namespace FabricUpgradeCmdlet.Models
 {
@@ -78,5 +80,10 @@ namespace FabricUpgradeCmdlet.Models
         /// </summary>
         [JsonProperty(PropertyName = "connectionHints", Order = 3, NullValueHandling = NullValueHandling.Ignore)]
         public FabricUpgradeConnectionHint ConnectionHints { get; set; }
+
+        public JToken ToJToken()
+        {
+            return UpgradeSerialization.ToJToken(this);
+        }
     }
 }

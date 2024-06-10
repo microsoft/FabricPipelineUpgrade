@@ -1,0 +1,19 @@
+﻿{
+  "resolutionFiles": [
+    "ResolutionsNoSuch.json"
+  ],
+
+  "expectedProgress": {
+    "state": "Failed",
+    "alerts": [
+      {
+        "severity": "Permanent",
+        "details": "Failed to load resolutions file './TestFiles/ResolutionFiles/ResolutionsNoSuch.json'."
+      }
+    ],
+
+    "resolutions": [],
+
+    "result": {}
+  }
+}

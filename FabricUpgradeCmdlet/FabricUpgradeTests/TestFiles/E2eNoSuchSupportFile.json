@@ -6,7 +6,7 @@
     "alerts": [
       {
         "severity": "Permanent",
-        "details": "Failed to load Support File './TestFiles/AdfSupportFiles/NoSuchSupportFile.zip'."
+        "details": "Failed to load Support File './TestFiles/AdfSupportFiles/NoSuch_support_live.zip'."
       }
     ],
     "result": {}

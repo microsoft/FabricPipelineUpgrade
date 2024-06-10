@@ -6,6 +6,8 @@ using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
+using FabricUpgradeCmdlet.Utilities;
 
 namespace FabricUpgradeCmdlet.Models
 {
@@ -59,6 +61,11 @@ namespace FabricUpgradeCmdlet.Models
         [DataMember(Name = "value")]
         [JsonProperty("value")]
         public string Value { get; set; }
+
+        public JToken ToJToken()
+        {
+            return UpgradeSerialization.ToJToken(this);
+        }
     }
 }
 
