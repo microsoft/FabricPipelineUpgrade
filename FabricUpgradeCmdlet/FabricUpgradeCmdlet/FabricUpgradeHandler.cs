@@ -1,4 +1,6 @@
-﻿using FabricUpgradeCmdlet.Models;
+﻿using FabricUpgradeCmdlet.Exporters;
+using FabricUpgradeCmdlet.ExportMachines;
+using FabricUpgradeCmdlet.Models;
 using FabricUpgradeCmdlet.UpgradeMachines;
 using FabricUpgradeCmdlet.Utilities;
 using Newtonsoft.Json;
@@ -20,10 +22,13 @@ namespace FabricUpgradeCmdlet
         public FabricUpgradeHandler() { }
 
         public FabricUpgradeProgress ImportAdfSupportFile(
+            string progressString,
             string fileName)
         {
+            FabricUpgradeProgress progress = FabricUpgradeProgress.FromString(progressString);
+
             AdfSupportFileUpgradePackageCollector collector = new AdfSupportFileUpgradePackageCollector();
-            byte[] supportFileData = null;
+            byte[] supportFileData;
             try
             {
                 supportFileData = File.ReadAllBytes(fileName);
@@ -69,10 +74,10 @@ namespace FabricUpgradeCmdlet
         }
 
         public FabricUpgradeProgress ConvertToFabricPipeline(
-            string toConvert,
+            string progressString,
             string resolutionsFilename)
         {
-            FabricUpgradeProgress.FabricUpgradeState previousState = this.CheckProgress(toConvert);
+            FabricUpgradeProgress.FabricUpgradeState previousState = this.CheckProgress(progressString);
             if (previousState != FabricUpgradeProgress.FabricUpgradeState.Succeeded)
             {
                 return new FabricUpgradeProgress()
@@ -82,37 +87,19 @@ namespace FabricUpgradeCmdlet
                 };
             }
 
-            FabricUpgradeProgress previousResponse = FabricUpgradeProgress.FromString(toConvert);
+            FabricUpgradeProgress progress = FabricUpgradeProgress.FromString(progressString);
 
-            AdfUpgradePackage adfUpgradePackage = AdfUpgradePackage.FromJToken(previousResponse.Result);
+            UpgradePackage upgradePackage = UpgradePackage.FromJToken(progress.Result);
 
-            if (adfUpgradePackage.Type == AdfUpgradePackage.UpgradePackageType.AdfSupportFile)
+            if (upgradePackage.Type == AdfUpgradePackage.UpgradePackageType.AdfSupportFile)
             {
-                AdfSupportFilesUpgradeMachine machine = new AdfSupportFilesUpgradeMachine(
-                    previousResponse.Result,
+                AdfSupportFileUpgradeMachine machine = new AdfSupportFileUpgradeMachine(
+                    progress.Result,
                     new List<FabricUpgradeResolution>(),
                     this.alerts);
 
                 return machine.Upgrade();
             }
-
-            /*
-            return @"{
-                ""name"": ""WaitPipeline"",
-                ""properties"": {
-                    ""activities"": [
-                        {
-                            ""name"": ""Wait10Seconds"",
-                            ""type"": ""Wait"",
-                            ""description"": ""This activity waits 10 seconds"",
-                            ""dependsOn"": [],
-                            ""typeProperties"": {
-                                ""waitTimeInSeconds"": 10
-                            }                            
-                         }
-                    ]
-                }
-            }";*/
 
             return new FabricUpgradeProgress()
             {
@@ -121,17 +108,17 @@ namespace FabricUpgradeCmdlet
             .WithAlert(new FabricUpgradeAlert()
             {
                 Severity = FabricUpgradeAlert.FailureSeverity.Permanent,
-                Details = $"FabricUpgrade does not support package type '{adfUpgradePackage.Type}.",
+                Details = $"FabricUpgrade does not support package type '{upgradePackage.Type}'.",
             });
         }
 
         public async Task<FabricUpgradeProgress> ExportFabricPipelineAsync(
-            string toExport,
+            string progressString,
             string cluster,
-            string workspace,
+            string workspaceId,
             string fabricToken)
         {
-            FabricUpgradeProgress.FabricUpgradeState progressState = this.CheckProgress(toExport);
+            FabricUpgradeProgress.FabricUpgradeState progressState = this.CheckProgress(progressString);
             if (progressState != FabricUpgradeProgress.FabricUpgradeState.Succeeded)
             {
                 return new FabricUpgradeProgress()
@@ -141,29 +128,18 @@ namespace FabricUpgradeCmdlet
                 };
             }
 
-            FabricUpgradeProgress progress = FabricUpgradeProgress.FromString(toExport);
+            FabricUpgradeProgress progress = FabricUpgradeProgress.FromString(progressString);
 
-            Dictionary<string, JObject> toUpload = JsonConvert.DeserializeObject<Dictionary<string, JObject>>(progress.Result.ToString());
 
-            JObject results = new JObject();
+            FabricExportMachine machine = new FabricExportMachine(
+                    progress.Result,
+                    cluster,
+                    workspaceId,
+                    fabricToken,
+                    new List<FabricUpgradeResolution>(),
+                    this.alerts);
 
-            foreach (var uploadable in toUpload)
-            {
-                // TODO: The previous response may, one day, include connections.
-                string uploadResult = await new PublicApiClient().UploadPipelineAsync(
-                                uploadable.Value,
-                                cluster,
-                                workspace,
-                                fabricToken);
-
-                results[uploadable.Key] = uploadResult;
-            }
-            return new FabricUpgradeProgress()
-            {
-                State = FabricUpgradeProgress.FabricUpgradeState.Succeeded,
-                Alerts = this.alerts.ToList(),
-                Result = results,
-            };
+            return await machine.ExportAsync().ConfigureAwait(false);
         }
 
         private FabricUpgradeProgress.FabricUpgradeState CheckProgress(

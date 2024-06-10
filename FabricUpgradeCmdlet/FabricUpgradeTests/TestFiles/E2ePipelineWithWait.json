@@ -1,41 +1,5 @@
 ﻿{
-  "progress": {
-    "state": "Succeeded",
-    "alerts": [],
-    "result": {
-      "fabricResources": [
-        {
-          "resourceName": "WaitPipeline",
-          "resourceType": "DataPipeline",
-          "link": [],
-          "export": {
-            "name": "WaitPipeline",
-            "properties": {
-              "activities": [
-                {
-                  "name": "Wait10Seconds",
-                  "type": "Wait",
-                  "description": "This activity waits 10 seconds",
-                  "dependsOn": [],
-                  "userProperties": [
-                    {
-                      "name": "UserProperty1",
-                      "value": "\"Value1\""
-                    }
-                  ],
-                  "typeProperties": {
-                    "waitTimeInSeconds": 10
-                  }
-                }
-              ],
-              "concurrency": 3
-            },
-            "annotations": []
-          }
-        }
-      ]
-    }
-  },
+  "adfSupportFile": "PipelineWithWait_support_live.zip",
 
   "expectedResponse": {
     "state": "Succeeded",

@@ -1,0 +1,15 @@
+﻿{
+  "adfSupportFile": "PipelineWithWaitWithExpression_support_live.zip",
+
+  "expectedResponse": {
+    "state": "Failed",
+    "alerts": [
+      {
+        "severity": "Permanent",
+        "details": "Cannot process expression found at PipelineWithWaitWithExpression/Wait1/typeProperties.waitTimeInSeconds."
+      }
+    ],
+    "result": {}
+  }
+
+}

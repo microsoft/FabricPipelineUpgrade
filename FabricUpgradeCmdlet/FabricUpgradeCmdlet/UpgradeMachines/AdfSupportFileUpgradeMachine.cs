@@ -2,27 +2,24 @@
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
+using System.Collections.Generic;
+using System.Linq;
+using FabricUpgradeCmdlet.Models;
+using FabricUpgradeCmdlet.Upgraders;
+using FabricUpgradeCmdlet.Upgraders.DatasetUpgraders;
+using FabricUpgradeCmdlet.Utilities;
+using Newtonsoft.Json.Linq;
+
 namespace FabricUpgradeCmdlet.UpgradeMachines
 {
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Threading;
-    using System.Threading.Tasks;
-    using FabricUpgradeCmdlet.Models;
-    using FabricUpgradeCmdlet.Upgraders;
-    using FabricUpgradeCmdlet.Utilities;
-    using Newtonsoft.Json;
-    using Newtonsoft.Json.Linq;
-
     /// <summary>
-    /// A FabricUpgradeMachine to process ADF Support Files.
+    /// A FabricUpgradeMachine to process an ADF Support File.
     /// </summary>
-    public class AdfSupportFilesUpgradeMachine : FabricUpgradeMachine
+    public class AdfSupportFileUpgradeMachine : FabricUpgradeMachine
     {
         private AdfSupportFileUpgradePackage upgradePackage;
-        private List<Upgrader> pipelineUpgraders = new List<Upgrader>();
 
-        public AdfSupportFilesUpgradeMachine(
+        public AdfSupportFileUpgradeMachine(
             JObject toUpgrade,
             List<FabricUpgradeResolution> resolutions,
             AlertCollector alerts)
@@ -34,17 +31,28 @@ namespace FabricUpgradeCmdlet.UpgradeMachines
         /// <inheritdoc/>
         public override FabricUpgradeProgress Upgrade()
         {
-            foreach (var pipelineEntry in this.upgradePackage.Pipelines)
+            foreach (var entry in this.upgradePackage.Pipelines)
             {
-                JToken pipelineToken = pipelineEntry.Value;
+                JToken pipelineToken = entry.Value;
                 Upgrader pipelineUpgrader = new PipelineUpgrader(pipelineToken, this);
                 this.Upgraders.Add(pipelineUpgrader);
-                this.pipelineUpgraders.Add(pipelineUpgrader);
             }
 
-            // TODO: Add upgraders for Datasets.
+            foreach (var entry in this.upgradePackage.Datasets)
+            {
+                JToken datasetToken = entry.Value;
+                Upgrader datasetUpgrader = DatasetUpgrader.CreateDatasetUpgrader(datasetToken, this);
+                this.Upgraders.Add(datasetUpgrader);
+            }
 
-            // TODO: Add upgraders for LinkedServices.
+            /*
+            foreach (var entry in this.upgradePackage.LinkedServices)
+            {
+                JToken pipelineToken = entry.Value;
+                Upgrader pipelineUpgrader = new PipelineUpgrader(pipelineToken, this);
+                this.Upgraders.Add(pipelineUpgrader);
+            }
+            */
 
             try
             {
@@ -70,36 +78,75 @@ namespace FabricUpgradeCmdlet.UpgradeMachines
 
         private JObject PerformUpgrade()
         {
-            this.CompilePipelines();
-            return this.ResolvePipelines();
+            this.CompileUpgraders();
+            this.PreLinkUpgraders();
+            this.SortUpgraders();
+            return this.GenerateFabricResources();
         }
 
-        private void CompilePipelines()
+        private void CompileUpgraders()
         {
-            foreach (Upgrader upgrader in this.pipelineUpgraders)
+            foreach (Upgrader upgrader in this.Upgraders)
             {
                 upgrader.Compile(this.Alerts);
             }
 
             if (this.AlertsIndicateFailure())
             {
-                throw new UpgradeFailureException("Precheck");
+                throw new UpgradeFailureException("Compile");
             }
         }
 
-        private JObject ResolvePipelines()
+        private void PreLinkUpgraders()
         {
-            JObject result = new JObject();
-            foreach (Upgrader upgrader in this.pipelineUpgraders)
+            foreach (Upgrader upgrader in this.Upgraders)
             {
-                Symbol pipelineSymbol = upgrader.ResolveExportedSymbol("pipeline", this.Alerts);
+                upgrader.PreLink(this.Upgraders, this.Alerts);
+            }
+
+            if (this.AlertsIndicateFailure())
+            {
+                throw new UpgradeFailureException("PreLink");
+            }
+        }
+
+        private void SortUpgraders()
+        {
+            List<Upgrader> sortedUpgraders = new List<Upgrader>();
+            while (true)
+            {
+                Upgrader unsortedUpgrader = this.Upgraders.Where(u => u.SortingState == Upgrader.UpgraderSortingState.Unsorted).FirstOrDefault();
+                if (unsortedUpgrader == null)
+                {
+                    this.Upgraders = sortedUpgraders;
+                    break;
+                }
+
+                unsortedUpgrader.Sort(sortedUpgraders, this.Alerts);
+            }
+            if (this.AlertsIndicateFailure())
+            {
+                throw new UpgradeFailureException("Sort");
+            }
+        }
+
+        private JObject GenerateFabricResources()
+        {
+            JArray fabricResources = new JArray();
+            foreach (Upgrader upgrader in this.Upgraders)
+            {
+                Symbol pipelineSymbol = upgrader.ResolveExportedSymbol("fabricResource", this.Alerts);
                 if (pipelineSymbol.State == Symbol.SymbolState.Ready)
                 {
-                    result[upgrader.Name] = pipelineSymbol.Value;
+                    if (pipelineSymbol.Value != null)
+                    {
+                        fabricResources.Add(pipelineSymbol.Value);
+                    }
                 }
                 else
                 {
                     this.Alerts.AddPermanentError($"Cannot upgrade {upgrader.Name}.");
+
                 }
             }
 
@@ -107,6 +154,9 @@ namespace FabricUpgradeCmdlet.UpgradeMachines
             {
                 throw new UpgradeFailureException("Precheck");
             }
+
+            JObject result = new JObject();
+            result["fabricResources"] = fabricResources;
 
             return result;
         }

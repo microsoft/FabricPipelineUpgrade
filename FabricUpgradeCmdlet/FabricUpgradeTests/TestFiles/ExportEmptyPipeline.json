@@ -1,31 +1,60 @@
 ﻿{
   "progress": {
     "state": "Succeeded",
-    "alerts": [
-      {
-        "severity": "Warning",
-        "details": "Look and see."
-      }
-    ],
+    "alerts": [],
+
     "result": {
-      "EmptyPipeline": {
-        "name": "EmptyPipeline",
-        "properties": {
-          "description": "This is an empty pipeline",
-          "activities": []
+      "fabricResources": [
+        {
+          "resourceName": "EmptyPipeline",
+          "resourceType": "DataPipeline",
+          "link": [],
+          "export": {
+            "name": "EmptyPipeline",
+            "properties": {
+              "description": "This is an empty pipeline",
+              "activities": [],
+              "parameters": {
+                "StringParam1": {
+                  "type": "string",
+                  "defaultValue": "\"abc\""
+                },
+                "IntParam1": {
+                  "type": "int",
+                  "defaultValue": 7
+                }
+              },
+              "variables": {
+                "StringVar1": {
+                  "type": "String",
+                  "defaultValue": "\"xyz\""
+                },
+                "BoolVar1": {
+                  "type": "Boolean",
+                  "defaultValue": true
+                }
+              }
+            },
+            "annotations": []
+          }
         }
-      }
+      ]
     }
+
   },
 
   "expectedResponse": {
     "state": "Succeeded",
-    "alerts": [
-      {
-        "severity": "Warning",
-        "details": "Look and see."
+    "alerts": [],
+    "result": {
+      "EmptyPipeline": {
+        "type": "DataPipeline",
+        "workspaceId": "",
+        "id": 0,
+        "displayName": "EmptyPipeline",
+        "description": "This is an empty pipeline"
       }
-    ]
+    }
   },
 
   "expectedItems": [
@@ -41,8 +70,29 @@
         "name": "EmptyPipeline",
         "properties": {
           "description": "This is an empty pipeline",
-          "activities": []
-        }
+          "activities": [],
+          "parameters": {
+            "StringParam1": {
+              "type": "string",
+              "defaultValue": "\"abc\""
+            },
+            "IntParam1": {
+              "type": "int",
+              "defaultValue": 7
+            }
+          },
+          "variables": {
+            "StringVar1": {
+              "type": "String",
+              "defaultValue": "\"xyz\""
+            },
+            "BoolVar1": {
+              "type": "Boolean",
+              "defaultValue": true
+            }
+          }
+        },
+        "annotations": []
       }
     }
   ]

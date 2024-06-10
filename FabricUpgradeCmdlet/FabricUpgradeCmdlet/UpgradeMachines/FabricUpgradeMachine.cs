@@ -20,7 +20,7 @@ namespace FabricUpgradeCmdlet.UpgradeMachines
     /// </summary>
     public abstract class FabricUpgradeMachine : IFabricUpgradeMachine
     {
-        private readonly List<FabricUpgradeResolution> resolutions;
+        private readonly List<FabricUpgradeResolution> resolutions = new List<FabricUpgradeResolution>();
 
         protected FabricUpgradeMachine(
             List<FabricUpgradeResolution> resolutions,
@@ -92,7 +92,6 @@ namespace FabricUpgradeCmdlet.UpgradeMachines
             }
             catch (UpgradeFailureException)
             {
-                string failureMessage = JsonConvert.SerializeObject(this.Alerts);
                 return this.RespondWithFailures();
             }
         }

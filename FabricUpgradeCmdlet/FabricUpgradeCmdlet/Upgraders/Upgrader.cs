@@ -19,36 +19,12 @@ namespace FabricUpgradeCmdlet.Upgraders
             this.Machine = machine;
         }
 
-        /// <summary>
-        /// The type of resource that this Upgrader processes.
-        /// </summary>
-        public enum Type
-        {
-            /// <summary>Every enum deserves an invalid value.</summary>
-            Unknown = 0,
-
-            /// <summary>Upgrader handles a DataPipeline.</summary>
-            DataPipeline = 1,
-
-            /// <summary>Upgrader handles a Dataset.</summary>
-            Dataset = 2,
-
-            /// <summary>Upgrader handles a LinkedService.</summary>
-            LinkedService = 3,
-
-            /// <summary>Upgrader handles a Trigger.</summary>
-            Trigger = 4,
-
-            /// <summary>Upgrader handles a PipelineActivity.</summary>
-            PipelineActivity = 5,
-        }
-
         protected JToken AdfResourceToken { get; set; }
 
-        // The type of this Upgrader, like "DataPipeline" or "LinkedService".
+        // The type of this Upgrader, like DataPipeline or LinkedService.
         // Used when resolving SymbolReferences (see below) in the unlikely event that two
         // resources have the same name but different types.
-        public Type UpgraderType { get; set; } = Type.Unknown;
+        public FabricUpgradeResourceTypes UpgraderType { get; set; } = FabricUpgradeResourceTypes.Unknown;
 
         // The name of the ADF resource being upgraded.
         // The generated Fabric resource will have the same name.
@@ -98,9 +74,26 @@ namespace FabricUpgradeCmdlet.Upgraders
         // The FabricUpgradeMachine that this Upgrader uses to resolve symbols, access the PublicApi, etc.
         public IFabricUpgradeMachine Machine { get; private set; }
 
+        public List<Upgrader> DependsOn { get; set; } = new List<Upgrader>();
 
+        public enum UpgraderSortingState
+        {
+            Unsorted = 0,
+            Sorting = 1,
+            Sorted = 2,
+        }
+
+        public UpgraderSortingState SortingState { get; set; } = UpgraderSortingState.Unsorted;
+        
 
         public virtual void Compile(AlertCollector alerts)
+        {
+            // Note: In subclasses, this is where you will ensure that properties have valid values.
+        }
+
+        public virtual void PreLink(
+            List<Upgrader> allUpgraders,
+            AlertCollector alerts)
         {
         }
 
@@ -108,43 +101,86 @@ namespace FabricUpgradeCmdlet.Upgraders
             string symbolName,
             AlertCollector alerts)
         {
+            if (symbolName == "fabricResource")
+            {
+                // If a subclass does not generate a fabric resource, then return a null symbol value.
+                // For example, Activities and Datasets to do not generate a fabric resource.
+                // For example, LinkedServices to not (yet!) generate a fabric resource.
+                return Symbol.ReadySymbol(null);
+            }
+
+            if (symbolName == "exportLinks")
+            {
+                // If a subclass does not have any links, then return a null symbol value.
+                // Most Activities do not have any links.
+                return Symbol.ReadySymbol(null);
+            }
+
+            // If the subclass does not resolve this, then it is an invalid symbol name.
             alerts.AddPermanentError($"Cannot resolve symbol '{symbolName}'.");
             return Symbol.MissingSymbol();
         }
 
-
-        protected void Set(
-            JToken value,
-            JObject destination,
-            string destinationLocation)
+        protected Upgrader FindOtherUpgrader(
+            List<Upgrader> allUpgraders,
+            FabricUpgradeResourceTypes upgraderType,
+            string pathToName,
+            AlertCollector alerts
+            )
         {
-            string[] targetPathParts = destinationLocation.Split(".");
-
-            JObject target = destination;
-            for (int nPart = 0; nPart < targetPathParts.Length - 1; nPart++)
+            string upgraderName = this.AdfResourceToken.SelectToken(pathToName)?.ToString();
+            if (string.IsNullOrEmpty(upgraderName))
             {
-                string dp = targetPathParts[nPart];
-                if (!target.ContainsKey(dp))
-                {
-                    target[dp] = new JObject();
-                }
-
-                target = (JObject)target[dp];
+                return null;
             }
 
-            string property = targetPathParts[targetPathParts.Length - 1];
-            target[property] = value;
+            Upgrader matchingUpgrader = allUpgraders.FirstOrDefault(u => u.UpgraderType == upgraderType && u.Name == upgraderName);
+            if (matchingUpgrader != null)
+            {
+                return matchingUpgrader;
+            }
+            else
+            {
+                alerts.AddPermanentError($"'{this.Path}' references {upgraderType} '{upgraderName}', but UpgradePackage does not include {upgraderType} '{upgraderName}'.");
+            }
+
+            return matchingUpgrader;
         }
 
-        protected void Move(
-            JToken source,
-            string sourceLocation,
-            JObject destination,
-            string destinationLocation)
+        public bool Sort(
+            List<Upgrader> sortedUpgraders,
+            AlertCollector alerts)
         {
-            JToken value = source.SelectToken(sourceLocation);
-            this.Set(value, destination, destinationLocation);
+            if (this.SortingState == UpgraderSortingState.Sorted)
+            {
+                return true;
+            }
+
+            if (this.SortingState == UpgraderSortingState.Sorting)
+            {
+                // Uh-oh! This DG is not a DAG!
+                alerts.AddPermanentError("The UpgradePackage contains circular references");
+                return false;
+            }
+
+            this.SortingState = UpgraderSortingState.Sorting;
+
+            foreach (Upgrader otherUpgrader in this.DependsOn)
+            {
+                otherUpgrader.Sort(sortedUpgraders, alerts);
+            }
+
+            this.SortingState = UpgraderSortingState.Sorted;
+
+            sortedUpgraders.Add(this);
+
+            return true;
+
         }
+
+
+
+
 
 
 

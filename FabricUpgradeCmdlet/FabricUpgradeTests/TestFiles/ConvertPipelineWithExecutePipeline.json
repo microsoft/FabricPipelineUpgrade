@@ -1,0 +1,104 @@
+﻿{
+  "progress": {
+    "state": "Succeeded"
+  },
+
+  "adfSupportFile": "PipelineWithExecutePipeline_support_live.zip",
+
+  "expectedResponse": {
+    "state": "Succeeded",
+    "alerts": [],
+    "result": {
+      "fabricResources": [
+        {
+          "resourceName": "WaitPipeline",
+          "resourceType": "DataPipeline",
+          "link": [],
+          "export": {
+            "name": "WaitPipeline",
+            "properties": {
+              "activities": [
+                {
+                  "name": "Wait10Seconds",
+                  "type": "Wait",
+                  "description": "This activity waits 10 seconds",
+                  "dependsOn": [],
+                  "userProperties": [
+                    {
+                      "name": "UserProperty1",
+                      "value": "\"Value1\""
+                    }
+                  ],
+                  "typeProperties": {
+                    "waitTimeInSeconds": 10
+                  }
+                }
+              ]
+            },
+            "annotations": []
+          }
+        },
+        {
+          "resourceName": "ExecutePipelinePipeline",
+          "resourceType": "DataPipeline",
+          "link": [
+            {
+              "from": "DataPipeline:WaitPipeline",
+              "to": "properties.activities[1].typeProperties.pipelineId"
+            },
+            {
+              "from": "$workspace",
+              "to": "properties.activities[1].typeProperties.workspaceId"
+            }
+          ],
+          "export": {
+            "name": "ExecutePipelinePipeline",
+            "properties": {
+              "activities": [
+                {
+                  "name": "Wait5Seconds",
+                  "type": "Wait",
+                  "description": "This activity waits 5 seconds",
+                  "dependsOn": [],
+                  "userProperties": [],
+                  "typeProperties": {
+                    "waitTimeInSeconds": 5
+                  }
+                },
+                {
+                  "name": "Execute Other Pipeline",
+                  "type": "Wait",
+                  "description": "This activity executes another pipeline",
+                  "dependsOn": [
+                    {
+                      "activity": "Wait5Seconds",
+                      "dependencyConditions": [
+                        "Succeeded"
+                      ]
+                    }
+                  ],
+                  "userProperties": [],
+                  "policy": {
+                    "secureInput": false
+                  },
+                  "typeProperties": {
+                    "waitOnCompletion": true,
+                    "parameters": null,
+                    "operationType": "InvokeFabricPipeline",
+                    "workspaceId": "00000000-0000-0000-0000-000000000000",
+                    "pipelineId": "00000000-0000-0000-0000-000000000000"
+                  },
+                  "externalReferences": {
+                    "connection": "00000000-0000-0000-0000-000000000000"
+                  }
+                }
+              ]
+            },
+            "annotations": []
+          }
+        }
+      ]
+    }
+  }
+
+}

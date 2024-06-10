@@ -15,9 +15,8 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
             string parentPath,
             JToken activityToken,
             IFabricUpgradeMachine machine)
-            : base(parentPath, activityToken, machine)
+            : base(ActivityUpgrader.ActivityTypes.WaitActivity, parentPath, activityToken, machine)
         {
-            this.ActivityType = ActivityUpgrader.ActivityTypes.WaitActivity;
         }
 
         public override void Compile(AlertCollector alerts)
@@ -31,19 +30,21 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
         {
             if (symbolName == "activity")
             {
-                Symbol activitySymbol = base.ResolveExportedSymbol("activity", alerts);
+                Symbol activitySymbol = base.ResolveExportedSymbol("activity.common", alerts);
 
                 if (activitySymbol.State != Symbol.SymbolState.Ready)
                 {
                     // TODO!
                 }
 
-                JObject fabricActivity = (JObject)activitySymbol.Value;
+                JObject fabricActivityObject = (JObject)activitySymbol.Value;
 
-                this.Move(this.AdfResourceToken, "description", fabricActivity, "description");
-                this.Move(this.AdfResourceToken, "typeProperties.waitTimeInSeconds", fabricActivity, "typeProperties.waitTimeInSeconds");
+                PropertyCopier copier = new PropertyCopier(this.Path, this.AdfResourceToken, fabricActivityObject, alerts);
 
-                return Symbol.ReadySymbol(fabricActivity);
+                copier.Copy("description");
+                copier.Copy("typeProperties.waitTimeInSeconds", allowNull: false);
+
+                return Symbol.ReadySymbol(fabricActivityObject);
             }
 
             return base.ResolveExportedSymbol(symbolName, alerts);

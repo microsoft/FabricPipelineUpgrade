@@ -68,7 +68,7 @@ namespace FabricUpgradeCmdlet.Models
         [JsonProperty(PropertyName = "alerts", Order = 20)]
         public List<FabricUpgradeAlert> Alerts { get; set; } = new List<FabricUpgradeAlert>();
 
-        [JsonProperty(PropertyName = "result", Order = 30)]
+        [JsonProperty(PropertyName = "result", Order = 40)]
         public JObject Result { get; set; } = new JObject();
 
         public FabricUpgradeProgress WithAlert(FabricUpgradeAlert alert)
@@ -89,6 +89,11 @@ namespace FabricUpgradeCmdlet.Models
 
         public static FabricUpgradeProgress FromString(string fur)
         {
+            if (string.IsNullOrEmpty(fur))
+            {
+                return new FabricUpgradeProgress() { State = FabricUpgradeState.Succeeded };
+            }
+
             return JsonConvert.DeserializeObject<FabricUpgradeProgress>(fur);
         }
 

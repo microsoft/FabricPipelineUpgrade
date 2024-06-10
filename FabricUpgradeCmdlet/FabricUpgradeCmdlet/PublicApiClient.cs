@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using FabricUpgradeCmdlet.Utilities;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -37,7 +38,7 @@ namespace FabricUpgradeCmdlet
                 publicApiBaseUrl,
                 workspaceId,
                 pbiAadToken,
-                "DataPipeline",
+                FabricUpgradeResourceTypes.DataPipeline.ToString(),
                 pipelineName,
                 pipelineDescription,
                 pipelineObject);

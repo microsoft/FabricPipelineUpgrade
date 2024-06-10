@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using FabricUpgradeCmdlet.Models;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
 using System;
@@ -9,19 +10,10 @@ using System.Threading.Tasks;
 
 namespace FabricUpgradeCmdlet.Utilities
 {
-    public class AdfUpgradePackage
+    public class AdfUpgradePackage : UpgradePackage
     {
-        [JsonConverter(typeof(StringEnumConverter))]
-        public enum UpgradePackageType
-        {
-            Unknown = 0,
-            AdfSupportFile = 1,
-        }
 
-        [JsonProperty(PropertyName = "type", Order = 1)]
-        public UpgradePackageType Type { get; set; } = UpgradePackageType.Unknown;
-
-        [JsonProperty(PropertyName = "adfName", Order = 2)]
+        [JsonProperty(PropertyName = "adfName", Order = 100)]
         public string AdfName { get; set; }
 
         public static AdfUpgradePackage FromString(string json)
@@ -29,7 +21,7 @@ namespace FabricUpgradeCmdlet.Utilities
             return JsonConvert.DeserializeObject<AdfUpgradePackage>(json);
         }
 
-        public static AdfUpgradePackage FromJToken(JToken jToken)
+        public static new AdfUpgradePackage FromJToken(JToken jToken)
         {
             return UpgradeSerialization.FromJToken<AdfUpgradePackage>(jToken);
         }

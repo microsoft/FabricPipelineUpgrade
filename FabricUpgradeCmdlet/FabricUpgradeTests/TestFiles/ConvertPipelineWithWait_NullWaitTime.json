@@ -1,0 +1,19 @@
+﻿{
+  "comments": [
+    "This test verifies that the code checks for forbidden null properties in the ADF resource JSON."
+  ],
+
+  "adfSupportFile": "PipelineWithWait_NullWaitTime_support_live.zip",
+
+  "expectedResponse": {
+    "state": "Failed",
+    "alerts": [
+      {
+        "severity": "Permanent",
+        "details": "WaitPipeline/Wait10Seconds/typeProperties.waitTimeInSeconds must not be null."
+      }
+    ],
+    "result": {}
+  }
+
+}

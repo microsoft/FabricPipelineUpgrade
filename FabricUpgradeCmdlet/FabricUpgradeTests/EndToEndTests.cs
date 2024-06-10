@@ -3,126 +3,18 @@ using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using FabricUpgradeCmdlet.Models;
 using FabricUpgradeTests.Utilities;
-using System.Security.Policy;
 using FabricUpgradeTests.TestConfigModels;
 
 namespace FabricUpgradeTests
 {
     [TestClass]
-    public class HandlerTests
+    public class EndToEndTests
     {
         [TestMethod]
-        [DataRow("ImportNoSuchSupportFile")]
-        [DataRow("ImportNotAZipFile")]
-        [DataRow("ImportEmptyPipeline")]
-        [DataRow("ImportPipelineWithExecutePipeline")]
-        [DataRow("ImportPipelineWithCopy")]
-        public void ImportAdfSupportFile_Test(
-            string testConfigFilename)
-        {
-            ImportTestConfig testConfig = ImportTestConfig.LoadFromFile(testConfigFilename);
-            FabricUpgradeProgress actualResponse = new FabricUpgradeHandler().ImportAdfSupportFile(
-                testConfig.Progress?.ToString(),
-                "./TestFiles/AdfSupportFiles/" + testConfig.AdfSupportFile);
-
-            JObject actualResponseObject = actualResponse.ToJObject();
-
-            JObject expectedResponseObject = testConfig.ExpectedResponse;
-
-            JObject mismatches = this.DeepCompare(expectedResponseObject, actualResponseObject);
-
-            Assert.IsNull(
-                    mismatches,
-                    $"MISMATCHES:\n{mismatches?.ToString(Formatting.Indented)}\n\nEXPECTED:\n{expectedResponseObject}\n\nACTUAL:\n{actualResponse}");
-        }
-
-        [TestMethod]
-        [DataRow("ConvertNotAZipFile")]
-        [DataRow("ConvertPipelineWithUnsupportedActivity")]
-
-        [DataRow("ConvertEmptyPipeline")]
-
-        [DataRow("ConvertPipelineWithWait")]
-        [DataRow("ConvertPipelineWithWaitWithExpression")]
-        [DataRow("ConvertPipelineWithWait_NullWaitTime")]
-
-        [DataRow("ConvertPipelineWithExecutePipeline")]
-        public void ConvertToFabricPipeline_Test(
-            string testConfigFilename,
-            string workspaceId = null) // we can set ws in param or in progress.
-        {
-            ImportTestConfig testConfig = ImportTestConfig.LoadFromFile(testConfigFilename);
-            FabricUpgradeProgress importResponse = new FabricUpgradeHandler().ImportAdfSupportFile(
-                testConfig.Progress?.ToString(),
-                "./TestFiles/AdfSupportFiles/" + testConfig.AdfSupportFile);
-
-            FabricUpgradeProgress actualConvertResponse = new FabricUpgradeHandler().ConvertToFabricPipeline(importResponse.ToString(), null);
-
-            JObject actualResponseObject = actualConvertResponse.ToJObject();
-
-            JObject expectedResponseObject = testConfig.ExpectedResponse;
-
-            JObject mismatches = this.DeepCompare(expectedResponseObject, actualResponseObject);
-
-            Assert.IsNull(
-                    mismatches,
-                    $"MISMATCHES:\n{mismatches?.ToString(Formatting.Indented)}\n\nEXPECTED:\n{expectedResponseObject}\n\nACTUAL:\n{actualConvertResponse}");
-        }
-
-        [TestMethod]
-        [DataRow("{\"state\":\"Failed\", \"alerts\": []}", "{\"state\":\"Failed\", \"alerts\": [], \"result\": {} }")]
-        public void ConvertToFabricPipeline_WithPreviousFailure_Test(
-            string progress,
-            string expectedResponse)
-        {
-            JObject expectedResponseObject = JObject.Parse(expectedResponse);
-            FabricUpgradeProgress actualResponse = new FabricUpgradeHandler().ConvertToFabricPipeline(progress, null);
-
-            Assert.AreEqual(FabricUpgradeProgress.FabricUpgradeState.Failed, actualResponse.State);
-            Assert.AreEqual(0, actualResponse.Alerts.Count);
-
-            var mismatches = this.DeepCompare(expectedResponseObject, actualResponse.ToJObject());
-            Assert.IsNull(
-                    mismatches,
-                    $"MISMATCHES:\n{mismatches?.ToString(Formatting.Indented)}\n\nEXPECTED:\n{expectedResponseObject}\n\nACTUAL:\n{actualResponse}");
-        }
-
-        [TestMethod]
-        [DataRow("{\"state\":\"Failed\", \"alerts\": []}", "passthrough")]
-        [DataRow("{\"state\":\"Failed\", \"alerts\": [{\"severity\": \"Permanent\"}]}", "passthrough")]
-        [DataRow("abc", "invalid")]
-        [DataRow("{\"state\": \"Failed\"", "invalid")]
-        public void ConvertToFabricPipeline_ErrorForwarding_Test(
-            string progress,
-            string expectedResponseType)
-        {
-            FabricUpgradeProgress expectedResponse = expectedResponseType switch
-            {
-                "passthrough" => FabricUpgradeProgress.FromString(progress),
-                "invalid" => new FabricUpgradeProgress()
-                {
-                    State = FabricUpgradeProgress.FabricUpgradeState.Failed,
-                    Alerts = new List<FabricUpgradeAlert> {
-                        new FabricUpgradeAlert() {
-                            Severity = FabricUpgradeAlert.FailureSeverity.Permanent,
-                            Details = "Input is not a valid JSON string."
-                        }
-                    }
-                },
-                _ => null,
-            };
-
-            FabricUpgradeProgress actualResponse = new FabricUpgradeHandler().ConvertToFabricPipeline(progress, null);
-
-            var mismatches = this.DeepCompare(expectedResponse.ToJObject(), actualResponse.ToJObject());
-            Assert.IsNull(
-                    mismatches,
-                    $"MISMATCHES:\n{mismatches?.ToString(Formatting.Indented)}\n\nEXPECTED:\n{expectedResponse}\n\nACTUAL:\n{actualResponse}");
-        }
-
-        [TestMethod]
-        [DataRow("ExportEmptyPipeline")]
-        [DataRow("ExportPipelineWithWait")]
+        [DataRow("E2eNoSuchSupportFile")]
+        [DataRow("E2eEmptyPipeline")]
+        [DataRow("E2ePipelineWithWait")]
+        [DataRow("E2ePipelineWithExecutePipeline")]
         public async Task ExportFabricPipeline_TestAsync(
             string testConfigFilename)
         {
@@ -134,31 +26,39 @@ namespace FabricUpgradeTests
                 Guid.NewGuid(),
             };
 
-            ExportTestConfig testConfig = ExportTestConfig.LoadFromFile(testConfigFilename);
+            EndToEndTestConfig testConfig = EndToEndTestConfig.LoadFromFile(testConfigFilename);
             testConfig.UpdateItemGuids(workspaceId, expectedGuids);
 
             TestPublicApiEndpoints endpoints = new TestPublicApiEndpoints("https://dailyapi.fabric.microsoft.com/v1/");
             endpoints.PrepareGuids(expectedGuids);
             TestHttpClientFactory.RegisterTestHttpClientFactory(endpoints);
 
-            FabricUpgradeProgress actualResponse = await new FabricUpgradeHandler().ExportFabricPipelineAsync(
-                testConfig.Progress.ToString(),
+            FabricUpgradeProgress runningProgress = testConfig.Progress;
+
+            runningProgress = new FabricUpgradeHandler().ImportAdfSupportFile(
+                runningProgress?.ToString(),
+                "./TestFiles/AdfSupportFiles/" + testConfig.AdfSupportFile);
+
+            runningProgress = new FabricUpgradeHandler().ConvertToFabricPipeline(
+                runningProgress?.ToString(),
+                null);
+
+            runningProgress = await new FabricUpgradeHandler().ExportFabricPipelineAsync(
+                runningProgress?.ToString(),
                 "daily",
                 workspaceId.ToString(),
                 "123").ConfigureAwait(false);
 
-            Assert.AreEqual(testConfig.ExpectedResponse.State, actualResponse.State);
-            Assert.AreEqual(testConfig.ExpectedResponse.Alerts.Count, actualResponse.Alerts.Count);
+            Assert.AreEqual(testConfig.ExpectedResponse.State, runningProgress.State);
+            Assert.AreEqual(testConfig.ExpectedResponse.Alerts.Count, runningProgress.Alerts.Count);
 
             JObject expectedResult = testConfig.ExpectedResponse.Result;
-            JObject actualResult = actualResponse.Result;
+            JObject actualResult = runningProgress.Result;
 
             var resultMismatches = this.DeepCompare(expectedResult, actualResult);
             Assert.IsNull(
                     resultMismatches,
                     $"MISMATCHES:\n{resultMismatches?.ToString(Formatting.Indented)}\n\nEXPECTED:\n{expectedResult}\n\nACTUAL:\n{actualResult}");
-
-
 
             int expectedNumItems = testConfig.ExpectedItems.Count();
 
@@ -185,45 +85,13 @@ namespace FabricUpgradeTests
             }
         }
 
-        private class ImportTestConfig
+        private class EndToEndTestConfig
         {
             [JsonProperty(PropertyName = "progress")]
             public FabricUpgradeProgress Progress { get; set; }
 
             [JsonProperty(PropertyName = "adfSupportFile")]
             public string AdfSupportFile { get; set; }
-
-            [JsonProperty(PropertyName = "expectedResponse")]
-            public JObject ExpectedResponse { get; set; }
-
-            public static ImportTestConfig LoadFromFile(string testFileName)
-            {
-                string test = File.ReadAllText("./TestFiles/" + testFileName + ".json");
-                ImportTestConfig config = JsonConvert.DeserializeObject<ImportTestConfig>(test);
-                return config;
-            }
-        }
-
-        private class ConvertTestConfig
-        {
-            [JsonProperty(PropertyName = "adfSupportFile")]
-            public string AdfSupportFile { get; set; }
-
-            [JsonProperty(PropertyName = "expectedResponse")]
-            public JObject expectedResponse { get; set; }
-
-            public static ImportTestConfig LoadFromFile(string testFileName)
-            {
-                string test = File.ReadAllText("./TestFiles/" + testFileName + ".json");
-                ImportTestConfig config = JsonConvert.DeserializeObject<ImportTestConfig>(test);
-                return config;
-            }
-        }
-
-        private class ExportTestConfig
-        {
-            [JsonProperty(PropertyName = "progress")]
-            public JObject Progress { get; set; }
 
             [JsonProperty(PropertyName = "prestock")]
             public List<Prestock> Prestocks { get; set; } = new List<Prestock>();
@@ -237,14 +105,13 @@ namespace FabricUpgradeTests
             [JsonProperty(PropertyName = "expectedItems")]
             public JArray ExpectedItems { get; set; } = new JArray();
 
-            public static ExportTestConfig LoadFromFile(string testFileName)
+            public static EndToEndTestConfig LoadFromFile(string testFileName)
             {
-                string test = File.ReadAllText("./TestFiles/" + testFileName + ".json");
-                ExportTestConfig config = JsonConvert.DeserializeObject<ExportTestConfig>(test);
-                return config;
+                string testConfig = File.ReadAllText("./TestFiles/" + testFileName + ".json");
+                return JsonConvert.DeserializeObject<EndToEndTestConfig>(testConfig);
             }
 
-            public ExportTestConfig UpdateItemGuids(Guid workspaceId, List<Guid> itemIds)
+            public EndToEndTestConfig UpdateItemGuids(Guid workspaceId, List<Guid> itemIds)
             {
                 foreach (var r in this.ExpectedResponse.Result)
                 {
