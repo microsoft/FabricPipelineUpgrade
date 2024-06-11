@@ -79,6 +79,9 @@ namespace FabricUpgradeCmdlet
 
     /// <summary>
     /// This cmdlet updates the "progress" field with the resolutions found in a file.
+    /// If there are already resolutions, the values in this file will appear "before"
+    /// the existing resolutions; therefore, the new resolutions will take precedence
+    /// over the old resolutions.
     /// </summary>
     [Cmdlet(VerbsData.Import, "FabricResolutions")]
     public class ImportFabricResolutions : Cmdlet
@@ -106,14 +109,18 @@ namespace FabricUpgradeCmdlet
 
         protected override void ProcessRecord()
         {
-            WriteObject("NOT YET IMPLEMENTED");
+            string result = new FabricUpgradeHandler().ImportFabricResolutions(
+                this.progress,
+                this.resolutionsFilename).ToString();
+
+            WriteObject(result);
         }
     }
 
     /// <summary>
     /// This cmdlet updates the "progress" field with a single resolution.
     /// </summary>
-    [Cmdlet(VerbsCommon.Add, "FabricResolutions")]
+    [Cmdlet(VerbsCommon.Add, "FabricResolution")]
     public class AddFabricResolution : Cmdlet
     {
         [Parameter(
@@ -196,7 +203,7 @@ namespace FabricUpgradeCmdlet
                 this.workspaceId,
                 this.fabricToken).Result.ToString();
 
-            WriteObject(result);            
+            WriteObject(result);
         }
     }
 

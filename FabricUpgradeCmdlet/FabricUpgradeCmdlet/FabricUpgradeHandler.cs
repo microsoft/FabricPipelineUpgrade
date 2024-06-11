@@ -25,6 +25,16 @@ namespace FabricUpgradeCmdlet
             string progressString,
             string fileName)
         {
+            FabricUpgradeProgress.FabricUpgradeState previousState = this.CheckProgress(progressString);
+            if (previousState != FabricUpgradeProgress.FabricUpgradeState.Succeeded)
+            {
+                return new FabricUpgradeProgress()
+                {
+                    State = previousState,
+                    Alerts = this.alerts.ToList(),
+                };
+            }
+
             FabricUpgradeProgress progress = FabricUpgradeProgress.FromString(progressString);
 
             AdfSupportFileUpgradePackageCollector collector = new AdfSupportFileUpgradePackageCollector();
@@ -68,6 +78,8 @@ namespace FabricUpgradeCmdlet
             return new FabricUpgradeProgress()
             {
                 State = FabricUpgradeProgress.FabricUpgradeState.Succeeded,
+                Alerts = progress.Alerts,
+                Resolutions = progress.Resolutions,
                 Result = collector.Build(),
             };
 
@@ -95,7 +107,7 @@ namespace FabricUpgradeCmdlet
             {
                 AdfSupportFileUpgradeMachine machine = new AdfSupportFileUpgradeMachine(
                     progress.Result,
-                    new List<FabricUpgradeResolution>(),
+                    progress.Resolutions,
                     this.alerts);
 
                 return machine.Upgrade();
@@ -195,7 +207,7 @@ namespace FabricUpgradeCmdlet
                     cluster,
                     workspaceId,
                     fabricToken,
-                    new List<FabricUpgradeResolution>(),
+                    progress.Resolutions,
                     this.alerts);
 
             return await machine.ExportAsync().ConfigureAwait(false);

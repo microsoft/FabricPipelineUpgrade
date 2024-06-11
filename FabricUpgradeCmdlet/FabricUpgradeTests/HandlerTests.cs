@@ -14,6 +14,7 @@ namespace FabricUpgradeTests
         [DataRow("ImportNoSuchSupportFile")]
         [DataRow("ImportNotAZipFile")]
         [DataRow("ImportEmptyPipeline")]
+        [DataRow("ImportEmptyPipeline_AfterImportResolutions")]
         [DataRow("ImportPipelineWithExecutePipeline")]
         [DataRow("ImportPipelineWithIf")]
         [DataRow("ImportPipelineWithCopy")]
@@ -21,6 +22,7 @@ namespace FabricUpgradeTests
             string testConfigFilename)
         {
             ImportTestConfig testConfig = ImportTestConfig.LoadFromFile(testConfigFilename);
+
             FabricUpgradeProgress actualResponse = new FabricUpgradeHandler().ImportAdfSupportFile(
                 testConfig.Progress?.ToString(),
                 "./TestFiles/AdfSupportFiles/" + testConfig.AdfSupportFile);
@@ -41,6 +43,7 @@ namespace FabricUpgradeTests
         [DataRow("ConvertPipelineWithUnsupportedActivity")]
 
         [DataRow("ConvertEmptyPipeline")]
+        [DataRow("ConvertEmptyPipeline_AfterImportResolutions")]
 
         [DataRow("ConvertPipelineWithWait")]
         [DataRow("ConvertPipelineWithWaitWithExpression")]
@@ -54,6 +57,7 @@ namespace FabricUpgradeTests
             string workspaceId = null) // we can set ws in param or in progress.
         {
             ImportTestConfig testConfig = ImportTestConfig.LoadFromFile(testConfigFilename);
+
             FabricUpgradeProgress importResponse = new FabricUpgradeHandler().ImportAdfSupportFile(
                 testConfig.Progress?.ToString(),
                 "./TestFiles/AdfSupportFiles/" + testConfig.AdfSupportFile);

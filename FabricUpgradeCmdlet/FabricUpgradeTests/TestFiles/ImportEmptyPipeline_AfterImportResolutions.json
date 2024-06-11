@@ -1,0 +1,71 @@
+﻿{
+  "progress": {
+    "state": "Succeeded",
+    "resolutions": [
+      {
+        "type": "LinkedServiceToConnection",
+        "key": "nosuch",
+        "value": "4363f9fe-a58e-4a23-a5a3-c14755571be3"
+      },
+      {
+        "type": "CredentialConnection",
+        "key": "user",
+        "value": "26f5b3d5-f9e8-4010-bb8a-50088d45dbd4"
+      }
+    ]
+  },
+
+  "adfSupportFile": "EmptyPipeline_support_live.zip",
+
+  "expectedResponse": {
+    "state": "Succeeded",
+    "alerts": [],
+    "resolutions": [
+      {
+        "type": "LinkedServiceToConnection",
+        "key": "nosuch",
+        "value": "4363f9fe-a58e-4a23-a5a3-c14755571be3"
+      },
+      {
+        "type": "CredentialConnection",
+        "key": "user",
+        "value": "26f5b3d5-f9e8-4010-bb8a-50088d45dbd4"
+      }
+    ],
+    "result": {
+      "type": "AdfSupportFile",
+      "adfName": "datafactoryqaaogpkbmturm",
+      "pipelines": {
+        "EmptyPipeline": {
+          "name": "EmptyPipeline",
+          "properties": {
+            "parameters": {
+              "StringParam1": {
+                "type": "string",
+                "defaultValue": "\"abc\""
+              },
+              "IntParam1": {
+                "type": "int",
+                "defaultValue": 7
+              }
+            },
+            "variables": {
+              "StringVar1": {
+                "type": "String",
+                "defaultValue": "\"xyz\""
+              },
+              "BoolVar1": {
+                "type": "Boolean",
+                "defaultValue": true
+              }
+            },
+            "annotations": []
+          }
+        }
+      },
+      "datasets": {},
+      "linkedServices": {},
+      "triggers": {}
+    }
+  }
+}

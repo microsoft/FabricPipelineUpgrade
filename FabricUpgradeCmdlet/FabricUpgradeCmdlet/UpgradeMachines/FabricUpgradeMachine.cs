@@ -20,17 +20,17 @@ namespace FabricUpgradeCmdlet.UpgradeMachines
     /// </summary>
     public abstract class FabricUpgradeMachine : IFabricUpgradeMachine
     {
-        private readonly List<FabricUpgradeResolution> resolutions = new List<FabricUpgradeResolution>();
-
         protected FabricUpgradeMachine(
             List<FabricUpgradeResolution> resolutions,
             AlertCollector alerts)
         {
-            this.resolutions = resolutions;
+            this.Resolutions = resolutions;
             this.Alerts = alerts ?? new AlertCollector();
         }
 
         protected AlertCollector Alerts { get; set; }
+
+        protected List<FabricUpgradeResolution> Resolutions { get; set; } = new List<FabricUpgradeResolution>();
 
         protected List<Upgrader> Upgraders { get; set; } = new List<Upgrader>();
 
@@ -46,7 +46,7 @@ namespace FabricUpgradeCmdlet.UpgradeMachines
             FabricUpgradeResolution.ResolutionType resolutionType,
             string key)
         {
-            FabricUpgradeResolution matchingResolution = this.resolutions.FirstOrDefault(
+            FabricUpgradeResolution matchingResolution = this.Resolutions.FirstOrDefault(
                 r => r.Type == resolutionType && r.Key == key);
 
             return matchingResolution?.Value;
