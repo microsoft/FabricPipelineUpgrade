@@ -62,6 +62,7 @@ namespace FabricUpgradeCmdlet.UpgradeMachines
                 {
                     State = FabricUpgradeProgress.FabricUpgradeState.Succeeded,
                     Alerts = this.Alerts.ToList(),
+                    Resolutions = this.Resolutions,
                     Result = result,
                 };
             }

@@ -1,0 +1,76 @@
+﻿{
+  "adfSupportFile": "EmptyPipeline_support_live.zip",
+
+  "progress": {
+    "state": "Succeeded",
+    "alerts": [],
+    "resolutions": [
+      {
+        "type": "LinkedServiceToConnection",
+        "key": "AzureBlobStorage1",
+        "value": "5363f9fe-a58e-4a23-a5a3-c14755571be3"
+      },
+      {
+        "type": "LinkedServiceToConnection",
+        "key": "nosuch",
+        "value": "4363f9fe-a58e-4a23-a5a3-c14755571be3"
+      }
+    ]
+  },
+
+  "expectedResponse": {
+    "state": "Succeeded",
+    "alerts": [],
+    "resolutions": [
+      {
+        "type": "LinkedServiceToConnection",
+        "key": "AzureBlobStorage1",
+        "value": "5363f9fe-a58e-4a23-a5a3-c14755571be3"
+      },
+      {
+        "type": "LinkedServiceToConnection",
+        "key": "nosuch",
+        "value": "4363f9fe-a58e-4a23-a5a3-c14755571be3"
+      }
+    ],
+
+    "result": {
+      "fabricResources": [
+        {
+          "resourceName": "EmptyPipeline",
+          "resourceType": "DataPipeline",
+          "link": [],
+          "export": {
+            "name": "EmptyPipeline",
+            "properties": {
+              "activities": [],
+              "parameters": {
+                "StringParam1": {
+                  "type": "string",
+                  "defaultValue": "\"abc\""
+                },
+                "IntParam1": {
+                  "type": "int",
+                  "defaultValue": 7
+                }
+              },
+              "variables": {
+                "StringVar1": {
+                  "type": "String",
+                  "defaultValue": "\"xyz\""
+                },
+                "BoolVar1": {
+                  "type": "Boolean",
+                  "defaultValue": true
+                }
+              }
+            },
+            "annotations": []
+          }
+        }
+      ]
+    }
+
+  }
+
+}
