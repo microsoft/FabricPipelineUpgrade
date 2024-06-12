@@ -61,8 +61,37 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
                     foreach (JToken requiredResolution in (JArray)resolutionSymbol.Value)
                     {
                         FabricExportLink link = FabricExportLink.FromJToken(requiredResolution);
-                        link.To = $"typeProperties.{activityGroup}[{nActivity}].{link.To}";
+                        link.TargetPath = $"typeProperties.{activityGroup}[{nActivity}].{link.TargetPath}";
                         links.Add(link);
+                    }
+                }
+
+                nActivity++;
+            }
+        }
+
+        protected void CollectSubActivityExportResolves(
+            List<Upgrader> upgraders,
+            string activityGroup,
+            List<FabricExportResolve> resolves,
+            AlertCollector alerts)
+        {
+            int nActivity = 0;
+            foreach (Upgrader activityUpgrader in upgraders)
+            {
+                Symbol resolutionSymbol = activityUpgrader.ResolveExportedSymbol("exportResolves", alerts);
+                if (resolutionSymbol.State != Symbol.SymbolState.Ready)
+                {
+                    // TODO!
+                }
+
+                if (resolutionSymbol.Value != null)
+                {
+                    foreach (JToken requiredResolution in (JArray)resolutionSymbol.Value)
+                    {
+                        FabricExportResolve resolve = FabricExportResolve.FromJToken(requiredResolution);
+                        resolve.TargetPath = $"typeProperties.{activityGroup}[{nActivity}].{resolve.TargetPath}";
+                        resolves.Add(resolve);
                     }
                 }
 

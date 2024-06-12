@@ -78,8 +78,15 @@ namespace FabricUpgradeCmdlet.Models
         /// A client/user can use this to find/create a Fabric Connection to
         /// associate with an ADF LinkedService.
         /// </summary>
-        [JsonProperty(PropertyName = "connectionHints", Order = 3, NullValueHandling = NullValueHandling.Ignore)]
-        public FabricUpgradeConnectionHint ConnectionHints { get; set; }
+        [JsonProperty(PropertyName = "connectionHint", Order = 3, NullValueHandling = NullValueHandling.Ignore)]
+        public FabricUpgradeConnectionHint ConnectionHint { get; set; }
+
+        /// <summary>
+        /// Gets or sets the 'template' for an unresolved connection.
+        /// A client/user can use this to add a new FabricUpgradeResolution to the Resolutions.
+        /// </summary>
+        [JsonProperty(PropertyName = "resolutionTemplate", Order = 3, NullValueHandling = NullValueHandling.Ignore)]
+        public FabricUpgradeResolution ResolutionTemplate { get; set; }
 
         public JToken ToJToken()
         {

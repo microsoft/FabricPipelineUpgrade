@@ -59,21 +59,19 @@ namespace FabricUpgradeCmdlet.Upgraders
             }
         }
 
+        /// <inheritdoc/>
         public override Symbol ResolveExportedSymbol(
             string symbolName,
             AlertCollector alerts)
         {
-            if (symbolName == "name")
-            {
-                string name = this.AdfResourceToken.SelectToken("$.name")?.ToString();
-                return Symbol.ReadySymbol(name);
-            }
             
             if (symbolName == "fabricResource")
             {
                 PipelineExportInstruction exportInstruction = new PipelineExportInstruction(this.Name);
 
                 this.AddExportLinks(exportInstruction, alerts);
+
+                this.AddExportResolves(exportInstruction, alerts);
 
                 FabricPipelineModel pipeline = new FabricPipelineModel()
                 {
@@ -89,7 +87,7 @@ namespace FabricUpgradeCmdlet.Upgraders
 
                 this.AddActivities(pipeline, alerts);
 
-                exportInstruction.Pipeline = pipeline.ToJObject();
+                exportInstruction.Export = pipeline.ToJObject();
 
                 return Symbol.ReadySymbol(exportInstruction.ToJObject());
             }
@@ -112,11 +110,38 @@ namespace FabricUpgradeCmdlet.Upgraders
 
                 if (resolutionSymbol.Value != null)
                 {
+                    foreach (JToken requiredLink in (JArray)resolutionSymbol.Value)
+                    {
+                        FabricExportLink link = FabricExportLink.FromJToken(requiredLink);
+                        link.TargetPath = $"properties.activities[{nActivity}].{link.TargetPath}";
+                        exportInstruction.Links.Add(link);
+                    }
+                }
+
+                nActivity++;
+            }
+        }
+
+        private void AddExportResolves(
+            PipelineExportInstruction exportInstruction,
+            AlertCollector alerts)
+        {
+            int nActivity = 0;
+            foreach (Upgrader activityUpgrader in this.activityUpgraders)
+            {
+                Symbol resolutionSymbol = activityUpgrader.ResolveExportedSymbol("exportResolves", alerts);
+                if (resolutionSymbol.State != Symbol.SymbolState.Ready)
+                {
+                    // TODO!
+                }
+
+                if (resolutionSymbol.Value != null)
+                {
                     foreach (JToken requiredResolution in (JArray)resolutionSymbol.Value)
                     {
-                        FabricExportLink link = FabricExportLink.FromJToken(requiredResolution);
-                        link.To = $"properties.activities[{nActivity}].{link.To}";
-                        exportInstruction.Links.Add(link);
+                        FabricExportResolve resolve = FabricExportResolve.FromJToken(requiredResolution);
+                        resolve.TargetPath = $"properties.activities[{nActivity}].{resolve.TargetPath}";
+                        exportInstruction.Resolves.Add(resolve);
                     }
                 }
 

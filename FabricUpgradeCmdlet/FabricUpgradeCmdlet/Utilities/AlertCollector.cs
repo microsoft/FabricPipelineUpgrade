@@ -49,16 +49,15 @@ namespace FabricUpgradeCmdlet.Utilities
         /// <param name="resolutionType">What kind of Resolution to add.</param>
         /// <param name="resolutionKey">The key of the desired Resolution.</param>
         /// <returns>this, for chaining.</returns>
-        public AlertCollector AlertMissingConnectionResolution(
+        public AlertCollector AddMissingResolutionAlert(
             FabricUpgradeResolution.ResolutionType resolutionType,
             string resolutionKey,
-            FabricUpgradeConnectionHint connectionHints)
+            FabricUpgradeConnectionHint connectionHint)
         {
-            string requestString = BuildResolutionString(resolutionType, resolutionKey, "<connection GUID>");
             return this.AddAlert(
                 FailureSeverity.RequiresUserAction,
-                $"Please add {requestString} to resolutions",
-                connectionHints);
+                $"Please use the hint and template to create/find a new connection and add its ID to your resolutions.",
+                connectionHint);
         }
 
         /// <summary>
@@ -72,37 +71,9 @@ namespace FabricUpgradeCmdlet.Utilities
             FabricUpgradeResolution.ResolutionType resolutionType,
             string resolutionKey)
         {
-            string requestString = BuildResolutionString(resolutionType, resolutionKey, "<connection GUID>");
             return this.AddAlert(
                 FailureSeverity.RequiresUserAction,
-                $"Please ensure that the resolution {requestString} has a GUID value");
-        }
-
-        /// <summary>
-        /// Some common code to build a string example of a Resolution.
-        /// </summary>
-        /// <param name="resolutionType">What kind of Resolution to add.</param>
-        /// <param name="resolutionKey">The key of the desired Resolution.</param>
-        /// <param name="resolutionValue">The example value of the Resolution.</param>
-        /// <returns>An example string showing a Resolution.</returns>
-        private static string BuildResolutionString(
-            FabricUpgradeResolution.ResolutionType resolutionType,
-            string resolutionKey,
-            string resolutionValue)
-        {
-            FabricUpgradeResolution resolution = new FabricUpgradeResolution()
-            {
-                Type = resolutionType,
-                Key = resolutionKey,
-                Value = resolutionValue,
-            };
-
-            JToken request = UpgradeSerialization.ToJToken(resolution);
-            return request.ToString(Formatting.None)
-                .Replace("{\"", "{ \"")
-                .Replace("\"}", "\" }")
-                .Replace("\",\"", "\", \"")
-                .Replace("\":\"", "\": \"");
+                $"Please ensure that the resolution for {resolutionType} '{resolutionKey}' has a GUID value");
         }
 
         /// <summary>
@@ -114,13 +85,15 @@ namespace FabricUpgradeCmdlet.Utilities
         private AlertCollector AddAlert(
             FailureSeverity severity,
             string details,
-            FabricUpgradeConnectionHint connectionHints = null)
+            FabricUpgradeConnectionHint connectionHint = null,
+            FabricUpgradeResolution resolutionTemplate = null)
         {
             this.alerts.Add(new FabricUpgradeAlert()
             {
                 Severity = severity,
                 Details = details,
-                ConnectionHints = connectionHints,
+                ConnectionHint = connectionHint,
+                ResolutionTemplate = resolutionTemplate,
             });
 
             return this;

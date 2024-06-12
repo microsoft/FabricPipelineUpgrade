@@ -28,7 +28,7 @@ namespace FabricUpgradeCmdlet.ExportMachines
 
         protected List<FabricUpgradeResolution> Resolutions { get; private set; }
 
-        protected JObject ExportObject { get; private set; }
+        protected JObject ExportObject { get; private set; } = new JObject();
 
         protected string WorkspaceId { get; private set; }
 
@@ -45,22 +45,20 @@ namespace FabricUpgradeCmdlet.ExportMachines
             string key,
             AlertCollector alerts)
         {
-            // TODO: Resolve from resolutions.
             FabricUpgradeResolution matchingResolution = this.Resolutions.Where(r => r.Type == type && r.Key == key).FirstOrDefault();
 
             if (matchingResolution == null)
             {
-                // TODO: Add an alert here!
-                return string.Empty;
+                return null;
             }
 
             return matchingResolution.Value;
         }
 
         public virtual JToken Link(
-            string key)
+            string key,
+            AlertCollector alerts)
         {
-            // TODO: Look at previously generated 
             return string.Empty;
         }
     }

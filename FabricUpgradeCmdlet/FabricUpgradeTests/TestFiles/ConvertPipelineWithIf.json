@@ -11,6 +11,7 @@
           "resourceName": "pipelineToInvoke",
           "resourceType": "DataPipeline",
           "link": [],
+          "resolve": [],
           "export": {
             "name": "pipelineToInvoke",
             "properties": {
@@ -41,11 +42,27 @@
           "link": [
             {
               "from": "DataPipeline:pipelineToInvoke",
-              "to": "properties.activities[0].typeProperties.ifFalseActivities[0].typeProperties.pipelineId"
+              "targetPath": "properties.activities[0].typeProperties.ifFalseActivities[0].typeProperties.pipelineId"
             },
             {
               "from": "$workspace",
-              "to": "properties.activities[0].typeProperties.ifFalseActivities[0].typeProperties.workspaceId"
+              "targetPath": "properties.activities[0].typeProperties.ifFalseActivities[0].typeProperties.workspaceId"
+            }
+          ],
+          "resolve": [
+            {
+              "type": "CredentialConnection",
+              "key": "user",
+              "targetPath": "properties.activities[0].typeProperties.ifFalseActivities[0].externalReferences.connection",
+              "hint": {
+                "connectionType": "Fabric Data Pipelines",
+                "datasource": "FabricDataPipelines",
+                "template": {
+                  "type": "CredentialConnection",
+                  "key": "user",
+                  "value": "<guid>"
+                }
+              }
             }
           ],
           "export": {

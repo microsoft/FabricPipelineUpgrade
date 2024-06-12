@@ -16,6 +16,7 @@
           "resourceName": "PipelineWithUnsupportedActivity",
           "resourceType": "DataPipeline",
           "link": [],
+          "resolve": [],
           "export": {
             "name": "PipelineWithUnsupportedActivity",
             "properties": {

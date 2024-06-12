@@ -184,7 +184,32 @@ namespace FabricUpgradeCmdlet
             }
         }
 
-        public async Task<FabricUpgradeProgress> ExportFabricPipelineAsync(
+        public FabricUpgradeProgress AddFabricResolution(
+            string progressString,
+            string resolution)
+        {
+            FabricUpgradeProgress.FabricUpgradeState progressState = this.CheckProgress(progressString);
+            if (progressState != FabricUpgradeProgress.FabricUpgradeState.Succeeded)
+            {
+                return new FabricUpgradeProgress()
+                {
+                    State = progressState,
+                    Alerts = this.alerts.ToList(),
+                };
+            }
+
+            FabricUpgradeProgress progress = FabricUpgradeProgress.FromString(progressString);
+
+            FabricUpgradeResolution newResolution = JsonConvert.DeserializeObject<FabricUpgradeResolution>(resolution);
+            // TODO: Handle parsing error
+
+            progress.Resolutions.Add(newResolution);
+
+            return progress;
+        }
+
+
+            public async Task<FabricUpgradeProgress> ExportFabricPipelineAsync(
             string progressString,
             string cluster,
             string workspaceId,

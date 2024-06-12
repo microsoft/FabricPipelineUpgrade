@@ -61,6 +61,7 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
                 // We need to update the id of the pipeline to execute
                 // after that pipeline has been created and has a fabric resource ID.
                 string pipelineToExecute = this.AdfResourceToken.SelectToken("$.typeProperties.pipeline.referenceName")?.ToString();
+
                 FabricExportLink otherPipelineResolution = new FabricExportLink(
                     $"{FabricUpgradeResourceTypes.DataPipeline}:{pipelineToExecute}",
                     "typeProperties.pipelineId");
@@ -74,11 +75,37 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
 
                 links.Add(workspaceIdResolution);
 
-                // TODO: The credential connection!
-
                 return Symbol.ReadySymbol(JArray.Parse(JsonConvert.SerializeObject(links)));
             }
 
+            if (symbolName == "exportResolves")
+            {
+                List<FabricExportResolve> resolves = new List<FabricExportResolve>();
+
+                FabricUpgradeResolution.ResolutionType resolutionType = FabricUpgradeResolution.ResolutionType.CredentialConnection;
+                FabricExportResolve userCredentialConnectionResolve = new FabricExportResolve(
+                    resolutionType,
+                    "user",
+                    "externalReferences.connection")
+                    .WithHint(new FabricUpgradeConnectionHint()
+                        {
+                            LinkedServiceName = null,
+                            ConnectionType = "Fabric Data Pipelines",
+                            Datasource = "FabricDataPipelines",
+                        }
+                        .WithTemplate(new FabricUpgradeResolution()
+                        {
+                            Type = resolutionType,
+                            Key = "user",
+                            Value = "<guid>"
+                        }
+                   ));
+
+                resolves.Add(userCredentialConnectionResolve);
+
+                return Symbol.ReadySymbol(JArray.Parse(JsonConvert.SerializeObject(resolves)));
+
+            }
             if (symbolName == "activity")
             {
                 Symbol activitySymbol = base.ResolveExportedSymbol("activity.common", alerts);

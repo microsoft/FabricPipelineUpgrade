@@ -11,6 +11,7 @@
           "resourceName": "WaitPipeline",
           "resourceType": "DataPipeline",
           "link": [],
+          "resolve": [],
           "export": {
             "name": "WaitPipeline",
             "properties": {
