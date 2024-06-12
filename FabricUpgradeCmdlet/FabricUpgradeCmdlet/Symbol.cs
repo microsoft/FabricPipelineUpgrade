@@ -13,6 +13,13 @@ namespace FabricUpgradeCmdlet
     /// </summary>
     public class Symbol
     {
+        public class CommonNames
+        {
+            public const string FabricResource = "fabricResource";
+            public const string ExportLinks = "exportLinks";
+            public const string ExportResolves = "exportResolves";
+            public const string Activity = "activity";
+        }
         public Symbol()
         {
         }

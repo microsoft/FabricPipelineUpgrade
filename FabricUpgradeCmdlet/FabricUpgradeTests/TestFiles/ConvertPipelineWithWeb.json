@@ -1,0 +1,77 @@
+﻿{
+  "adfSupportFile": "PipelineWithWebActivity_support_live.zip",
+
+  "expectedResponse": {
+    "state": "Succeeded",
+    "alerts": [],
+    "resolutions": [],
+    "result": {
+      "fabricResources": [
+        {
+          "resourceName": "PipelineWithWebActivity",
+          "resourceType": "DataPipeline",
+          "link": [],
+          "resolve": [
+            {
+              "type": "UrlHostToConnectionId",
+              "key": "www.bing.com",
+              "targetPath": "properties.activities[0].externalReferences.connection",
+              "hint": {
+                "connectionType": "Web v2",
+                "datasource": "www.bing.com",
+                "template": {
+                  "type": "UrlHostToConnectionId",
+                  "key": "www.bing.com",
+                  "value": "<guid>"
+                }
+              }
+            }
+          ],
+          "export": {
+            "name": "PipelineWithWebActivity",
+            "properties": {
+              "activities": [
+                {
+                  "name": "Web1",
+                  "type": "WebActivity",
+                  "dependsOn": [],
+                  "userProperties": [],
+                  "description": null,
+                  "policy": {
+                    "timeout": "0.12:00:00",
+                    "retry": 1,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": true,
+                    "secureInput": true
+                  },
+                  "typeProperties": {
+                    "method": "GET",
+                    "headers": {
+                      "x-vacant": "NothingAtAll"
+                    },
+                    "relativeUrl": "/over/under",
+                    "body": null,
+                    "disableCertValidation": {
+                      "value": "@greater(dayOfWeek(utcNow()), 3)",
+                      "type": "Expression"
+                    },
+                    "httpRequestTimeout": "00:02:00",
+                    "turnOffAsync": {
+                      "value": "@equals(dayOfWeek(utcNow()), 1)",
+                      "type": "Expression"
+                    }
+                  },
+                  "externalReferences": {
+                    "connection": "00000000-0000-0000-0000-000000000000"
+                  }
+                }
+              ]
+            },
+            "annotations": []
+          }
+        }
+      ]
+    }
+  }
+
+}

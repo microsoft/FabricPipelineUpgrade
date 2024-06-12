@@ -14,11 +14,24 @@ namespace FabricUpgradeTests
         [DataRow("E2eNoSuchSupportFile")]
         [DataRow("E2eEmptyPipeline")]
         [DataRow("E2ePipelineWithUnsupportedActivity")]
+
         [DataRow("E2ePipelineWithWait")]
-        [DataRow("E2ePipelineWithExecutePipeline")]
-        [DataRow("E2ePipelineWithExecutePipeline_MissingResolution")]
         [DataRow("E2ePipelineWithIf")]
         [DataRow("E2ePipelineWithWaitAndIf")]
+
+        [DataRow("E2ePipelineWithExecutePipeline")]
+        [DataRow("E2ePipelineWithExecutePipeline_MissingResolution")]
+
+
+        [DataRow("E2ePipelineWithWeb")]
+        [DataRow("E2ePipelineWithWeb_Post")]
+        [DataRow("E2ePipelineWithWeb_HttpUrl")]
+        [DataRow("E2ePipelineWithWeb_NoHeaders")]
+        [DataRow("E2ePipelineWithWeb_MissingResolution")]
+        [DataRow("E2ePipelineWithWeb_DynamicUrl")]
+        [DataRow("E2ePipelineWithWeb_NullUrl")]
+        [DataRow("E2ePipelineWithWeb_BadUrl")]
+        [DataRow("E2ePipelineWithWeb_WithLinkedServicesAndDatasets")]
         public async Task ExportFabricPipeline_TestAsync(
             string testConfigFilename)
         {
@@ -230,7 +243,7 @@ namespace FabricUpgradeTests
 
             if (expected.Type != actual.Type)
             {
-                if (!(expected.Type == JTokenType.Null && actual.Value<string>() == null))
+                if (!(expected.Type == JTokenType.Null && actual.Type == JTokenType.String && actual.Value<string>() == null))
                 {
                     mismatches["typeMismatch"] = $"Expected type {expected.Type}, Actual type {actual.Type}";
                 }

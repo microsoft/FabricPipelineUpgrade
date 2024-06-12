@@ -304,10 +304,10 @@ namespace FabricUpgradeTests.Utilities
 
             JObject itemModel = new JObject();
             itemModel["type"] = createItemPayload.ItemType.ToString();
-            itemModel["workspaceId"] = workspaceId;
-            itemModel["id"] = newItemId.ToString();
             itemModel["displayName"] = createItemPayload.DisplayName;
             itemModel["description"] = createItemPayload.Description;
+            itemModel["workspaceId"] = workspaceId;
+            itemModel["id"] = newItemId.ToString();
 
             this.storedItems.Add(itemModel);
 

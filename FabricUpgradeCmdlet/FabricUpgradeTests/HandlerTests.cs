@@ -52,6 +52,8 @@ namespace FabricUpgradeTests
         [DataRow("ConvertPipelineWithExecutePipeline")]
 
         [DataRow("ConvertPipelineWithIf")]
+
+        [DataRow("ConvertPipelineWithWeb")]
         public void ConvertToFabricPipeline_Test(
             string testConfigFilename,
             string workspaceId = null) // we can set ws in param or in progress.

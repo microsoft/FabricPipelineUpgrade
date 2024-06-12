@@ -1,0 +1,28 @@
+﻿{
+  "adfSupportFile": "PipelineWithWebActivity_support_live.zip",
+
+
+  "expectedResponse": {
+    "state": "Failed",
+    "alerts": [
+      {
+        "severity": "RequiresUserAction",
+        "details": "Please use the hint and template to create/find a new connection and add its ID to your resolutions.",
+        "connectionHint": {
+          "linkedServiceName": null,
+          "connectionType": "Web v2",
+          "datasource": "www.bing.com",
+          "template": {
+            "type": "UrlHostToConnectionId",
+            "key": "www.bing.com",
+            "value": "<guid>"
+          }
+        }
+      }
+    ],
+    "resolutions": [],
+    "result": {}
+  },
+
+  "expectedItems": []
+}

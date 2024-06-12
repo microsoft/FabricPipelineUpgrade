@@ -136,7 +136,7 @@ namespace FabricUpgradeCmdlet.UpgradeMachines
             JArray fabricResources = new JArray();
             foreach (Upgrader upgrader in this.Upgraders)
             {
-                Symbol pipelineSymbol = upgrader.ResolveExportedSymbol("fabricResource", this.Alerts);
+                Symbol pipelineSymbol = upgrader.ResolveExportedSymbol(Symbol.CommonNames.FabricResource, this.Alerts);
                 if (pipelineSymbol.State == Symbol.SymbolState.Ready)
                 {
                     if (pipelineSymbol.Value != null)

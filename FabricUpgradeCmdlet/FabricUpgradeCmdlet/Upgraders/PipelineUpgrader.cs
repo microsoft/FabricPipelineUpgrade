@@ -65,7 +65,7 @@ namespace FabricUpgradeCmdlet.Upgraders
             AlertCollector alerts)
         {
             
-            if (symbolName == "fabricResource")
+            if (symbolName == Symbol.CommonNames.FabricResource)
             {
                 PipelineExportInstruction exportInstruction = new PipelineExportInstruction(this.Name);
 
@@ -102,7 +102,7 @@ namespace FabricUpgradeCmdlet.Upgraders
             int nActivity = 0;
             foreach (Upgrader activityUpgrader in this.activityUpgraders)
             {
-                Symbol resolutionSymbol = activityUpgrader.ResolveExportedSymbol("exportLinks", alerts);
+                Symbol resolutionSymbol = activityUpgrader.ResolveExportedSymbol(Symbol.CommonNames.ExportLinks, alerts);
                 if (resolutionSymbol.State != Symbol.SymbolState.Ready)
                 {
                     // TODO!
@@ -129,7 +129,7 @@ namespace FabricUpgradeCmdlet.Upgraders
             int nActivity = 0;
             foreach (Upgrader activityUpgrader in this.activityUpgraders)
             {
-                Symbol resolutionSymbol = activityUpgrader.ResolveExportedSymbol("exportResolves", alerts);
+                Symbol resolutionSymbol = activityUpgrader.ResolveExportedSymbol(Symbol.CommonNames.ExportResolves, alerts);
                 if (resolutionSymbol.State != Symbol.SymbolState.Ready)
                 {
                     // TODO!
@@ -155,7 +155,7 @@ namespace FabricUpgradeCmdlet.Upgraders
         {
             foreach (Upgrader activityUpgrader in this.activityUpgraders)
             {
-                Symbol activitySymbol = activityUpgrader.ResolveExportedSymbol("activity", alerts);
+                Symbol activitySymbol = activityUpgrader.ResolveExportedSymbol(Symbol.CommonNames.Activity, alerts);
                 if (activitySymbol.State != Symbol.SymbolState.Ready)
                 {
                     // TODO!

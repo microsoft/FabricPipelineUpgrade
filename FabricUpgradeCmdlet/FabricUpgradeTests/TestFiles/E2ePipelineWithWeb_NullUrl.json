@@ -1,0 +1,25 @@
+﻿{
+  "adfSupportFile": "PipelineWithWebActivity_NullUrl_support_live.zip",
+
+  "resolutions": [
+    {
+      "type": "UrlHostToConnectionId",
+      "key": "www.bing.com",
+      "value": "c97b2144-fa4c-49a8-8c24-e5426690b7eb"
+    }
+  ],
+
+  "expectedResponse": {
+    "state": "Failed",
+    "alerts": [
+      {
+        "severity": "Permanent",
+        "details": "PipelineWithWebActivity_NullUrl/Web1.typeProperties.url must not be null."
+      }
+    ],
+    "resolutions": [],
+    "result": {}
+  },
+
+  "expectedItems": []
+}

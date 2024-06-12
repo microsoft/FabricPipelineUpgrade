@@ -1,13 +1,8 @@
-﻿using FabricUpgradeCmdlet.Models;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using FabricUpgradeCmdlet.Models;
 using FabricUpgradeCmdlet.UpgradeMachines;
 using FabricUpgradeCmdlet.Utilities;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
 {
@@ -24,7 +19,7 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
             string parentPath,
             JToken activityToken,
             IFabricUpgradeMachine machine)
-            : base(ActivityUpgrader.ActivityTypes.WaitActivity, parentPath, activityToken, machine)
+            : base(ActivityUpgrader.ActivityTypes.Wait, parentPath, activityToken, machine)
         {
         }
 
@@ -54,7 +49,7 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
             string symbolName,
             AlertCollector alerts)
         {
-            if (symbolName == "exportLinks")
+            if (symbolName == Symbol.CommonNames.ExportLinks)
             {
                 List<FabricExportLink> links = new List<FabricExportLink>();
 
@@ -78,7 +73,7 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
                 return Symbol.ReadySymbol(JArray.Parse(JsonConvert.SerializeObject(links)));
             }
 
-            if (symbolName == "exportResolves")
+            if (symbolName == Symbol.CommonNames.ExportResolves)
             {
                 List<FabricExportResolve> resolves = new List<FabricExportResolve>();
 
@@ -106,9 +101,9 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
                 return Symbol.ReadySymbol(JArray.Parse(JsonConvert.SerializeObject(resolves)));
 
             }
-            if (symbolName == "activity")
+            if (symbolName == Symbol.CommonNames.Activity)
             {
-                Symbol activitySymbol = base.ResolveExportedSymbol("activity.common", alerts);
+                Symbol activitySymbol = base.ResolveExportedSymbol(Symbol.CommonNames.Activity, alerts);
 
                 if (activitySymbol.State != Symbol.SymbolState.Ready)
                 {
@@ -126,7 +121,7 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
                 copier.Set("typeProperties.operationType", "InvokeFabricPipeline");
 
                 // These properties cannot be set until the Export operation phase.
-                // We include these properties in the "exportLinks" symbol.
+                // We include these properties in the ExportLinks symbol.
                 copier.Set("typeProperties.pipelineId", Guid.Empty.ToString());
                 copier.Set("typeProperties.workspaceId", Guid.Empty.ToString());
 

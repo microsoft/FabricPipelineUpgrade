@@ -17,8 +17,10 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
         public class ActivityTypes
         {
             public const string ExecutePipeline = "ExecutePipeline";
-            public const string IfCondition = "IfCondition";
-            public const string WaitActivity = "Wait";
+            public const string If = "IfCondition";
+            public const string Wait = "Wait";
+            public const string Web = "WebActivity";
+
         }
 
         protected ActivityUpgrader(
@@ -55,8 +57,9 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
             return activityType switch
             {
                 ActivityTypes.ExecutePipeline => new ExecutePipelineActivityUpgrader(parentPath, adfActivityToken, machine),
-                ActivityTypes.IfCondition => new IfConditionActivityUpgrader(parentPath, adfActivityToken, machine),
-                ActivityTypes.WaitActivity => new WaitActivityUpgrader(parentPath, adfActivityToken, machine),
+                ActivityTypes.If => new IfConditionActivityUpgrader(parentPath, adfActivityToken, machine),
+                ActivityTypes.Wait => new WaitActivityUpgrader(parentPath, adfActivityToken, machine),
+                ActivityTypes.Web => new WebActivityUpgrader(parentPath, adfActivityToken, machine),
                 _ => new UnsupportedActivityUpgrader(parentPath, adfActivityToken, machine),
             };
         }
@@ -77,7 +80,7 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
             string symbolName,
             AlertCollector alerts)
         {
-            if (symbolName == "activity.common")
+            if (symbolName == Symbol.CommonNames.Activity)
             {
                 // Create a Symbol whose Value is a JObject that contains all of the 
                 // common activity properties.

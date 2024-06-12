@@ -50,7 +50,7 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
             int nActivity = 0;
             foreach (Upgrader activityUpgrader in upgraders)
             {
-                Symbol resolutionSymbol = activityUpgrader.ResolveExportedSymbol("exportLinks", alerts);
+                Symbol resolutionSymbol = activityUpgrader.ResolveExportedSymbol(Symbol.CommonNames.ExportLinks, alerts);
                 if (resolutionSymbol.State != Symbol.SymbolState.Ready)
                 {
                     // TODO!
@@ -79,7 +79,7 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
             int nActivity = 0;
             foreach (Upgrader activityUpgrader in upgraders)
             {
-                Symbol resolutionSymbol = activityUpgrader.ResolveExportedSymbol("exportResolves", alerts);
+                Symbol resolutionSymbol = activityUpgrader.ResolveExportedSymbol(Symbol.CommonNames.ExportResolves, alerts);
                 if (resolutionSymbol.State != Symbol.SymbolState.Ready)
                 {
                     // TODO!
@@ -107,7 +107,7 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
 
             foreach (Upgrader upgrader in upgraders)
             {
-                Symbol subActivitySymbol = upgrader.ResolveExportedSymbol("activity", alerts);
+                Symbol subActivitySymbol = upgrader.ResolveExportedSymbol(Symbol.CommonNames.Activity, alerts);
                 if (subActivitySymbol.State != Symbol.SymbolState.Ready)
                 {
                     // TODO!
