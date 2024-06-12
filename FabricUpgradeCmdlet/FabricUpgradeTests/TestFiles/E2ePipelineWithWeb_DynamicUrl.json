@@ -1,0 +1,25 @@
+﻿{
+  "adfSupportFile": "PipelineWithWebActivity_DynamicUrl_support_live.zip",
+
+  "resolutions": [
+    {
+      "type": "UrlHostToConnectionId",
+      "key": "www.bing.com",
+      "value": "c97b2144-fa4c-49a8-8c24-e5426690b7eb"
+    }
+  ],
+
+  "expectedResponse": {
+    "state": "Failed",
+    "alerts": [
+      {
+        "severity": "Permanent",
+        "details": "PipelineWithWebActivity_DynamicUrl/Web1.typeProperties.url is not a string and the FabricUpgrader cannot upgrade a WebActivity whose URL is not a string."
+      }
+    ],
+    "resolutions": [],
+    "result": {}
+  },
+
+  "expectedItems": []
+}

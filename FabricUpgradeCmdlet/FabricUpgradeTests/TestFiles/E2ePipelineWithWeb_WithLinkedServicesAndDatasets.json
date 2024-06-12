@@ -1,0 +1,31 @@
+﻿{
+  "adfSupportFile": "PipelineWithWebActivity_WithLinkedServicesAndDatasets_support_live.zip",
+
+  "resolutions": [
+    {
+      "type": "UrlHostToConnectionId",
+      "key": "www.bing.com",
+      "value": "c97b2144-fa4c-49a8-8c24-e5426690b7eb"
+    }
+  ],
+
+  "expectedResponse": {
+    "state": "Failed",
+    "alerts": [
+      {
+        "severity": "Permanent",
+        "details": "Cannot upgrade Web Activity 'PipelineWithWebActivity_WithLinkedServicesAndDatasets/Web1' because it includes LinkedServices"
+      },
+      {
+        "severity": "Permanent",
+        "details": "Cannot upgrade Web Activity 'PipelineWithWebActivity_WithLinkedServicesAndDatasets/Web1' because it includes Datasets"
+      },
+      {
+        "severity": "UnsupportedResource",
+        "details": "Cannot upgrade Dataset 'Json1' because its Type is 'Json'"
+      }
+    ],
+    "resolutions": [],
+    "result": {}
+  }
+}

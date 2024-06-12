@@ -15,7 +15,7 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
             string parentPath,
             JToken activityToken,
             IFabricUpgradeMachine machine)
-            : base(ActivityUpgrader.ActivityTypes.WaitActivity, parentPath, activityToken, machine)
+            : base(ActivityUpgrader.ActivityTypes.Wait, parentPath, activityToken, machine)
         {
             // This "stub" activity will be a Wait activity with a waitTimeInSeconds of 0.
         }
@@ -29,13 +29,13 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
             string symbolName,
             AlertCollector alerts)
         {
-            if (symbolName == "activity")
+            if (symbolName == Symbol.CommonNames.Activity)
             {
                 // We "pretend" that this Activity is actually a Wait Activity
                 // with WaitTimeInSeconds = 0
                 // and a description that contains useful information for the user.
 
-                Symbol activitySymbol = base.ResolveExportedSymbol("activity.common", alerts);
+                Symbol activitySymbol = base.ResolveExportedSymbol(Symbol.CommonNames.Activity, alerts);
 
                 if (activitySymbol.State != Symbol.SymbolState.Ready)
                 {
@@ -44,7 +44,7 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
 
                 JObject fabricActivityObject = (JObject)activitySymbol.Value;
 
-                JToken newDescription = this.ResolveExportedSymbol("newDescription", alerts).Value;
+                JToken newDescription = this.MakeDescriptionForUnsupportedActivity();
 
                 PropertyCopier copier = new PropertyCopier(this.Path, this.AdfResourceToken, fabricActivityObject, alerts);
 
@@ -55,11 +55,6 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
                 alerts.AddWarning($"Cannot upgrade Activity '{this.Path}'; please inspect this Activity for more details");
 
                 return Symbol.ReadySymbol(fabricActivityObject);
-            }
-
-            if (symbolName == "newDescription")
-            {
-                return Symbol.ReadySymbol(this.MakeDescriptionForUnsupportedActivity());
             }
 
             return base.ResolveExportedSymbol(symbolName, alerts);

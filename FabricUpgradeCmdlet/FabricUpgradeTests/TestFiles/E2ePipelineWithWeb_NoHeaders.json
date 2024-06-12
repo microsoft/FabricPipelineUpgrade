@@ -1,0 +1,79 @@
+﻿{
+  "adfSupportFile": "PipelineWithWebActivity_NoHeaders_support_live.zip",
+
+  "resolutions": [
+    {
+      "type": "UrlHostToConnectionId",
+      "key": "bing.com",
+      "value": "c97b2144-fa4c-49a8-8c24-e5426690b7eb"
+    }
+  ],
+
+  "expectedResponse": {
+    "state": "Succeeded",
+    "alerts": [],
+    "resolutions": [
+      {
+        "type": "UrlHostToConnectionId",
+        "key": "bing.com",
+        "value": "c97b2144-fa4c-49a8-8c24-e5426690b7eb"
+      }
+    ],
+    "result": {
+      "PipelineWithWebActivity_NoHeaders": {
+        "type": "DataPipeline",
+        "workspaceId": "",
+        "id": 0,
+        "displayName": "PipelineWithWebActivity_NoHeaders",
+        "description": null
+      }
+    }
+  },
+
+  "expectedItems": [
+    {
+      "item": {
+        "type": "DataPipeline",
+        "displayName": "PipelineWithWebActivity_NoHeaders",
+        "description": null,
+        "workspaceId": "",
+        "id": 0
+      },
+      "definition": {
+        "name": "PipelineWithWebActivity_NoHeaders",
+        "properties": {
+          "activities": [
+            {
+              "name": "Web1",
+              "type": "WebActivity",
+              "dependsOn": [],
+              "userProperties": [],
+              "description": null,
+              "policy": {
+                "timeout": "0.12:00:00",
+                "retry": 0,
+                "retryIntervalInSeconds": 30,
+                "secureOutput": false,
+                "secureInput": false
+              },
+              "typeProperties": {
+                "method": "GET",
+                "headers": null,
+                "relativeUrl": "/over/under",
+                "body": null,
+                "disableCertValidation": null,
+                "httpRequestTimeout": null,
+                "turnOffAsync": null
+              },
+              "externalReferences": {
+                "connection": "c97b2144-fa4c-49a8-8c24-e5426690b7eb"
+              }
+            }
+          ]
+        },
+        "annotations": []
+      }
+    }
+
+  ]
+}

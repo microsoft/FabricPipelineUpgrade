@@ -113,7 +113,7 @@ namespace FabricUpgradeCmdlet.Upgraders
             string symbolName,
             AlertCollector alerts)
         {
-            if (symbolName == "fabricResource")
+            if (symbolName == Symbol.CommonNames.FabricResource)
             {
                 // If a subclass does not generate a fabric resource, then return a null symbol value.
                 // For example, Activities and Datasets to do not generate a fabric resource.
@@ -121,14 +121,14 @@ namespace FabricUpgradeCmdlet.Upgraders
                 return Symbol.ReadySymbol(null);
             }
 
-            if (symbolName == "exportLinks")
+            if (symbolName == Symbol.CommonNames.ExportLinks)
             {
                 // If a subclass does not have any links, then return a null symbol value.
                 // Most Activities do not have any links.
                 return Symbol.ReadySymbol(null);
             }
 
-            if (symbolName == "exportResolves")
+            if (symbolName == Symbol.CommonNames.ExportResolves)
             {
                 // If a subclass does not have any resolves, then return a null symbol value.
                 // Most Activities do not have any resolves, but Copy, Web, and ExecutePipeline do.

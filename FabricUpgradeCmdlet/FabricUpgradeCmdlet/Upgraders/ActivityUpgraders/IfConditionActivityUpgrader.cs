@@ -27,7 +27,7 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
             string parentPath,
             JToken activityToken,
             IFabricUpgradeMachine machine)
-            : base(ActivityUpgrader.ActivityTypes.WaitActivity, parentPath, activityToken, machine)
+            : base(ActivityUpgrader.ActivityTypes.Wait, parentPath, activityToken, machine)
         {
         }
 
@@ -55,7 +55,7 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
             string symbolName,
             AlertCollector alerts)
         {
-            if (symbolName == "exportLinks")
+            if (symbolName == Symbol.CommonNames.ExportLinks)
             {
                 List<FabricExportLink> links = new List<FabricExportLink>();
 
@@ -65,7 +65,7 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
                 return Symbol.ReadySymbol(JArray.Parse(JsonConvert.SerializeObject(links)));
             }
 
-            if (symbolName == "exportResolves")
+            if (symbolName == Symbol.CommonNames.ExportResolves)
             {
                 List<FabricExportResolve> resolves = new List<FabricExportResolve>();
 
@@ -75,9 +75,9 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
                 return Symbol.ReadySymbol(JArray.Parse(JsonConvert.SerializeObject(resolves)));
             }
 
-            if (symbolName == "activity")
+            if (symbolName == Symbol.CommonNames.Activity)
             {
-                Symbol activitySymbol = base.ResolveExportedSymbol("activity.common", alerts);
+                Symbol activitySymbol = base.ResolveExportedSymbol(Symbol.CommonNames.Activity, alerts);
 
                 if (activitySymbol.State != Symbol.SymbolState.Ready)
                 {

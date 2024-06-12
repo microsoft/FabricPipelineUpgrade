@@ -67,7 +67,7 @@ namespace FabricUpgradeCmdlet.Upgraders.LinkedServiceUpgraders
             AlertCollector alerts)
         {
 
-            if (symbolName == "fabricResource")
+            if (symbolName == Symbol.CommonNames.FabricResource)
             {
                 ConnectionExportInstruction exportInstruction = new ConnectionExportInstruction(this.Name);
 
