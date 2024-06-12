@@ -39,19 +39,9 @@ namespace FabricUpgradeCmdlet.ExportMachines
         {
             try
             {
-                JArray toExport = (JArray)this.ExportObject.SelectToken("fabricResources");
-                if (toExport == null)
-                {
-                    this.Alerts.AddPermanentError("Cannot find fabricResources to export");
-                    throw new UpgradeFailureException("Construct");
-                }
-                foreach (var exportable in toExport)
-                {
-                    ResourceExporter exporter = ResourceExporter.CreateResourceExporter(exportable, this);
-                    this.exporters.Add(exporter);
-                }
-
-                return await this.DoExportAsync().ConfigureAwait(false);
+                this.BuildAllExporters();
+                this.CheckAllExportersBeforeExport();
+                return await this.ExportAllExportersAsync().ConfigureAwait(false);
             }
             catch (UpgradeFailureException)
             {
@@ -63,6 +53,7 @@ namespace FabricUpgradeCmdlet.ExportMachines
             }
         }
 
+        /// <inheritdoc/>
         public override JToken Link(
             string key,
             AlertCollector alerts)
@@ -77,21 +68,41 @@ namespace FabricUpgradeCmdlet.ExportMachines
                 return this.fabricResourceIds[key];
             }
 
-            // TODO: Add an alert!
+            // The caller must add an alert.
             return null;
         }
 
-        private async Task<FabricUpgradeProgress> DoExportAsync()
+        private void BuildAllExporters()
+        {
+            JArray toExport = (JArray)this.ExportObject.SelectToken("fabricResources");
+            if (toExport == null)
+            {
+                this.Alerts.AddPermanentError("Cannot find fabricResources to export");
+                throw new UpgradeFailureException("Construct");
+            }
+
+            foreach (var exportable in toExport)
+            {
+                ResourceExporter exporter = ResourceExporter.CreateResourceExporter(exportable, this);
+                this.exporters.Add(exporter);
+            }
+        }
+
+        private void CheckAllExportersBeforeExport()
         {
             foreach (ResourceExporter exporter in this.exporters)
             {
                 exporter.CheckBeforeExports(this.Alerts);
             }
-            if (this.Alerts.Count > 0)
+
+            if (this.AlertsIndicateFailure())
             {
                 throw new UpgradeFailureException("PreCheck");
             }
+        }
 
+        private async Task<FabricUpgradeProgress> ExportAllExportersAsync()
+        {
             JObject results = new JObject();
 
             foreach (ResourceExporter exporter in this.exporters)
@@ -108,7 +119,7 @@ namespace FabricUpgradeCmdlet.ExportMachines
                 this.fabricResourceIds[$"{exporter.ResourceType}:{exporter.Name}"] = uploadResult.SelectToken("$.id")?.ToString();
             }
 
-            if (this.Alerts.Count > 0)
+            if (this.AlertsIndicateFailure())
             {
                 throw new UpgradeFailureException("Export");
             }
@@ -121,5 +132,11 @@ namespace FabricUpgradeCmdlet.ExportMachines
                 Result = results,
             };
         }
+
+        private bool AlertsIndicateFailure()
+        {
+            return this.Alerts.Any(f => f.Severity != FabricUpgradeAlert.FailureSeverity.Warning);
+        }
+
     }
 }

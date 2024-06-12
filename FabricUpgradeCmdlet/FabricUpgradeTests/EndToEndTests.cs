@@ -13,6 +13,7 @@ namespace FabricUpgradeTests
         [TestMethod]
         [DataRow("E2eNoSuchSupportFile")]
         [DataRow("E2eEmptyPipeline")]
+        [DataRow("E2ePipelineWithUnsupportedActivity")]
         [DataRow("E2ePipelineWithWait")]
         [DataRow("E2ePipelineWithExecutePipeline")]
         [DataRow("E2ePipelineWithExecutePipeline_MissingResolution")]
