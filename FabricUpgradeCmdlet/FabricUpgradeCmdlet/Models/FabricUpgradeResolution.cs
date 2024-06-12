@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using FabricUpgradeCmdlet.Utilities;
+using System.Security.Policy;
 
 namespace FabricUpgradeCmdlet.Models
 {
@@ -65,6 +66,11 @@ namespace FabricUpgradeCmdlet.Models
         public JToken ToJToken()
         {
             return UpgradeSerialization.ToJToken(this);
+        }
+
+        public override string ToString()
+        {
+            return JsonConvert.SerializeObject(this, Formatting.Indented);
         }
     }
 }

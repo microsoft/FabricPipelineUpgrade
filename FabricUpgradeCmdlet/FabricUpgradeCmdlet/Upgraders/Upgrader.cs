@@ -128,6 +128,13 @@ namespace FabricUpgradeCmdlet.Upgraders
                 return Symbol.ReadySymbol(null);
             }
 
+            if (symbolName == "exportResolves")
+            {
+                // If a subclass does not have any resolves, then return a null symbol value.
+                // Most Activities do not have any resolves, but Copy, Web, and ExecutePipeline do.
+                return Symbol.ReadySymbol(null);
+            }
+
             // If the subclass does not resolve this, then it is an invalid symbol name.
             alerts.AddPermanentError($"Cannot resolve symbol '{symbolName}'.");
             return Symbol.MissingSymbol();

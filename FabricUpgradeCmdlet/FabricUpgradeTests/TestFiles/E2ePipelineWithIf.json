@@ -1,8 +1,19 @@
 ﻿{
+  "progress": {
+    "state": "Succeeded",
+    "resolutions": [
+      {
+        "type": "CredentialConnection",
+        "key": "user",
+        "value": "99ca07da-2163-4dc7-ac59-ae13cd46581f"
+      }
+    ]
+  },
+
   "adfSupportFile": "PipelineWithIf_support_live.zip",
 
   "guidSubstitutions": [
-   
+
     {
       "comment": "Set the pipelineId of the ExecutePipeline activity to the Guid assigned to the WaitPipeline.",
       "path": "[1].definition.properties.activities[0].typeProperties.ifFalseActivities[0].typeProperties.pipelineId",
@@ -18,6 +29,13 @@
   "expectedResponse": {
     "state": "Succeeded",
     "alerts": [],
+    "resolutions": [
+      {
+        "type": "CredentialConnection",
+        "key": "user",
+        "value": "99ca07da-2163-4dc7-ac59-ae13cd46581f"
+      }
+    ],
     "result": {
       "pipelineToInvoke": {
         "type": "DataPipeline",
@@ -110,7 +128,7 @@
                       "pipelineId": "00000000-0000-0000-0000-000000000000"
                     },
                     "externalReferences": {
-                      "connection": "00000000-0000-0000-0000-000000000000"
+                      "connection": "99ca07da-2163-4dc7-ac59-ae13cd46581f"
                     }
                   }
                 ],

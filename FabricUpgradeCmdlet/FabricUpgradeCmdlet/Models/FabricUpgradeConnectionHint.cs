@@ -22,13 +22,6 @@ namespace FabricUpgradeCmdlet.Models
         public string LinkedServiceName { get; set; }
 
         /// <summary>
-        /// Gets or sets the type of the Resolution that needs to be added.
-        /// </summary>
-        [DataMember(Name = "resolutionType", Order = 20)]
-        [JsonProperty("resolutionType")]
-        public FabricUpgradeResolution.ResolutionType ResolutionType { get; set; }
-
-        /// <summary>
         /// Gets or sets the type of the Fabric Connection to find/create.
         /// </summary>
         [DataMember(Name = "connectionType", Order = 30)]
@@ -44,6 +37,10 @@ namespace FabricUpgradeCmdlet.Models
         [JsonProperty("datasource")]
         public string Datasource { get; set; }
 
+        // If we don't find this resolution during Export,
+        [JsonProperty(PropertyName = "template")]
+        public FabricUpgradeResolution Template { get; set; }
+
         /// <summary>
         /// Set the LinkedServiceName of the hint.
         /// </summary>
@@ -52,17 +49,6 @@ namespace FabricUpgradeCmdlet.Models
         public FabricUpgradeConnectionHint WithLinkedServiceName(string linkedServiceName)
         {
             this.LinkedServiceName = linkedServiceName;
-            return this;
-        }
-
-        /// <summary>
-        /// Set the ResolutionType of the hint.
-        /// </summary>
-        /// <param name="resolutionType">The type of Resolution to create.</param>
-        /// <returns>this, for chaining.</returns>
-        public FabricUpgradeConnectionHint WithResolutionType(FabricUpgradeResolution.ResolutionType resolutionType)
-        {
-            this.ResolutionType = resolutionType;
             return this;
         }
 
@@ -85,6 +71,12 @@ namespace FabricUpgradeCmdlet.Models
         public FabricUpgradeConnectionHint WithDatasource(string datasource)
         {
             this.Datasource = datasource;
+            return this;
+        }
+
+        public FabricUpgradeConnectionHint WithTemplate(FabricUpgradeResolution template)
+        {
+            this.Template = template;
             return this;
         }
     }

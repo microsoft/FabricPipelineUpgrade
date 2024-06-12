@@ -1,0 +1,58 @@
+﻿using FabricUpgradeCmdlet.Utilities;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace FabricUpgradeCmdlet.Models
+{
+    /// <summary>
+    /// Part of the communication between an Upgrader and an Exporter.
+    /// This class tells the Exporter how to "finish" the item that it is exporting.
+    /// Each of these typically tell the Exporter to copy the Fabric resource ID of another item.
+    /// We cannot know the Fabric resource ID of another item until the Export operation.
+    /// </summary>
+    public class FabricExportResolve
+    {
+        // Look for a resolution of this type.
+        [JsonProperty(PropertyName = "type", Order = 1)]
+        public FabricUpgradeResolution.ResolutionType Type { get; set; }
+
+        // Look for a resolution with this 'key' (e.g., the LinkedService name).
+        [JsonProperty(PropertyName = "key", Order = 2)]
+        public string Key { get; set; }
+
+        // Where in the Fabric resource JSON to place the value.
+        [JsonProperty(PropertyName = "targetPath", Order = 3)]
+        public string TargetPath { get; set; }
+
+        // If we don't find this resolution during Export,
+        // then include this hint in the Alert.
+        [JsonProperty(PropertyName = "hint", Order = 4)]
+        public FabricUpgradeConnectionHint Hint { get; set; }
+
+        public FabricExportResolve(
+            FabricUpgradeResolution.ResolutionType type,
+            string key,
+            string targetPath)
+        {
+            this.Type = type;
+            this.Key = key;
+            this.TargetPath = targetPath;
+        }
+
+        public FabricExportResolve WithHint(FabricUpgradeConnectionHint hint)
+        {
+            this.Hint = hint;
+            return this;
+        }
+
+        public static FabricExportResolve FromJToken(JToken token)
+        {
+            return UpgradeSerialization.FromJToken<FabricExportResolve>(token);
+        }
+    }
+}

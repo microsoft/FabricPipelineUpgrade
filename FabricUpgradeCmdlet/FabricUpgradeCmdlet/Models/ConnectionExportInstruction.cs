@@ -9,23 +9,18 @@ using System.Threading.Tasks;
 
 namespace FabricUpgradeCmdlet.Models
 {
-    public class PipelineExportInstruction : FabricExportInstruction
+    // Currently, the FabricUpgrader does not actually export Connections.
+    // When it does, then we can "back-fill" this functionality.
+    public class ConnectionExportInstruction : FabricExportInstruction
     {
-        // These Links describe which properties in the generated code should be set to the
-        // value of a Fabric Resource ID of a previously exported Resource.
         [JsonProperty(PropertyName = "link", Order = 100)]
         public List<FabricExportLink> Links { get; set; } = new List<FabricExportLink>();
 
-        // These Resolves describe which properties in the generated code should be set to the GUID
-        // of a Fabric Connection that was manually created.
-        [JsonProperty(PropertyName = "resolve", Order = 101)]
-        public List<FabricExportResolve> Resolves { get; set; } = new List<FabricExportResolve>();
-
-        [JsonProperty(PropertyName = "export", Order = 102)]
+        [JsonProperty(PropertyName = "export", Order = 101)]
         public JObject Export { get; set; }
 
-        public PipelineExportInstruction(string name)
-            : base(name, FabricUpgradeResourceTypes.DataPipeline)
+        public ConnectionExportInstruction(string name)
+            : base(name, FabricUpgradeResourceTypes.Connection)
         {
         }
 

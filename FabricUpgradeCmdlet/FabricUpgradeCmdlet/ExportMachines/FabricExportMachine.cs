@@ -63,23 +63,35 @@ namespace FabricUpgradeCmdlet.ExportMachines
             }
         }
 
-        public override JToken Link(string key)
+        public override JToken Link(
+            string key,
+            AlertCollector alerts)
         {
             if (key == "$workspace")
             {
                 return this.WorkspaceId;
             }
-
-            if (!this.fabricResourceIds.ContainsKey(key))
+           
+            if (this.fabricResourceIds.ContainsKey(key))
             {
-                // TODO!
+                return this.fabricResourceIds[key];
             }
 
-            return this.fabricResourceIds[key];
+            // TODO: Add an alert!
+            return null;
         }
 
         private async Task<FabricUpgradeProgress> DoExportAsync()
         {
+            foreach (ResourceExporter exporter in this.exporters)
+            {
+                exporter.CheckBeforeExports(this.Alerts);
+            }
+            if (this.Alerts.Count > 0)
+            {
+                throw new UpgradeFailureException("PreCheck");
+            }
+
             JObject results = new JObject();
 
             foreach (ResourceExporter exporter in this.exporters)
@@ -94,6 +106,11 @@ namespace FabricUpgradeCmdlet.ExportMachines
 
                 results[$"{exporter.Name}"] = uploadResult;
                 this.fabricResourceIds[$"{exporter.ResourceType}:{exporter.Name}"] = uploadResult.SelectToken("$.id")?.ToString();
+            }
+
+            if (this.Alerts.Count > 0)
+            {
+                throw new UpgradeFailureException("Export");
             }
 
             return new FabricUpgradeProgress()

@@ -15,6 +15,7 @@ namespace FabricUpgradeTests
         [DataRow("E2eEmptyPipeline")]
         [DataRow("E2ePipelineWithWait")]
         [DataRow("E2ePipelineWithExecutePipeline")]
+        [DataRow("E2ePipelineWithExecutePipeline_MissingResolution")]
         [DataRow("E2ePipelineWithIf")]
         [DataRow("E2ePipelineWithWaitAndIf")]
         public async Task ExportFabricPipeline_TestAsync(
@@ -44,6 +45,13 @@ namespace FabricUpgradeTests
             runningProgress = new FabricUpgradeHandler().ConvertToFabricPipeline(
                 runningProgress?.ToString(),
                 null);
+
+            foreach (FabricUpgradeResolution resolution in testConfig.Resolutions)
+            {
+                runningProgress = new FabricUpgradeHandler().AddFabricResolution(
+                    runningProgress?.ToString(),
+                    resolution?.ToString());
+            }
 
             runningProgress = await new FabricUpgradeHandler().ExportFabricPipelineAsync(
                 runningProgress?.ToString(),
@@ -115,6 +123,9 @@ namespace FabricUpgradeTests
 
             [JsonProperty(PropertyName = "adfSupportFile")]
             public string AdfSupportFile { get; set; }
+
+            [JsonProperty(PropertyName = "resolutions")]
+            public List<FabricUpgradeResolution> Resolutions { get; set; } = new List<FabricUpgradeResolution>();
 
             [JsonProperty(PropertyName = "prestock")]
             public List<Prestock> Prestocks { get; set; } = new List<Prestock>();

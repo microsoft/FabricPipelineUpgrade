@@ -19,19 +19,19 @@ namespace FabricUpgradeCmdlet.Models
     {
         // Typically, the name of the other ADF resource.
         // May also the "$workspace", which means the workspaceId.
-        [JsonProperty(PropertyName = "from")]
+        [JsonProperty(PropertyName = "from", Order = 1)]
         public string From { get; set; }
 
         // Where in the Fabric resource JSON to place the value.
-        [JsonProperty(PropertyName = "to")]
-        public string To { get; set; }
+        [JsonProperty(PropertyName = "targetPath", Order = 2)]
+        public string TargetPath { get; set; }
 
         public FabricExportLink(
             string from,
-            string to)
+            string targetPath)
         {
             this.From = from;
-            this.To = to;
+            this.TargetPath = targetPath;
         }
 
         public static FabricExportLink FromJToken(JToken token)

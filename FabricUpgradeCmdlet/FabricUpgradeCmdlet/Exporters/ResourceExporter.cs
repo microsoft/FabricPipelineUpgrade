@@ -45,7 +45,7 @@ namespace FabricUpgradeCmdlet.Exporters
             };
         }
 
-        public virtual void CheckLinks(AlertCollector alerts)
+        public virtual void CheckBeforeExports(AlertCollector alerts)
         {
         }
 

@@ -1,0 +1,26 @@
+﻿{
+  "adfSupportFile": "PipelineWithExecutePipeline_support_live.zip",
+
+  "expectedResponse": {
+    "state": "Failed",
+    "alerts": [
+
+      {
+        "severity": "RequiresUserAction",
+        "details": "Please use the hint and template to create/find a new connection and add its ID to your resolutions.",
+        "connectionHint": {
+          "linkedServiceName": null,
+          "connectionType": "Fabric Data Pipelines",
+          "datasource": "FabricDataPipelines",
+          "template": {
+            "type": "CredentialConnection",
+            "key": "user",
+            "value": "<guid>"
+          }
+        }
+      }
+    ],
+    "resolutions": [],
+    "result": {}
+  }
+}

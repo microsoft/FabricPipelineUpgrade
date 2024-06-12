@@ -40,6 +40,7 @@
           "resourceName": "EmptyPipeline",
           "resourceType": "DataPipeline",
           "link": [],
+          "resolve": [],
           "export": {
             "name": "EmptyPipeline",
             "properties": {

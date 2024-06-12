@@ -65,6 +65,16 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
                 return Symbol.ReadySymbol(JArray.Parse(JsonConvert.SerializeObject(links)));
             }
 
+            if (symbolName == "exportResolves")
+            {
+                List<FabricExportResolve> resolves = new List<FabricExportResolve>();
+
+                this.CollectSubActivityExportResolves(this.subActivityUpgraders["false"], "ifFalseActivities", resolves, alerts);
+                this.CollectSubActivityExportResolves(this.subActivityUpgraders["true"], "ifTrueActivities", resolves, alerts);
+
+                return Symbol.ReadySymbol(JArray.Parse(JsonConvert.SerializeObject(resolves)));
+            }
+
             if (symbolName == "activity")
             {
                 Symbol activitySymbol = base.ResolveExportedSymbol("activity.common", alerts);
