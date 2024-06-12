@@ -1,0 +1,54 @@
+﻿{
+  "adfSupportFile": "PipelineWithUnsupportedActivity_support_live.zip",
+
+  "expectedResponse": {
+    "state": "Succeeded",
+    "alerts": [
+      {
+        "severity": "Warning",
+        "details": "Cannot upgrade Activity 'PipelineWithUnsupportedActivity/AnUnsupportedActivity'; please inspect this Activity for more details"
+      }
+    ],
+    "resolutions": [],
+    "result": {
+      "PipelineWithUnsupportedActivity": {
+        "type": "DataPipeline",
+        "workspaceId": "",
+        "id": 0,
+        "displayName": "PipelineWithUnsupportedActivity",
+        "description": null
+      }
+    }
+  },
+
+  "expectedItems": [
+    {
+      "item": {
+        "type": "DataPipeline",
+        "workspaceId": "",
+        "id": 0,
+        "displayName": "PipelineWithUnsupportedActivity",
+        "description": null
+      },
+      "definition": {
+        "name": "PipelineWithUnsupportedActivity",
+        "properties": {
+          "activities": [
+            {
+              "name": "AnUnsupportedActivity",
+              "type": "Wait",
+              "description": "Failed to upgrade activity 'AnUnsupportedActivity' because it has type 'Unsupported'.\nTo run this pipeline anyway, mark this Activity as 'Deactivated' and select the desired value for 'Mark activity as'.\nOriginal description=\nThis activity is unsupported",
+              "dependsOn": [],
+              "userProperties": [],
+              "typeProperties": {
+                "waitTimeInSeconds": 0
+              }
+            }
+          ],
+          "concurrency": 3
+        },
+        "annotations": []
+      }
+    }
+  ]
+}
