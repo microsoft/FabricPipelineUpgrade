@@ -32,17 +32,17 @@ namespace FabricUpgradeCmdlet.Models
             Unknown = 0,
 
             /// <summary>This resolution converts a LinkedServiceName to a Connection ID.</summary>
-            LinkedServiceToConnection = 1,
+            LinkedServiceToConnectionId = 1,
 
             /// <summary>This resolution converts an ADF Web(Hook)Activity's URL to a Connection ID and a relative URL.</summary>
-            UrlHostToConnection = 2,
+            UrlHostToConnectionId = 2,
 
             /// <summary>This resolution holds the Credential Connection for a user.</summary>
             /// <remarks>
             /// This resolution is used in InvokePipeline.
             /// The key should be "user".
             /// </remarks>
-            CredentialConnection = 3,
+            CredentialConnectionId = 3,
         }
 
         [DataMember(Name = "type")]

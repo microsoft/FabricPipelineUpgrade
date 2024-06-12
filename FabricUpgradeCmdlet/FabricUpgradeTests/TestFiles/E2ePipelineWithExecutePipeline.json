@@ -3,7 +3,7 @@
 
   "resolutions": [
     {
-      "type": "CredentialConnection",
+      "type": "CredentialConnectionId",
       "key": "user",
       "value": "d9c82ff5-bb3e-46d6-9e35-a84872ad550f"
     }
@@ -27,7 +27,7 @@
     "alerts": [],
     "resolutions": [
       {
-        "type": "CredentialConnection",
+        "type": "CredentialConnectionId",
         "key": "user",
         "value": "d9c82ff5-bb3e-46d6-9e35-a84872ad550f"
       }

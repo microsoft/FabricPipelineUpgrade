@@ -51,14 +51,14 @@
           ],
           "resolve": [
             {
-              "type": "CredentialConnection",
+              "type": "CredentialConnectionId",
               "key": "user",
               "targetPath": "properties.activities[0].typeProperties.ifFalseActivities[0].externalReferences.connection",
               "hint": {
                 "connectionType": "Fabric Data Pipelines",
                 "datasource": "FabricDataPipelines",
                 "template": {
-                  "type": "CredentialConnection",
+                  "type": "CredentialConnectionId",
                   "key": "user",
                   "value": "<guid>"
                 }

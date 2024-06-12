@@ -82,7 +82,7 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
             {
                 List<FabricExportResolve> resolves = new List<FabricExportResolve>();
 
-                FabricUpgradeResolution.ResolutionType resolutionType = FabricUpgradeResolution.ResolutionType.CredentialConnection;
+                FabricUpgradeResolution.ResolutionType resolutionType = FabricUpgradeResolution.ResolutionType.CredentialConnectionId;
                 FabricExportResolve userCredentialConnectionResolve = new FabricExportResolve(
                     resolutionType,
                     "user",
@@ -94,11 +94,11 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
                             Datasource = "FabricDataPipelines",
                         }
                         .WithTemplate(new FabricUpgradeResolution()
-                        {
-                            Type = resolutionType,
-                            Key = "user",
-                            Value = "<guid>"
-                        }
+                            {
+                                Type = resolutionType,
+                                Key = "user",
+                                Value = "<guid>"
+                            }
                    ));
 
                 resolves.Add(userCredentialConnectionResolve);
@@ -129,6 +129,9 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
                 // We include these properties in the "exportLinks" symbol.
                 copier.Set("typeProperties.pipelineId", Guid.Empty.ToString());
                 copier.Set("typeProperties.workspaceId", Guid.Empty.ToString());
+
+                // This property cannot be set until the Export operation phase.
+                // We include this property in the "exportResolve" symbol.
                 copier.Set("externalReferences.connection", Guid.Empty.ToString());
 
                 return Symbol.ReadySymbol(fabricActivityObject);

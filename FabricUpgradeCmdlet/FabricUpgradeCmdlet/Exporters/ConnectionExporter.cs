@@ -31,11 +31,11 @@ namespace FabricUpgradeCmdlet.Exporters
         {
             base.CheckBeforeExports(alerts);
 
-            this.connectionId = this.Machine.Resolve(FabricUpgradeResolution.ResolutionType.LinkedServiceToConnection, this.Name, alerts);
+            this.connectionId = this.Machine.Resolve(FabricUpgradeResolution.ResolutionType.LinkedServiceToConnectionId, this.Name, alerts);
             if (this.connectionId == null)
             {
                 alerts.AddMissingResolutionAlert(
-                    FabricUpgradeResolution.ResolutionType.LinkedServiceToConnection,
+                    FabricUpgradeResolution.ResolutionType.LinkedServiceToConnectionId,
                     this.Name,
                     new FabricUpgradeConnectionHint()
                     {

@@ -6,12 +6,12 @@
     "alerts": [],
     "resolutions": [
       {
-        "type": "LinkedServiceToConnection",
+        "type": "LinkedServiceToConnectionId",
         "key": "AzureBlobStorage1",
         "value": "5363f9fe-a58e-4a23-a5a3-c14755571be3"
       },
       {
-        "type": "LinkedServiceToConnection",
+        "type": "LinkedServiceToConnectionId",
         "key": "nosuch",
         "value": "4363f9fe-a58e-4a23-a5a3-c14755571be3"
       }
@@ -23,12 +23,12 @@
     "alerts": [],
     "resolutions": [
       {
-        "type": "LinkedServiceToConnection",
+        "type": "LinkedServiceToConnectionId",
         "key": "AzureBlobStorage1",
         "value": "5363f9fe-a58e-4a23-a5a3-c14755571be3"
       },
       {
-        "type": "LinkedServiceToConnection",
+        "type": "LinkedServiceToConnectionId",
         "key": "nosuch",
         "value": "4363f9fe-a58e-4a23-a5a3-c14755571be3"
       }

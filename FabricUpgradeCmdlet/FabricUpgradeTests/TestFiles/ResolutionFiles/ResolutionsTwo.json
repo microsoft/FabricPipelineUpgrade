@@ -3,7 +3,7 @@
     "comments": [
       "Resolve the ADF 'AzureBlobStorage1' LinkedService to the Fabric 'rodenkewblob' Connection"
     ],
-    "type": "LinkedServiceToConnection",
+    "type": "LinkedServiceToConnectionId",
     "key": "AzureBlobStorage1",
     "value": "6363f9fe-a58e-4a23-a5a3-c14755571be3"
   }
