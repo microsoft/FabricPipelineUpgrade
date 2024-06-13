@@ -31,7 +31,7 @@ namespace FabricUpgradeCmdlet.ExportMachines
         protected AlertCollector Alerts { get; private set; }
 
 
-        public virtual Task<FabricUpgradeProgress> ExportAsync()
+        public virtual Task<FabricUpgradeProgress> ExportAsync(CancellationToken cancellationToken)
         {
             return Task.FromResult(new FabricUpgradeProgress());
         }

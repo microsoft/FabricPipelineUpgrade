@@ -6,42 +6,51 @@ using FabricUpgradeCmdlet.Utilities;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Text;
+using System.Threading;
 
 namespace FabricUpgradeCmdlet
 {
     public class PublicApiClient
     {
-        public PublicApiClient()
-        {
-        }
+        private readonly string cluster;
+        private readonly string workspaceId;
+        private readonly string pbiAadToken;
 
-        public async Task<string> Ping(string url)
-        {
-            HttpResponseMessage response = await CreateHttpClient().GetAsync(url).ConfigureAwait(false);
-            return $"{response.StatusCode}";
-        }
-
-        public async Task<string> UploadPipelineAsync(
-            JObject pipelineObject,
+        public PublicApiClient(
             string cluster,
             string workspaceId,
             string pbiAadToken)
         {
-            string publicApiBaseUrl = ComputePublicApiBaseUrl(cluster);
+            this.cluster = cluster;
+            this.workspaceId = workspaceId;
+            this.pbiAadToken = pbiAadToken;
+        }
+
+        public async Task<string> CreateOrUpdatePipelineAsync(
+            JObject pipelineObject,
+            CancellationToken cancellationToken)
+        {
+            // TODO: If the pipeline already exists, then Update it instead!
+            return await this.CreatePipelineAsync(pipelineObject, cancellationToken);
+        }
+
+        private async Task<string> CreatePipelineAsync(
+            JObject pipelineObject,
+            CancellationToken cancellationToken)
+        {
+            string publicApiBaseUrl = ComputePublicApiBaseUrl(this.cluster);
 
             string pipelineName = pipelineObject.SelectToken("$.name")?.ToString();
             string pipelineDescription = pipelineObject.SelectToken("$.properties.description")?.ToString();
 
             HttpRequestMessage request = this.BuildCreateItemRequestMessage(
                 publicApiBaseUrl,
-                workspaceId,
-                pbiAadToken,
                 FabricUpgradeResourceTypes.DataPipeline.ToString(),
                 pipelineName,
                 pipelineDescription,
                 pipelineObject);
 
-            HttpResponseMessage response = await CreateHttpClient().SendAsync(request, CancellationToken.None).ConfigureAwait(false);
+            HttpResponseMessage response = await CreateHttpClient().SendAsync(request, cancellationToken).ConfigureAwait(false);
             string responsePayload = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
 
             return responsePayload;
@@ -74,33 +83,13 @@ namespace FabricUpgradeCmdlet
 
         private HttpRequestMessage BuildCreateItemRequestMessage(
             string publicApiBaseUrl,
-            string workspaceId,
-            string pbiAadToken,
             string artifactType,
             string displayName,
             string description,
             JObject payload)
         {
-            /*
-            string payload64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(payload.ToString()));
-
-            PublicApiCreateItemRequestModel createItemPayload = new PublicApiCreateItemRequestModel()
-            {
-                ItemType = artifactType,
-                DisplayName = displayName,
-                Description = description,
-            };
-
-            createItemPayload.Definition.Parts.Add(new PublicApiItemDefinitionPartModel()
-            {
-                Path = "pipeline-content.json",
-                PayloadType = "InlineBase64",
-                Payload = payload64,
-            });
-            */
-
             HttpMethod httpMethod = HttpMethod.Post;
-            string relativeUrl = publicApiBaseUrl + $"workspaces/{workspaceId}/items";
+            string relativeUrl = publicApiBaseUrl + $"workspaces/{this.workspaceId}/items";
 
             HttpRequestMessage request = new HttpRequestMessage(httpMethod, relativeUrl)
             {
@@ -114,7 +103,7 @@ namespace FabricUpgradeCmdlet
                     mediaType: "application/json"),
             };
 
-            request.Headers.Add("Authorization", $"Bearer {pbiAadToken}");
+            request.Headers.Add("Authorization", $"Bearer {this.pbiAadToken}");
 
             return request;
         }

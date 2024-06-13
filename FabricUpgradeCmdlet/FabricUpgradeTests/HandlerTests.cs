@@ -191,7 +191,8 @@ namespace FabricUpgradeTests
                 testConfig.Progress.ToString(),
                 "daily",
                 workspaceId.ToString(),
-                "123").ConfigureAwait(false);
+                "123",
+                CancellationToken.None).ConfigureAwait(false);
 
             Assert.AreEqual(testConfig.ExpectedResponse.State, actualResponse.State);
             Assert.AreEqual(testConfig.ExpectedResponse.Alerts.Count, actualResponse.Alerts.Count);

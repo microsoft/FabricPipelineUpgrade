@@ -8,6 +8,7 @@ namespace FabricUpgradeCmdlet.Utilities
     {
         public HttpClient CreateHttpClient()
         {
+            // TODO: Reuse one HttpClient for the lifespan of the application.
             return new HttpClient();
         }
     }

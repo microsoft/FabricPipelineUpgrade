@@ -198,11 +198,13 @@ namespace FabricUpgradeCmdlet
 
         protected override void ProcessRecord()
         {
+            CancellationTokenSource cts = new CancellationTokenSource(TimeSpan.FromSeconds(120));
             string result = new FabricUpgradeHandler().ExportFabricPipelineAsync(
                 this.progress,
                 this.cluster,
                 this.workspaceId,
-                this.fabricToken).Result.ToString();
+                this.fabricToken,
+                cts.Token).Result.ToString();
 
             WriteObject(result);
         }

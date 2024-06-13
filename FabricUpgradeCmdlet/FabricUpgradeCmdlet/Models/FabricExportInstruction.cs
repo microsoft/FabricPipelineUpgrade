@@ -10,20 +10,21 @@ namespace FabricUpgradeCmdlet.Models
 {
     public class FabricExportInstruction
     {
-        [JsonProperty(PropertyName = "resourceName", Order = 1)]
-        public string ResourceName { get; set; }
-
-        [JsonProperty(PropertyName = "resourceType", Order = 2)]
+        [JsonProperty(PropertyName = "resourceType", Order = 1)]
         public FabricUpgradeResourceTypes ResourceType { get; set; }
+
+        [JsonProperty(PropertyName = "resourceName", Order = 2)]
+        public string ResourceName { get; set; }
 
         public FabricExportInstruction() { }
 
         protected FabricExportInstruction(
-            string resourceName,
-            FabricUpgradeResourceTypes resourceType)
+            FabricUpgradeResourceTypes resourceType,
+            string resourceName
+            )
         {
-            this.ResourceName = resourceName;
             this.ResourceType = resourceType;
+            this.ResourceName = resourceName;
         }
 
         static public FabricExportInstruction FromJToken(JToken token)

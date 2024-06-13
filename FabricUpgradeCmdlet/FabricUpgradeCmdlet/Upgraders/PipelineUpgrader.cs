@@ -62,7 +62,6 @@ namespace FabricUpgradeCmdlet.Upgraders
             string symbolName,
             AlertCollector alerts)
         {
-            
             if (symbolName == Symbol.CommonNames.FabricResource)
             {
                 PipelineExportInstruction exportInstruction = new PipelineExportInstruction(this.Name);

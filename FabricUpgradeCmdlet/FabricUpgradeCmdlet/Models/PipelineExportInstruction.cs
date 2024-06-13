@@ -24,7 +24,7 @@ namespace FabricUpgradeCmdlet.Models
         public JObject Export { get; set; } = new JObject();
 
         public PipelineExportInstruction(string name)
-            : base(name, FabricUpgradeResourceTypes.DataPipeline)
+            : base(FabricUpgradeResourceTypes.DataPipeline, name)
         {
         }
 

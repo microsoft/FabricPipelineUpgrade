@@ -32,13 +32,13 @@ namespace FabricUpgradeCmdlet.ExportMachines
         protected string FabricToken { get; private set; }
 
         /// <inheritdoc/>
-        public override async Task<FabricUpgradeProgress> ExportAsync()
+        public override async Task<FabricUpgradeProgress> ExportAsync(CancellationToken cancellationToken)
         {
             try
             {
                 this.BuildAllExporters();
                 this.CheckAllExportersBeforeExport();
-                return await this.ExportAllExportersAsync().ConfigureAwait(false);
+                return await this.ExportAllExportersAsync(cancellationToken).ConfigureAwait(false);
             }
             catch (UpgradeFailureException)
             {
@@ -98,7 +98,7 @@ namespace FabricUpgradeCmdlet.ExportMachines
             }
         }
 
-        private async Task<FabricUpgradeProgress> ExportAllExportersAsync()
+        private async Task<FabricUpgradeProgress> ExportAllExportersAsync(CancellationToken cancellationToken)
         {
             JObject results = new JObject();
 
@@ -108,7 +108,8 @@ namespace FabricUpgradeCmdlet.ExportMachines
                     this.Cluster,
                     this.WorkspaceId,
                     this.FabricToken,
-                    this.Alerts).ConfigureAwait(false);
+                    this.Alerts,
+                    cancellationToken).ConfigureAwait(false);
 
                 // TODO: Handle an error here! Throw an exception from ExportAsync.
 

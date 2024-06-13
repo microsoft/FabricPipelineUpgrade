@@ -19,7 +19,7 @@ namespace FabricUpgradeCmdlet.Models
         public JObject Export { get; set; } = new JObject();
 
         public ConnectionExportInstruction(string name)
-            : base(name, FabricUpgradeResourceTypes.Connection)
+            : base(FabricUpgradeResourceTypes.Connection, name)
         {
         }
 
