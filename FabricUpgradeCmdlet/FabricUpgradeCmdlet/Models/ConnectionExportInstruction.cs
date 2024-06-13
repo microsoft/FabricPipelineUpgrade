@@ -1,4 +1,8 @@
-﻿using FabricUpgradeCmdlet.Utilities;
+﻿// <copyright file="ConnectionExportInstruction.cs" company="Microsoft">
+// Copyright (c) Microsoft. All rights reserved.
+// </copyright>
+
+using FabricUpgradeCmdlet.Utilities;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 

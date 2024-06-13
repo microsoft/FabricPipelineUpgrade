@@ -1,14 +1,12 @@
-﻿using FabricUpgradeCmdlet;
+﻿// <copyright file="TestPublicApiEndpoints.cs" company="Microsoft">
+// Copyright (c) Microsoft. All rights reserved.
+// </copyright>
+
+using FabricUpgradeCmdlet.Utilities;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using FabricUpgradeCmdlet.Utilities;
 
 namespace FabricUpgradeTests.Utilities
 {

@@ -1,12 +1,10 @@
-﻿using FabricUpgradeCmdlet.Models;
+﻿// <copyright file="AdfUpgradePackage.cs" company="Microsoft">
+// Copyright (c) Microsoft. All rights reserved.
+// </copyright>
+
+using FabricUpgradeCmdlet.Models;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace FabricUpgradeCmdlet.Utilities
 {

@@ -1,4 +1,7 @@
-﻿using FabricUpgradeCmdlet.Models;
+﻿// <copyright file="BinaryDatasetUpgrader.cs" company="Microsoft">
+// Copyright (c) Microsoft. All rights reserved.
+// </copyright>
+
 using FabricUpgradeCmdlet.UpgradeMachines;
 using FabricUpgradeCmdlet.Utilities;
 using Newtonsoft.Json.Linq;

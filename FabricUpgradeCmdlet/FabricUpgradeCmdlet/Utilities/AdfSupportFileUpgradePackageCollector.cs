@@ -1,4 +1,7 @@
-﻿using Newtonsoft.Json;
+﻿// <copyright file="AdfSupportFileUpgradePackageCollector.cs" company="Microsoft">
+// Copyright (c) Microsoft. All rights reserved.
+// </copyright>
+
 using Newtonsoft.Json.Linq;
 
 namespace FabricUpgradeCmdlet.Utilities

@@ -1,7 +1,8 @@
-﻿using System;
-using System.Diagnostics;
+﻿// <copyright file="ExposedCommands.cs" company="Microsoft">
+// Copyright (c) Microsoft. All rights reserved.
+// </copyright>
+
 using System.Management.Automation;
-using System.Xml;
 
 // These classes expose the PowerShell commands.
 // The ProcessRecord method of each class immediately calls
@@ -234,7 +235,7 @@ namespace FabricUpgradeCmdlet
         protected override void ProcessRecord()
         {
             // No pipeline => item1 is null.
-            WriteObject(Services.JunkPrefix + ":" + (item1 ?? "<null>") + " and then " + item2);
+            WriteObject((item1 ?? "<null>") + " and then " + item2);
         }
     }
 }

@@ -1,8 +1,11 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+﻿// <copyright file="ExecutePipelineActivityUpgrader.cs" company="Microsoft">
+// Copyright (c) Microsoft. All rights reserved.
+// </copyright>
+
 using FabricUpgradeCmdlet.Models;
 using FabricUpgradeCmdlet.UpgradeMachines;
 using FabricUpgradeCmdlet.Utilities;
+using Newtonsoft.Json.Linq;
 
 namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
 {

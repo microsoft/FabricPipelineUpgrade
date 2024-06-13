@@ -1,4 +1,8 @@
-﻿using Newtonsoft.Json;
+﻿// <copyright file="FabricUpgradeResourceTypes.cs" company="Microsoft">
+// Copyright (c) Microsoft. All rights reserved.
+// </copyright>
+
+using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
 namespace FabricUpgradeCmdlet.Utilities

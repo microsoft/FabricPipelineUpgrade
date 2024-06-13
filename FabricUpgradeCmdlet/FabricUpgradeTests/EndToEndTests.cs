@@ -1,10 +1,14 @@
+// <copyright file="EndToEndTests.cs" company="Microsoft">
+// Copyright (c) Microsoft. All rights reserved.
+// </copyright>
+
 using FabricUpgradeCmdlet;
-using Newtonsoft.Json.Linq;
-using Newtonsoft.Json;
 using FabricUpgradeCmdlet.Models;
+using FabricUpgradeCmdlet.Utilities;
 using FabricUpgradeTests.Utilities;
 using FabricUpgradeTests.TestConfigModels;
-using FabricUpgradeCmdlet.Utilities;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 
 namespace FabricUpgradeTests
 {

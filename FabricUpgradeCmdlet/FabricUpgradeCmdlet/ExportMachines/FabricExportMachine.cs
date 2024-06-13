@@ -1,15 +1,11 @@
-﻿using FabricUpgradeCmdlet.Exporters;
+﻿// <copyright file="FabricExportMachine.cs" company="Microsoft">
+// Copyright (c) Microsoft. All rights reserved.
+// </copyright>
+
+using FabricUpgradeCmdlet.Exporters;
 using FabricUpgradeCmdlet.Models;
 using FabricUpgradeCmdlet.Utilities;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Diagnostics.Metrics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace FabricUpgradeCmdlet.ExportMachines
 {
