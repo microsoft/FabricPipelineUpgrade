@@ -56,31 +56,6 @@ namespace FabricUpgradeCmdlet
             return responsePayload;
         }
 
-        private string BuildCreateItemRequestPayload(
-            string artifactType,
-            string displayName,
-            string description,
-            JObject payload)
-        {
-            string payload64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(payload.ToString()));
-
-            PublicApiCreateItemRequestModel createItemPayload = new PublicApiCreateItemRequestModel()
-            {
-                ItemType = artifactType,
-                DisplayName = displayName,
-                Description = description,
-            };
-
-            createItemPayload.Definition.Parts.Add(new PublicApiItemDefinitionPartModel()
-            {
-                Path = "pipeline-content.json",
-                PayloadType = "InlineBase64",
-                Payload = payload64,
-            });
-
-            return createItemPayload.ToString();
-        }
-
         private HttpRequestMessage BuildCreateItemRequestMessage(
             string publicApiBaseUrl,
             string artifactType,
@@ -106,6 +81,31 @@ namespace FabricUpgradeCmdlet
             request.Headers.Add("Authorization", $"Bearer {this.pbiAadToken}");
 
             return request;
+        }
+
+        private string BuildCreateItemRequestPayload(
+            string artifactType,
+            string displayName,
+            string description,
+            JObject payload)
+        {
+            string payload64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(payload.ToString()));
+
+            PublicApiCreateItemRequestModel createItemPayload = new PublicApiCreateItemRequestModel()
+            {
+                ItemType = artifactType,
+                DisplayName = displayName,
+                Description = description,
+            };
+
+            createItemPayload.Definition.Parts.Add(new PublicApiItemDefinitionPartModel()
+            {
+                Path = "pipeline-content.json",
+                PayloadType = "InlineBase64",
+                Payload = payload64,
+            });
+
+            return createItemPayload.ToString();
         }
 
         private static string ComputePublicApiBaseUrl(string cluster)
