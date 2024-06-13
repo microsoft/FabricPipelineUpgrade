@@ -8,6 +8,7 @@ using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using FabricUpgradeCmdlet.Utilities;
 
 namespace FabricUpgradeTests.Utilities
 {
@@ -318,7 +319,7 @@ namespace FabricUpgradeTests.Utilities
 
             return new HttpResponseMessage(HttpStatusCode.OK)
             {
-                Content = new StringContent(JsonConvert.SerializeObject(itemModel)),
+                Content = new StringContent(UpgradeSerialization.Serialize(itemModel)),
             };
         }
 

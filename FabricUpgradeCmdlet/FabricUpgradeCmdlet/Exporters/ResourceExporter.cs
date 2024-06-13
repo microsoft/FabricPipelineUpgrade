@@ -15,11 +15,11 @@ namespace FabricUpgradeCmdlet.Exporters
     public class ResourceExporter
     {
         protected ResourceExporter(
-            JObject exportObject,
+            JToken exportToken,
             FabricUpgradeResourceTypes resourceType,
             FabricExportMachine machine)
         {
-            this.ExportObject = exportObject;
+            this.ExportObject = (JObject)exportToken;
             this.ResourceType = resourceType;
             this.Machine = machine;
 
@@ -40,8 +40,9 @@ namespace FabricUpgradeCmdlet.Exporters
 
             return instruction.ResourceType switch
             {
-                FabricUpgradeResourceTypes.DataPipeline => new PipelineExporter((JObject)exportable, machine),
-                _ => null,
+                FabricUpgradeResourceTypes.Connection => new ConnectionExporter(exportable, machine),
+                FabricUpgradeResourceTypes.DataPipeline => new PipelineExporter(exportable, machine),
+                _ => new UnsupportedResourceExporter(exportable, machine),
             };
         }
 

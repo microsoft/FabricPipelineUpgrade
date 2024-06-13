@@ -13,7 +13,7 @@ namespace FabricUpgradeCmdlet.Utilities
     public class AdfUpgradePackage : UpgradePackage
     {
 
-        [JsonProperty(PropertyName = "adfName", Order = 100)]
+        [JsonProperty(PropertyName = "adfName", Order = 10)]
         public string AdfName { get; set; }
 
         public static AdfUpgradePackage FromString(string json)

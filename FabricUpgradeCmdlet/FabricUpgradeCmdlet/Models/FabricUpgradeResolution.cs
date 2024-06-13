@@ -70,7 +70,7 @@ namespace FabricUpgradeCmdlet.Models
 
         public override string ToString()
         {
-            return JsonConvert.SerializeObject(this, Formatting.Indented);
+            return UpgradeSerialization.Serialize(this);
         }
     }
 }

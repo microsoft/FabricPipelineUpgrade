@@ -67,7 +67,8 @@ namespace FabricUpgradeCmdlet.Upgraders
         public void Copy(
             string from,
             string to,
-            bool allowNull = true)
+            bool allowNull = true,
+            bool copyIfNull = true)
         {
             JToken value = this.adfResourceToken.SelectToken(from);
 
@@ -79,10 +80,11 @@ namespace FabricUpgradeCmdlet.Upgraders
                 // (To wit: the user just wants to run ConvertTo-FabricPipeline to see what happens).
             }
 
-            this.ValidateAdfToken(from, value);
-
-            this.Set(to, value);
-
+            if (copyIfNull || value != null)
+            {
+                this.ValidateAdfToken(from, value);
+                this.Set(to, value);
+            }
         }
 
         /// <summary>
@@ -96,9 +98,10 @@ namespace FabricUpgradeCmdlet.Upgraders
         /// <param name="path">Where to get the value in the ADF resource JSON and put the value in the Fabric resource JSON.</param>
         public void Copy(
             string path,
-            bool allowNull = true)
+            bool allowNull = true,
+            bool copyIfNull = true)
         {
-            this.Copy(path, path, allowNull);
+            this.Copy(path, path, allowNull, copyIfNull);
         }
 
         /// <summary>

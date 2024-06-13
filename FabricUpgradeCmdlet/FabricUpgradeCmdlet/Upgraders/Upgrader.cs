@@ -140,6 +140,20 @@ namespace FabricUpgradeCmdlet.Upgraders
             return Symbol.MissingSymbol();
         }
 
+        protected void CheckRequiredAdfProperties(
+            List<string> requiredAdfProperties,
+            AlertCollector alerts)
+        {
+            foreach (var property in requiredAdfProperties)
+            {
+                JToken value = this.AdfResourceToken.SelectToken(property);
+                if (value == null)
+                {
+                    alerts.AddPermanentError($"{this.Path}.{property} must not be null.");
+                }
+            }
+        }
+
         protected Upgrader FindOtherUpgrader(
             List<Upgrader> allUpgraders,
             FabricUpgradeResourceTypes upgraderType,

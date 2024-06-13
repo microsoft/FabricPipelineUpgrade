@@ -8,9 +8,11 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
 {
     public class ExecutePipelineActivityUpgrader : ActivityUpgrader
     {
+        private const string adfPipelineToExecutePath = "typeProperties.pipeline.referenceName";
+
         private readonly List<string> requiredAdfProperties = new List<string>
         {
-            "typeProperties.pipeline.referenceName",
+            adfPipelineToExecutePath,
         };
 
         private Upgrader pipelineToExecute;
@@ -36,12 +38,12 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
             this.pipelineToExecute = this.FindOtherUpgrader(
                 allUpgraders,
                 FabricUpgradeResourceTypes.DataPipeline,
-                "typeProperties.pipeline.referenceName",
+                adfPipelineToExecutePath,
                 alerts);
 
-            if (pipelineToExecute != null)
+            if (this.pipelineToExecute != null)
             {
-                this.DependsOn.Add(pipelineToExecute);
+                this.DependsOn.Add(this.pipelineToExecute);
             }
         }
 
@@ -55,22 +57,22 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
 
                 // We need to update the id of the pipeline to execute
                 // after that pipeline has been created and has a fabric resource ID.
-                string pipelineToExecute = this.AdfResourceToken.SelectToken("$.typeProperties.pipeline.referenceName")?.ToString();
+                string pipelineToExecuteName = this.AdfResourceToken.SelectToken("$.typeProperties.pipeline.referenceName")?.ToString();
 
-                FabricExportLink otherPipelineResolution = new FabricExportLink(
-                    $"{FabricUpgradeResourceTypes.DataPipeline}:{pipelineToExecute}",
+                FabricExportLink otherPipelineLink = new FabricExportLink(
+                    $"{FabricUpgradeResourceTypes.DataPipeline}:{pipelineToExecuteName}",
                     "typeProperties.pipelineId");
 
-                links.Add(otherPipelineResolution);
+                links.Add(otherPipelineLink);
 
                 // The workspaceId is included in the ExportFabricPipeline phase.
-                FabricExportLink workspaceIdResolution = new FabricExportLink(
+                FabricExportLink workspaceIdLink = new FabricExportLink(
                     "$workspace",
                     "typeProperties.workspaceId");
 
-                links.Add(workspaceIdResolution);
+                links.Add(workspaceIdLink);
 
-                return Symbol.ReadySymbol(JArray.Parse(JsonConvert.SerializeObject(links)));
+                return Symbol.ReadySymbol(JArray.Parse(UpgradeSerialization.Serialize(links)));
             }
 
             if (symbolName == Symbol.CommonNames.ExportResolves)
@@ -98,9 +100,9 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
 
                 resolves.Add(userCredentialConnectionResolve);
 
-                return Symbol.ReadySymbol(JArray.Parse(JsonConvert.SerializeObject(resolves)));
-
+                return Symbol.ReadySymbol(JArray.Parse(UpgradeSerialization.Serialize(resolves)));
             }
+
             if (symbolName == Symbol.CommonNames.Activity)
             {
                 Symbol activitySymbol = base.ResolveExportedSymbol(Symbol.CommonNames.Activity, alerts);

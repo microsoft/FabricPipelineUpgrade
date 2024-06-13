@@ -1,0 +1,28 @@
+﻿{
+  "adfSupportFile": "PipelineWithCopy_JsonToJson_support_live.zip",
+
+  "expectedResponse": {
+    "state": "Failed",
+    "alerts": [
+      {
+        "severity": "RequiresUserAction",
+        "details": "Please use the hint and template to create/find a new connection and add its ID to your resolutions.",
+        "connectionHint": {
+          "linkedServiceName": "ArmtemplateStorageLinkedService",
+          "connectionType": "AzureBlobStorage",
+          "datasource": "storageqaaogpkbmturm",
+          "template": {
+            "type": "LinkedServiceToConnectionId",
+            "key": "ArmtemplateStorageLinkedService",
+            "value": "<guid>"
+          }
+        }
+      }
+    ],
+    "resolutions": [],
+    "result": {}
+  },
+
+  "expectedItems": []
+
+}

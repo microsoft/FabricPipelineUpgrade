@@ -44,7 +44,7 @@ namespace FabricUpgradeCmdlet.Utilities
 
         public JObject Build()
         {
-            return JObject.Parse(JsonConvert.SerializeObject(upgradePackage));
+            return JObject.Parse(UpgradeSerialization.Serialize(upgradePackage));
         }
 
         private void ProcessDiagnosticFile(string entryData)

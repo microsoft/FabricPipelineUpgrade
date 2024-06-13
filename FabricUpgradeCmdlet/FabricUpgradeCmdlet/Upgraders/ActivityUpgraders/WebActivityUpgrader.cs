@@ -87,7 +87,7 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
 
                 resolves.Add(userCredentialConnectionResolve);
 
-                return Symbol.ReadySymbol(JArray.Parse(JsonConvert.SerializeObject(resolves)));
+                return Symbol.ReadySymbol(JArray.Parse(UpgradeSerialization.Serialize(resolves)));
 
             }
             if (symbolName == Symbol.CommonNames.Activity)

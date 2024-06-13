@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using FabricUpgradeCmdlet.Models;
 using FabricUpgradeTests.Utilities;
 using FabricUpgradeTests.TestConfigModels;
+using FabricUpgradeCmdlet.Utilities;
 
 namespace FabricUpgradeTests
 {
@@ -32,6 +33,10 @@ namespace FabricUpgradeTests
         [DataRow("E2ePipelineWithWeb_NullUrl")]
         [DataRow("E2ePipelineWithWeb_BadUrl")]
         [DataRow("E2ePipelineWithWeb_WithLinkedServicesAndDatasets")]
+
+        [DataRow("E2ePipelineWithCopy_JsonToJson")]
+        [DataRow("E2ePipelineWithCopy_JsonToJson_MissingResolution")]
+        [DataRow("E2ePipelineWithCopy_StagingAndLogging")]
         public async Task ExportFabricPipeline_TestAsync(
             string testConfigFilename)
         {
@@ -117,8 +122,8 @@ namespace FabricUpgradeTests
                 JObject expectedItem = JObject.Parse(expectedItemToken.ToString());
 
                 JObject actualItem = endpoints.ReadItemDirectly(workspaceId, expectedGuids[nItem]);
-                string eis = expectedItem.ToString();
-                string ais = actualItem.ToString();
+                string eis = UpgradeSerialization.Serialize(expectedItem);
+                string ais = UpgradeSerialization.Serialize(actualItem);
 
                 JObject mismatches = this.DeepCompare(expectedItem, actualItem);
 
@@ -163,9 +168,16 @@ namespace FabricUpgradeTests
             {
                 foreach (var r in this.ExpectedResponse.Result)
                 {
-                    r.Value["workspaceId"] = workspaceId.ToString();
-                    int idGuidIndex = r.Value["id"].ToObject<int>();
-                    r.Value["id"] = itemIds[idGuidIndex].ToString();
+                    if (((JObject)r.Value)["workspaceId"]?.ToString() == "")
+                    {
+                        r.Value["workspaceId"] = workspaceId.ToString();
+                    }
+
+                    if (r.Value["id"].Type == JTokenType.Integer)
+                    {
+                        int idGuidIndex = r.Value["id"].ToObject<int>();
+                        r.Value["id"] = itemIds[idGuidIndex].ToString();
+                    }
                 }
 
                 int numItem = 0;

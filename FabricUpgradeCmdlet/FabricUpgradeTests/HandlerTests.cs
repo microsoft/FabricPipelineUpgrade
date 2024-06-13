@@ -17,7 +17,7 @@ namespace FabricUpgradeTests
         [DataRow("ImportEmptyPipeline_AfterImportResolutions")]
         [DataRow("ImportPipelineWithExecutePipeline")]
         [DataRow("ImportPipelineWithIf")]
-        [DataRow("ImportPipelineWithCopy")]
+        [DataRow("ImportPipelineWithCopy_JsonToJson")]
         public void ImportAdfSupportFile_Test(
             string testConfigFilename)
         {
@@ -54,6 +54,9 @@ namespace FabricUpgradeTests
         [DataRow("ConvertPipelineWithIf")]
 
         [DataRow("ConvertPipelineWithWeb")]
+
+        [DataRow("ConvertPipelineWithCopy_JsonToJson")]
+        [DataRow("ConvertPipelineWithCopy_StagingAndLogging")]
         public void ConvertToFabricPipeline_Test(
             string testConfigFilename,
             string workspaceId = null) // we can set ws in param or in progress.

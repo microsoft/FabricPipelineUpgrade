@@ -1,0 +1,204 @@
+﻿{
+  "adfSupportFile": "PipelineWithCopy_StagingAndLogging_support_live.zip",
+
+  "resolutions": [
+    {
+      "type": "LinkedServiceToConnectionId",
+      "key": "AzureBlobStorage1",
+      "value": "0f1083d3-8b19-44a2-bd3b-26a7e82ebe51"
+    },
+    {
+      "type": "LinkedServiceToConnectionId",
+      "key": "AzureBlobStorage2",
+      "value": "36b22d4d-9f24-423c-a7c1-58765809e6dc"
+    },
+    {
+      "type": "LinkedServiceToConnectionId",
+      "key": "AzureBlobStorage3",
+      "value": "77cd8131-e33b-4888-a51a-4a35c30e0858"
+    },
+    {
+      "type": "LinkedServiceToConnectionId",
+      "key": "ArmtemplateStorageLinkedService",
+      "value": "a10b2808-2356-4fa6-92b7-fccc540006ef"
+    }
+  ],
+
+  "expectedResponse": {
+    "state": "Succeeded",
+    "alerts": [],
+    "resolutions": [
+      {
+        "type": "LinkedServiceToConnectionId",
+        "key": "AzureBlobStorage1",
+        "value": "0f1083d3-8b19-44a2-bd3b-26a7e82ebe51"
+      },
+      {
+        "type": "LinkedServiceToConnectionId",
+        "key": "AzureBlobStorage2",
+        "value": "36b22d4d-9f24-423c-a7c1-58765809e6dc"
+      },
+      {
+        "type": "LinkedServiceToConnectionId",
+        "key": "AzureBlobStorage3",
+        "value": "77cd8131-e33b-4888-a51a-4a35c30e0858"
+      },
+      {
+        "type": "LinkedServiceToConnectionId",
+        "key": "ArmtemplateStorageLinkedService",
+        "value": "a10b2808-2356-4fa6-92b7-fccc540006ef"
+      }
+    ],
+    "result": {
+      "AzureBlobStorage1": {
+        "id": "0f1083d3-8b19-44a2-bd3b-26a7e82ebe51"
+      },
+      "AzureBlobStorage2": {
+        "id": "36b22d4d-9f24-423c-a7c1-58765809e6dc"
+      },
+      "AzureBlobStorage3": {
+        "id": "77cd8131-e33b-4888-a51a-4a35c30e0858"
+      },
+      "ArmtemplateStorageLinkedService": {
+        "id": "a10b2808-2356-4fa6-92b7-fccc540006ef"
+      },
+      "CopyPipeline": {
+        "type": "DataPipeline",
+        "displayName": "CopyPipeline",
+        "description": null,
+        "workspaceId": "",
+        "id": 0
+      }
+    }
+  },
+
+  "expectedItems": [
+    {
+      "item": {
+        "type": "DataPipeline",
+        "displayName": "CopyPipeline",
+        "description": null,
+        "workspaceId": "c4368ed4-8181-47d5-b2b9-b978158da04a",
+        "id": "44940c9d-28d9-42fd-8816-d43f27ccd666"
+      },
+      "definition": {
+        "name": "CopyPipeline",
+        "properties": {
+          "activities": [
+            {
+              "name": "CopySomeData",
+              "type": "Copy",
+              "description": "This activity copies some data",
+              "dependsOn": [],
+              "userProperties": [],
+              "policy": {
+                "timeout": "0.12:00:00",
+                "retry": 2,
+                "retryIntervalInSeconds": 30,
+                "secureOutput": true,
+                "secureInput": true
+              },
+              "typeProperties": {
+                "parallelCopies": 3,
+                "dataIntegrationUnits": 2,
+                "source": {
+                  "type": "BinarySource",
+                  "storeSettings": {
+                    "type": "AzureBlobStorageReadSettings",
+                    "maxConcurrentConnections": 3,
+                    "recursive": true,
+                    "modifiedDatetimeStart": "2024-03-05T00:00:00Z",
+                    "modifiedDatetimeEnd": "2024-03-15T00:00:00Z",
+                    "prefix": "wwwww",
+                    "deleteFilesAfterCompletion": true
+                  },
+                  "formatSettings": {
+                    "type": "BinaryReadSettings"
+                  },
+                  "datasetSettings": {
+                    "properties": {
+                      "annotations": [],
+                      "type": "Binary",
+                      "typeProperties": {
+                        "location": {
+                          "type": "AzureBlobStorageLocation",
+                          "fileName": "ghi",
+                          "folderPath": "def",
+                          "container": "abc"
+                        }
+                      }
+                    },
+                    "externalReferences": {
+                      "connection": "0f1083d3-8b19-44a2-bd3b-26a7e82ebe51"
+                    }
+                  }
+                },
+                "sink": {
+                  "type": "JsonSink",
+                  "storeSettings": {
+                    "type": "AzureBlobStorageWriteSettings",
+                    "maxConcurrentConnections": 3,
+                    "copyBehavior": "FlattenHierarchy",
+                    "blockSizeInMB": 7,
+                    "metadata": [
+                      {
+                        "name": "metadata1",
+                        "value": "abc"
+                      }
+                    ]
+                  },
+                  "formatSettings": {
+                    "type": "JsonWriteSettings",
+                    "filePattern": "setOfObjects"
+                  },
+                  "datasetSettings": {
+                    "properties": {
+                      "annotations": [],
+                      "type": "Json",
+                      "typeProperties": {
+                        "location": {
+                          "type": "AzureBlobStorageLocation",
+                          "fileName": "ccc",
+                          "folderPath": "bbb",
+                          "container": "aaa"
+                        }
+                      }
+                    },
+                    "externalReferences": {
+                      "connection": "36b22d4d-9f24-423c-a7c1-58765809e6dc"
+                    },
+                    "schema": {}
+                  }
+                },
+                "enableStaging": true,
+                "stagingSettings": {
+                  "path": "qrs/tuv",
+                  "enableCompression": true,
+                  "externalReferences": {
+                    "connection": "77cd8131-e33b-4888-a51a-4a35c30e0858"
+                  }
+                },
+                "logSettings": {
+                  "enableCopyActivityLog": true,
+                  "copyActivityLogSettings": {
+                    "logLevel": "Warning",
+                    "enableReliableLogging": false
+                  },
+                  "logLocationSettings": {
+                    "path": "qrs",
+                    "externalReferences": {
+                      "connection": "a10b2808-2356-4fa6-92b7-fccc540006ef"
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "annotations": []
+      }
+    }
+
+  ]
+
+}

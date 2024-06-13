@@ -19,6 +19,7 @@ namespace FabricUpgradeCmdlet
             public const string ExportLinks = "exportLinks";
             public const string ExportResolves = "exportResolves";
             public const string Activity = "activity";
+            public const string DatasetSettings = "datasetSettings";
         }
         public Symbol()
         {

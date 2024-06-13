@@ -160,7 +160,7 @@ namespace FabricUpgradeCmdlet
 
             public override string ToString()
             {
-                return JsonConvert.SerializeObject(this);
+                return UpgradeSerialization.Serialize(this);
             }
         }
 
@@ -181,7 +181,7 @@ namespace FabricUpgradeCmdlet
 
             public override string ToString()
             {
-                return JsonConvert.SerializeObject(this);
+                return UpgradeSerialization.Serialize(this);
             }
         }
 
@@ -198,7 +198,7 @@ namespace FabricUpgradeCmdlet
 
             public override string ToString()
             {
-                return JsonConvert.SerializeObject(this);
+                return UpgradeSerialization.Serialize(this);
             }
         }
 
