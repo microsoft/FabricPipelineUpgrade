@@ -51,7 +51,8 @@ namespace FabricUpgradeCmdlet.Exporters
             string cluster,
             string workspace,
             string fabricToken,
-            AlertCollector alerts)
+            AlertCollector alerts,
+            CancellationToken cancellationToken)
         {
             return null;
         }

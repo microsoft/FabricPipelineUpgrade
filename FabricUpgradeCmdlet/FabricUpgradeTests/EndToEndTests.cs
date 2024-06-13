@@ -87,7 +87,8 @@ namespace FabricUpgradeTests
                 runningProgress?.ToString(),
                 "daily",
                 workspaceId.ToString(),
-                "123").ConfigureAwait(false);
+                "123",
+                CancellationToken.None).ConfigureAwait(false);
 
             string q = runningProgress.ToString();
             Assert.AreEqual(testConfig.ExpectedResponse.State, runningProgress.State, runningProgress.ToString());

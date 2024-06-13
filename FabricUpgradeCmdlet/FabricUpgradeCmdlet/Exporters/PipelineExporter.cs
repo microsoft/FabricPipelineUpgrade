@@ -41,20 +41,20 @@ namespace FabricUpgradeCmdlet.Exporters
 
         public override async Task<JObject> ExportAsync(
             string cluster,
-            string workspace,
+            string workspaceId,
             string fabricToken,
-            AlertCollector alerts)
+            AlertCollector alerts,
+            CancellationToken cancellationToken)
         {
             this.ResolveLinks(alerts);
             this.ResolveResolutions(alerts);
 
-            string uploadResult = await new PublicApiClient().UploadPipelineAsync(
-                this.exportInstruction.Export,
-                cluster,
-                workspace,
-                fabricToken).ConfigureAwait(false);
+            string exportResult = await new PublicApiClient(cluster, workspaceId, fabricToken)
+                .CreateOrUpdatePipelineAsync(
+                    this.exportInstruction.Export,
+                    cancellationToken).ConfigureAwait(false);
 
-            return JObject.Parse(uploadResult);
+            return JObject.Parse(exportResult);
         }
 
         private void ResolveLinks(AlertCollector alerts)

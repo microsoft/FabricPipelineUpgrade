@@ -44,7 +44,8 @@ namespace FabricUpgradeCmdlet.Exporters
             string cluster,
             string workspace,
             string fabricToken,
-            AlertCollector alerts)
+            AlertCollector alerts,
+            CancellationToken cancellationToken)
         {
             // We do not actually export a connection.
             // We use the resolutions to pretend.

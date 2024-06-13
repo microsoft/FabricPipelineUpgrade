@@ -204,11 +204,12 @@ namespace FabricUpgradeCmdlet
         }
 
 
-            public async Task<FabricUpgradeProgress> ExportFabricPipelineAsync(
+        public async Task<FabricUpgradeProgress> ExportFabricPipelineAsync(
             string progressString,
             string cluster,
             string workspaceId,
-            string fabricToken)
+            string fabricToken,
+            CancellationToken cancellationToken)
         {
             FabricUpgradeProgress.FabricUpgradeState progressState = this.CheckProgress(progressString);
             if (progressState != FabricUpgradeProgress.FabricUpgradeState.Succeeded)
@@ -230,7 +231,7 @@ namespace FabricUpgradeCmdlet
                     progress.Resolutions,
                     this.alerts);
 
-            return await machine.ExportAsync().ConfigureAwait(false);
+            return await machine.ExportAsync(cancellationToken).ConfigureAwait(false);
         }
 
         private FabricUpgradeProgress.FabricUpgradeState CheckProgress(
