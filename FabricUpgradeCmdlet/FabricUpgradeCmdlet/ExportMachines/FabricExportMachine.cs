@@ -35,6 +35,7 @@ namespace FabricUpgradeCmdlet.ExportMachines
 
         protected string FabricToken { get; private set; }
 
+        /// <inheritdoc/>
         public override async Task<FabricUpgradeProgress> ExportAsync()
         {
             try

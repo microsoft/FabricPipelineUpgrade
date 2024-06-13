@@ -16,6 +16,7 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
     {
         public class ActivityTypes
         {
+            public const string Copy = "Copy";
             public const string ExecutePipeline = "ExecutePipeline";
             public const string If = "IfCondition";
             public const string Wait = "Wait";
@@ -56,6 +57,7 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
             string activityType = AdfPipelineActivityModel.Build(adfActivityToken).ActivityType;
             return activityType switch
             {
+                ActivityTypes.Copy => new CopyActivityUpgrader(parentPath, adfActivityToken, machine),
                 ActivityTypes.ExecutePipeline => new ExecutePipelineActivityUpgrader(parentPath, adfActivityToken, machine),
                 ActivityTypes.If => new IfConditionActivityUpgrader(parentPath, adfActivityToken, machine),
                 ActivityTypes.Wait => new WaitActivityUpgrader(parentPath, adfActivityToken, machine),
@@ -100,21 +102,6 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
 
             }
             return base.ResolveExportedSymbol(symbolName, alerts);
-        }
-
-        protected void CheckRequiredAdfProperties(
-            List<string> requiredAdfProperties,
-            AlertCollector alerts)
-        {
-            foreach (var property in requiredAdfProperties)
-            {
-                JToken value = this.AdfResourceToken.SelectToken(property);
-                if (value == null)
-                {
-                    alerts.AddPermanentError($"{this.Path}.{property} must not be null.");
-                }
-            }
-
         }
 
         /// <summary>

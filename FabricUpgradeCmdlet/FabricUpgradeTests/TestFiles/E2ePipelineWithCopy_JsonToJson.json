@@ -1,0 +1,131 @@
+﻿{
+  "adfSupportFile": "PipelineWithCopy_JsonToJson_support_live.zip",
+
+  "resolutions": [
+    {
+      "type": "LinkedServiceToConnectionId",
+      "key": "ArmtemplateStorageLinkedService",
+      "value": "d1fcfcfa-0b8c-469d-af92-5dcb300c8e6e"
+    }
+  ],
+
+  "expectedResponse": {
+    "state": "Succeeded",
+    "alerts": [],
+    "resolutions": [
+      {
+        "type": "LinkedServiceToConnectionId",
+        "key": "ArmtemplateStorageLinkedService",
+        "value": "d1fcfcfa-0b8c-469d-af92-5dcb300c8e6e"
+      }
+    ],
+    "result": {
+      "ArmtemplateStorageLinkedService": {
+        "id": "d1fcfcfa-0b8c-469d-af92-5dcb300c8e6e"
+      },
+      "PipelineWithCopy_JsonToJson": {
+        "type": "DataPipeline",
+        "displayName": "PipelineWithCopy_JsonToJson",
+        "description": null,
+        "workspaceId": "",
+        "id": 0
+      }
+    }
+  },
+
+  "expectedItems": [
+    {
+      "item": {
+        "type": "DataPipeline",
+        "workspaceId": "",
+        "id": "",
+        "displayName": "PipelineWithCopy_JsonToJson",
+        "description": null
+      },
+      "definition": {
+        "name": "PipelineWithCopy_JsonToJson",
+        "properties": {
+          "activities": [
+            {
+              "name": "Copy data1",
+              "type": "Copy",
+              "dependsOn": [],
+              "userProperties": [],
+              "description": null,
+              "policy": {
+                "timeout": "0.12:00:00",
+                "retry": 0,
+                "retryIntervalInSeconds": 30,
+                "secureOutput": false,
+                "secureInput": false
+              },
+              "typeProperties": {
+                "source": {
+                  "type": "JsonSource",
+                  "storeSettings": {
+                    "type": "AzureBlobStorageReadSettings",
+                    "recursive": true,
+                    "enablePartitionDiscovery": false
+                  },
+                  "formatSettings": {
+                    "type": "JsonReadSettings"
+                  },
+                  "datasetSettings": {
+                    "properties": {
+                      "annotations": [],
+                      "type": "Json",
+                      "typeProperties": {
+                        "location": {
+                          "type": "AzureBlobStorageLocation",
+                          "fileName": "ccc",
+                          "container": "aaa"
+                        }
+                      }
+                    },
+                    "externalReferences": {
+                      "connection": "d1fcfcfa-0b8c-469d-af92-5dcb300c8e6e"
+                    },
+                    "schema": {}
+                  }
+                },
+                "sink": {
+                  "type": "JsonSink",
+                  "storeSettings": {
+                    "type": "AzureBlobStorageWriteSettings",
+                    "maxConcurrentConnections": 3,
+                    "copyBehavior": "PreserveHierarchy",
+                    "blockSizeInMB": 4
+                  },
+                  "formatSettings": {
+                    "type": "JsonWriteSettings",
+                    "filePattern": "arrayOfObjects"
+                  },
+                  "datasetSettings": {
+                    "properties": {
+                      "annotations": [],
+                      "type": "Json",
+                      "typeProperties": {
+                        "location": {
+                          "type": "AzureBlobStorageLocation",
+                          "fileName": "ccc",
+                          "container": "aaa"
+                        }
+                      }
+                    },
+                    "externalReferences": {
+                      "connection": "d1fcfcfa-0b8c-469d-af92-5dcb300c8e6e"
+                    },
+                    "schema": {}
+                  }
+                },
+                "enableStaging": false
+              }
+            }
+          ]
+        },
+        "annotations": []
+      }
+    }
+  ]
+
+}

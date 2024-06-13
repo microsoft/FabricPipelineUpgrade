@@ -22,7 +22,7 @@ namespace FabricUpgradeCmdlet.Models
         public List<FabricExportResolve> Resolves { get; set; } = new List<FabricExportResolve>();
 
         [JsonProperty(PropertyName = "export", Order = 102)]
-        public JObject Export { get; set; }
+        public JObject Export { get; set; } = new JObject();
 
         public PipelineExportInstruction(string name)
             : base(name, FabricUpgradeResourceTypes.DataPipeline)

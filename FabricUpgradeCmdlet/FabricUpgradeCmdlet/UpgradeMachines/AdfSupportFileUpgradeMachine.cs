@@ -7,6 +7,7 @@ using System.Linq;
 using FabricUpgradeCmdlet.Models;
 using FabricUpgradeCmdlet.Upgraders;
 using FabricUpgradeCmdlet.Upgraders.DatasetUpgraders;
+using FabricUpgradeCmdlet.Upgraders.LinkedServiceUpgraders;
 using FabricUpgradeCmdlet.Utilities;
 using Newtonsoft.Json.Linq;
 
@@ -45,14 +46,12 @@ namespace FabricUpgradeCmdlet.UpgradeMachines
                 this.Upgraders.Add(datasetUpgrader);
             }
 
-            /*
             foreach (var entry in this.upgradePackage.LinkedServices)
             {
-                JToken pipelineToken = entry.Value;
-                Upgrader pipelineUpgrader = new PipelineUpgrader(pipelineToken, this);
+                JToken linkedServiceToken = entry.Value;
+                Upgrader pipelineUpgrader = LinkedServiceUpgrader.CreateLinkedServiceUpgrader(linkedServiceToken, this);
                 this.Upgraders.Add(pipelineUpgrader);
             }
-            */
 
             try
             {
@@ -136,12 +135,12 @@ namespace FabricUpgradeCmdlet.UpgradeMachines
             JArray fabricResources = new JArray();
             foreach (Upgrader upgrader in this.Upgraders)
             {
-                Symbol pipelineSymbol = upgrader.ResolveExportedSymbol(Symbol.CommonNames.FabricResource, this.Alerts);
-                if (pipelineSymbol.State == Symbol.SymbolState.Ready)
+                Symbol resourceSymbol = upgrader.ResolveExportedSymbol(Symbol.CommonNames.FabricResource, this.Alerts);
+                if (resourceSymbol.State == Symbol.SymbolState.Ready)
                 {
-                    if (pipelineSymbol.Value != null)
+                    if (resourceSymbol.Value != null)
                     {
-                        fabricResources.Add(pipelineSymbol.Value);
+                        fabricResources.Add(resourceSymbol.Value);
                     }
                 }
                 else

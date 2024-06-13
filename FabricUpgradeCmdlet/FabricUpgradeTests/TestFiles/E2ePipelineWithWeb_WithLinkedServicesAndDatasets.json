@@ -19,10 +19,6 @@
       {
         "severity": "Permanent",
         "details": "Cannot upgrade Web Activity 'PipelineWithWebActivity_WithLinkedServicesAndDatasets/Web1' because it includes Datasets"
-      },
-      {
-        "severity": "UnsupportedResource",
-        "details": "Cannot upgrade Dataset 'Json1' because its Type is 'Json'"
       }
     ],
     "resolutions": [],

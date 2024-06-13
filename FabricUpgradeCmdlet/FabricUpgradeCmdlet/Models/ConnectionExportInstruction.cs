@@ -1,11 +1,6 @@
 ﻿using FabricUpgradeCmdlet.Utilities;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace FabricUpgradeCmdlet.Models
 {
@@ -13,20 +8,20 @@ namespace FabricUpgradeCmdlet.Models
     // When it does, then we can "back-fill" this functionality.
     public class ConnectionExportInstruction : FabricExportInstruction
     {
-        [JsonProperty(PropertyName = "link", Order = 100)]
-        public List<FabricExportLink> Links { get; set; } = new List<FabricExportLink>();
+        [JsonProperty(PropertyName = "resolve", Order = 100)]
+        public List<FabricExportResolve> Resolves { get; set; } = new List<FabricExportResolve>();
 
         [JsonProperty(PropertyName = "export", Order = 101)]
-        public JObject Export { get; set; }
+        public JObject Export { get; set; } = new JObject();
 
         public ConnectionExportInstruction(string name)
             : base(name, FabricUpgradeResourceTypes.Connection)
         {
         }
 
-        static public new PipelineExportInstruction FromJToken(JToken token)
+        static public new ConnectionExportInstruction FromJToken(JToken token)
         {
-            return UpgradeSerialization.FromJToken<PipelineExportInstruction>(token);
+            return UpgradeSerialization.FromJToken<ConnectionExportInstruction>(token);
         }
 
         public JObject ToJObject()

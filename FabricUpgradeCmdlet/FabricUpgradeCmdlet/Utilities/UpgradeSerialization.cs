@@ -12,7 +12,7 @@ namespace FabricUpgradeCmdlet.Utilities
     /// <summary>
     /// This class performs the serialization and deserialization used by the FabricUpgrader.
     /// </summary>
-    internal static class UpgradeSerialization
+    public static class UpgradeSerialization
     {
         /// <summary>
         /// This object contains the JsonSerializerSettings used to (de)serialize the models defined in the Upgrader.
@@ -66,11 +66,6 @@ namespace FabricUpgradeCmdlet.Utilities
                 DateTimeZoneHandling = DateTimeZoneHandling.Utc,
                 NullValueHandling = NullValueHandling.Ignore,
                 ReferenceLoopHandling = ReferenceLoopHandling.Serialize,
-                /*Converters = new List<JsonConverter>
-                {
-                    // This is the magic bit that allows us to specify [JsonProperty(PropertyName = "a.b.c")]
-                    new TransformationJsonConverter(),
-                },*/
             };
 
             JsonSerializerSettings serializationSettings = new JsonSerializerSettings()
@@ -80,11 +75,6 @@ namespace FabricUpgradeCmdlet.Utilities
                 DateTimeZoneHandling = DateTimeZoneHandling.Utc,
                 NullValueHandling = NullValueHandling.Ignore,
                 ReferenceLoopHandling = ReferenceLoopHandling.Serialize,
-                /*Converters = new List<JsonConverter>
-                {
-                    // This is the magic bit that allows us to specify [JsonProperty(PropertyName = "a.b.c")]
-                    new TransformationJsonConverter(),
-                },*/
             };
 
             return new ParserSettings()

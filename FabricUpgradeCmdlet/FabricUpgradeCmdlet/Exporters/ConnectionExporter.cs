@@ -14,11 +14,11 @@ namespace FabricUpgradeCmdlet.Exporters
 {
     public class ConnectionExporter : ResourceExporter
     {
-        private readonly PipelineExportInstruction exportInstruction;
+        private readonly ConnectionExportInstruction exportInstruction;
         private string connectionId;
 
         public ConnectionExporter(
-            JObject toExport,
+            JToken toExport,
             FabricExportMachine machine)
             : base(toExport, FabricUpgradeResourceTypes.Connection, machine)
         {
@@ -31,16 +31,16 @@ namespace FabricUpgradeCmdlet.Exporters
         {
             base.CheckBeforeExports(alerts);
 
-            this.connectionId = this.Machine.Resolve(FabricUpgradeResolution.ResolutionType.LinkedServiceToConnectionId, this.Name, alerts);
-            if (this.connectionId == null)
+            foreach (FabricExportResolve resolve in this.exportInstruction.Resolves)
             {
-                alerts.AddMissingResolutionAlert(
-                    FabricUpgradeResolution.ResolutionType.LinkedServiceToConnectionId,
-                    this.Name,
-                    new FabricUpgradeConnectionHint()
-                    {
-                        // TODO: Build a connection hint
-                    });
+                var resolution = this.Machine.Resolve(resolve.Type, resolve.Key, alerts);
+                if (resolution == null)
+                {
+                    alerts.AddMissingResolutionAlert(
+                        resolve.Type,
+                        resolve.Key,
+                        resolve.Hint);
+                }
             }
         }
 
@@ -53,9 +53,19 @@ namespace FabricUpgradeCmdlet.Exporters
             // We do not actually export a connection.
             // We use the resolutions to pretend.
 
-            JObject result = new JObject();
-            result["id"] = this.connectionId;
-            return Task.FromResult(result);
+            this.ResolveResolutions(alerts);
+
+            return Task.FromResult(this.exportInstruction.Export);
         }
+
+        private void ResolveResolutions(AlertCollector alerts)
+        {
+            foreach (FabricExportResolve resolve in this.exportInstruction.Resolves)
+            {
+                var resolution = this.Machine.Resolve(resolve.Type, resolve.Key, alerts);
+                this.exportInstruction.Export.SelectToken(resolve.TargetPath).Replace(resolution);
+            }
+        }
+
     }
 }

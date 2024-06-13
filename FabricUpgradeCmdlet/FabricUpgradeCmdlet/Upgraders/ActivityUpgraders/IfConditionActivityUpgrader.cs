@@ -16,9 +16,11 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
 {
     public class IfConditionActivityUpgrader : ActivityWithSubActivitiesUpgrader
     {
+        private const string adfExpressionPath = "typeProperties.expression";
+
         private readonly List<string> requiredAdfProperties = new List<string>
         {
-            "typeProperties.expression"
+            adfExpressionPath
         };
 
         private readonly Dictionary<string, List<Upgrader>> subActivityUpgraders = new Dictionary<string, List<Upgrader>>();
@@ -62,7 +64,7 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
                 this.CollectSubActivityExportLinks(this.subActivityUpgraders["false"], "ifFalseActivities", links, alerts);
                 this.CollectSubActivityExportLinks(this.subActivityUpgraders["true"], "ifTrueActivities", links, alerts);
 
-                return Symbol.ReadySymbol(JArray.Parse(JsonConvert.SerializeObject(links)));
+                return Symbol.ReadySymbol(JArray.Parse(UpgradeSerialization.Serialize(links)));
             }
 
             if (symbolName == Symbol.CommonNames.ExportResolves)
@@ -72,7 +74,7 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
                 this.CollectSubActivityExportResolves(this.subActivityUpgraders["false"], "ifFalseActivities", resolves, alerts);
                 this.CollectSubActivityExportResolves(this.subActivityUpgraders["true"], "ifTrueActivities", resolves, alerts);
 
-                return Symbol.ReadySymbol(JArray.Parse(JsonConvert.SerializeObject(resolves)));
+                return Symbol.ReadySymbol(JArray.Parse(UpgradeSerialization.Serialize(resolves)));
             }
 
             if (symbolName == Symbol.CommonNames.Activity)
@@ -89,7 +91,7 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
                 PropertyCopier copier = new PropertyCopier(this.Path, this.AdfResourceToken, fabricActivityObject, alerts);
                 copier.Copy("description");
 
-                copier.Copy("typeProperties.expression");
+                copier.Copy(adfExpressionPath);
 
                 copier.Set("typeProperties.ifFalseActivities", CollectSubActivities(this.subActivityUpgraders["false"], alerts));
                 copier.Set("typeProperties.ifTrueActivities", CollectSubActivities(this.subActivityUpgraders["true"], alerts));

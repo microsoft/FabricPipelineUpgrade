@@ -17,7 +17,7 @@ namespace FabricUpgradeCmdlet.Exporters
         private readonly PipelineExportInstruction exportInstruction;
 
         public PipelineExporter(
-            JObject toExport,
+            JToken toExport,
             FabricExportMachine machine)
             : base(toExport, FabricUpgradeResourceTypes.DataPipeline, machine)
         {

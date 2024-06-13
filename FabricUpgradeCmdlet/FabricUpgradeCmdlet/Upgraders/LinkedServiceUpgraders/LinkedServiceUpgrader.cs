@@ -4,6 +4,7 @@ using FabricUpgradeCmdlet.Utilities;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -19,6 +20,13 @@ namespace FabricUpgradeCmdlet.Upgraders.LinkedServiceUpgraders
             public const string AzureBlobStorage = "AzureBlobStorage";
         }
 
+        protected const string AdfLinkedServiceTypePath = "properties.type";
+        protected const string AdfConnectionStringPath = "properties.typeProperties.connectionString";
+
+        private readonly List<string> requiredAdfProperties = new List<string>
+        {
+        };
+
         protected LinkedServiceUpgrader(
             JToken adfToken,
             IFabricUpgradeMachine machine)
@@ -26,10 +34,13 @@ namespace FabricUpgradeCmdlet.Upgraders.LinkedServiceUpgraders
         {
             this.Name = adfToken.SelectToken("name")?.ToString();
             this.UpgraderType = FabricUpgradeResourceTypes.LinkedService;
+            this.LinkedServiceType = adfToken.SelectToken(AdfLinkedServiceTypePath)?.ToString();
             this.Path = this.Name;
         }
 
-        // This dictionary is used in some DatasetUpgraders.
+        protected string LinkedServiceType { get; set; }
+
+        // This dictionary is used by some DatasetUpgraders.
         // For example, the AzureSqlTableDatasetUpgrader uses it to fill in the "database"
         // field in the datasetSettings of a CopyActivity.
         public Dictionary<string, JToken> ConnectionSettings { get; set; } = new Dictionary<string, JToken>();
@@ -50,8 +61,8 @@ namespace FabricUpgradeCmdlet.Upgraders.LinkedServiceUpgraders
             // We don't _upgrade_ the LinkedService, but we might need to know _something_ about it!
             return linkedServiceType switch
             {
-                //LinkedServiceTypes.AzureBlobStorage => new AzureBlobStorageLinkedServiceUpgrader(linkedServiceToken, machine),
-                _ => null, //new UnsupportedLinkedServiceUpgrader(linkedServiceToken, machine),
+                LinkedServiceTypes.AzureBlobStorage => new AzureBlobStorageLinkedServiceUpgrader(linkedServiceToken, machine),
+                _ => new UnsupportedLinkedServiceUpgrader(linkedServiceToken, machine),
             };
         }
 
@@ -59,6 +70,15 @@ namespace FabricUpgradeCmdlet.Upgraders.LinkedServiceUpgraders
         public override void Compile(AlertCollector alerts)
         {
             base.Compile(alerts);
+
+            this.CheckRequiredAdfProperties(this.requiredAdfProperties, alerts);
+
+            JToken connectionString = this.AdfResourceToken.SelectToken(AdfConnectionStringPath);
+
+            if ((connectionString != null) && (connectionString.Type == JTokenType.String))
+            {
+                this.BuildConnectionSettings(connectionString.ToString());
+            }
         }
 
         /// <inheritdoc/>
@@ -66,12 +86,46 @@ namespace FabricUpgradeCmdlet.Upgraders.LinkedServiceUpgraders
             string symbolName,
             AlertCollector alerts)
         {
+            if (symbolName == Symbol.CommonNames.ExportResolves)
+            {
+                List<FabricExportResolve> resolves = new List<FabricExportResolve>();
 
+                FabricUpgradeResolution.ResolutionType resolutionType = FabricUpgradeResolution.ResolutionType.LinkedServiceToConnectionId;
+                FabricExportResolve userCredentialConnectionResolve = new FabricExportResolve(
+                    resolutionType,
+                    this.Name,
+                    "id")
+                    .WithHint(this.BuildFabricConnectionHint()
+                        .WithTemplate(new FabricUpgradeResolution()
+                        {
+                            Type = resolutionType,
+                            Key = this.Name,
+                            Value = "<guid>"
+                        }
+                   ));
+
+                resolves.Add(userCredentialConnectionResolve);
+
+                return Symbol.ReadySymbol(JArray.Parse(UpgradeSerialization.Serialize(resolves)));
+            }
             if (symbolName == Symbol.CommonNames.FabricResource)
             {
                 ConnectionExportInstruction exportInstruction = new ConnectionExportInstruction(this.Name);
 
-                // TODO: Put a ConnectinHint in the Export property!
+                Symbol resolvesSymbol = this.ResolveExportedSymbol(Symbol.CommonNames.ExportResolves, alerts);
+                if (resolvesSymbol.State != Symbol.SymbolState.Ready)
+                {
+                    // TODO!
+                }
+                if (resolvesSymbol.Value != null)
+                {
+                    foreach (JToken requiredResolution in (JArray)resolvesSymbol.Value)
+                    {
+                        FabricExportResolve resolve = FabricExportResolve.FromJToken(requiredResolution);
+                        exportInstruction.Resolves.Add(resolve);
+                    }
+                }
+                exportInstruction.Export["id"] = Guid.Empty.ToString();
 
                 return Symbol.ReadySymbol(exportInstruction.ToJObject());
             }

@@ -1,0 +1,137 @@
+﻿{
+  "adfSupportFile": "PipelineWithCopy_JsonToJson_support_live.zip",
+
+  "expectedResponse": {
+    "state": "Succeeded",
+    "alerts": [],
+    "resolutions": [],
+    "result": {
+      "fabricResources": [
+        {
+          "resourceName": "ArmtemplateStorageLinkedService",
+          "resourceType": "Connection",
+          "resolve": [
+            {
+              "type": "LinkedServiceToConnectionId",
+              "key": "ArmtemplateStorageLinkedService",
+              "targetPath": "id",
+              "hint": {
+                "linkedServiceName": "ArmtemplateStorageLinkedService",
+                "connectionType": "AzureBlobStorage",
+                "datasource": "storageqaaogpkbmturm",
+                "template": {
+                  "type": "LinkedServiceToConnectionId",
+                  "key": "ArmtemplateStorageLinkedService",
+                  "value": "<guid>"
+                }
+              }
+            }
+          ],
+          "export": {
+            "id": "00000000-0000-0000-0000-000000000000"
+          }
+        },
+        {
+          "resourceName": "PipelineWithCopy_JsonToJson",
+          "resourceType": "DataPipeline",
+          "link": [
+            {
+              "from": "Connection:ArmtemplateStorageLinkedService",
+              "targetPath": "properties.activities[0].typeProperties.source.datasetSettings.externalReferences.connection"
+            },
+            {
+              "from": "Connection:ArmtemplateStorageLinkedService",
+              "targetPath": "properties.activities[0].typeProperties.sink.datasetSettings.externalReferences.connection"
+            }
+          ],
+          "resolve": [],
+          "export": {
+            "name": "PipelineWithCopy_JsonToJson",
+            "properties": {
+              "activities": [
+                {
+                  "name": "Copy data1",
+                  "type": "Copy",
+                  "dependsOn": [],
+                  "userProperties": [],
+                  "description": null,
+                  "policy": {
+                    "timeout": "0.12:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                  },
+                  "typeProperties": {
+                    "source": {
+                      "type": "JsonSource",
+                      "storeSettings": {
+                        "type": "AzureBlobStorageReadSettings",
+                        "recursive": true,
+                        "enablePartitionDiscovery": false
+                      },
+                      "formatSettings": {
+                        "type": "JsonReadSettings"
+                      },
+                      "datasetSettings": {
+                        "properties": {
+                          "annotations": [],
+                          "type": "Json",
+                          "typeProperties": {
+                            "location": {
+                              "type": "AzureBlobStorageLocation",
+                              "fileName": "ccc",
+                              "container": "aaa"
+                            }
+                          }
+                        },
+                        "externalReferences": {
+                          "connection": "00000000-0000-0000-0000-000000000000"
+                        },
+                        "schema": {}
+                      }
+                    },
+                    "sink": {
+                      "type": "JsonSink",
+                      "storeSettings": {
+                        "type": "AzureBlobStorageWriteSettings",
+                        "maxConcurrentConnections": 3,
+                        "copyBehavior": "PreserveHierarchy",
+                        "blockSizeInMB": 4
+                      },
+                      "formatSettings": {
+                        "type": "JsonWriteSettings",
+                        "filePattern": "arrayOfObjects"
+                      },
+                      "datasetSettings": {
+                        "properties": {
+                          "annotations": [],
+                          "type": "Json",
+                          "typeProperties": {
+                            "location": {
+                              "type": "AzureBlobStorageLocation",
+                              "fileName": "ccc",
+                              "container": "aaa"
+                            }
+                          }
+                        },
+                        "externalReferences": {
+                          "connection": "00000000-0000-0000-0000-000000000000"
+                        },
+                        "schema": {}
+                      }
+                    },
+                    "enableStaging":  false
+                  }
+                }
+              ]
+            },
+            "annotations": []
+          }
+        }
+      ]
+    }
+  }
+
+
+}
