@@ -1,10 +1,9 @@
-﻿using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿// <copyright file="FabricUpgradeConnectionHint.cs" company="Microsoft">
+// Copyright (c) Microsoft. All rights reserved.
+// </copyright>
+
+using Newtonsoft.Json;
 using System.Runtime.Serialization;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace FabricUpgradeCmdlet.Models
 {

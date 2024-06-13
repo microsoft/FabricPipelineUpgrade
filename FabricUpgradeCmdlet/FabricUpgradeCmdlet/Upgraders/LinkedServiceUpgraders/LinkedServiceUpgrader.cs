@@ -1,15 +1,11 @@
-﻿using FabricUpgradeCmdlet.Models;
+﻿// <copyright file="LinkedServiceUpgrader.cs" company="Microsoft">
+// Copyright (c) Microsoft. All rights reserved.
+// </copyright>
+
+using FabricUpgradeCmdlet.Models;
 using FabricUpgradeCmdlet.UpgradeMachines;
 using FabricUpgradeCmdlet.Utilities;
 using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
-using static FabricUpgradeCmdlet.Upgraders.PipelineUpgrader;
 
 namespace FabricUpgradeCmdlet.Upgraders.LinkedServiceUpgraders
 {

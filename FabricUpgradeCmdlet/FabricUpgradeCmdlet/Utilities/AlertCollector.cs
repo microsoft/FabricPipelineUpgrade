@@ -1,6 +1,8 @@
-﻿using FabricUpgradeCmdlet.Models;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+﻿// <copyright file="AlertCollector.cs" company="Microsoft">
+// Copyright (c) Microsoft. All rights reserved.
+// </copyright>
+
+using FabricUpgradeCmdlet.Models;
 using System.Collections;
 using static FabricUpgradeCmdlet.Models.FabricUpgradeAlert;
 

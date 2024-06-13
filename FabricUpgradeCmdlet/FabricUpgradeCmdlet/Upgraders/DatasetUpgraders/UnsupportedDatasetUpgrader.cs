@@ -1,4 +1,8 @@
-﻿using FabricUpgradeCmdlet.UpgradeMachines;
+﻿// <copyright file="UnsupportedDatasetUpgrader.cs" company="Microsoft">
+// Copyright (c) Microsoft. All rights reserved.
+// </copyright>
+
+using FabricUpgradeCmdlet.UpgradeMachines;
 using FabricUpgradeCmdlet.Utilities;
 using Newtonsoft.Json.Linq;
 

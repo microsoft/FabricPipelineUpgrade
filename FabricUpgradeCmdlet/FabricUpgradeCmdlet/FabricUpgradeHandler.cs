@@ -1,17 +1,12 @@
-﻿using FabricUpgradeCmdlet.Exporters;
+﻿// <copyright file="FabricUpgradeHandler.cs" company="Microsoft">
+// Copyright (c) Microsoft. All rights reserved.
+// </copyright>
+
 using FabricUpgradeCmdlet.ExportMachines;
 using FabricUpgradeCmdlet.Models;
 using FabricUpgradeCmdlet.UpgradeMachines;
 using FabricUpgradeCmdlet.Utilities;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace FabricUpgradeCmdlet
 {
