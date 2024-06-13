@@ -74,15 +74,13 @@
                         "type": "JsonReadSettings"
                       },
                       "datasetSettings": {
-                        "properties": {
-                          "annotations": [],
-                          "type": "Json",
-                          "typeProperties": {
-                            "location": {
-                              "type": "AzureBlobStorageLocation",
-                              "fileName": "ccc",
-                              "container": "aaa"
-                            }
+                        "annotations": [],
+                        "type": "Json",
+                        "typeProperties": {
+                          "location": {
+                            "type": "AzureBlobStorageLocation",
+                            "fileName": "ccc",
+                            "container": "aaa"
                           }
                         },
                         "externalReferences": {
@@ -104,15 +102,13 @@
                         "filePattern": "arrayOfObjects"
                       },
                       "datasetSettings": {
-                        "properties": {
-                          "annotations": [],
-                          "type": "Json",
-                          "typeProperties": {
-                            "location": {
-                              "type": "AzureBlobStorageLocation",
-                              "fileName": "ccc",
-                              "container": "aaa"
-                            }
+                        "annotations": [],
+                        "type": "Json",
+                        "typeProperties": {
+                          "location": {
+                            "type": "AzureBlobStorageLocation",
+                            "fileName": "ccc",
+                            "container": "aaa"
                           }
                         },
                         "externalReferences": {
@@ -121,7 +117,7 @@
                         "schema": {}
                       }
                     },
-                    "enableStaging":  false
+                    "enableStaging": false
                   }
                 }
               ]

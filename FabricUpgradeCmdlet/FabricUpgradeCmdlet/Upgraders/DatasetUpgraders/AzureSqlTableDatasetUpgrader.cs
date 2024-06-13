@@ -1,24 +1,21 @@
-﻿// <copyright file="JsonDatasetUpgrader.cs" company="Microsoft">
+﻿// <copyright file="AzureSqlTableDatasetUpgrader.cs" company="Microsoft">
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
 using FabricUpgradeCmdlet.UpgradeMachines;
+using FabricUpgradeCmdlet.Upgraders.LinkedServiceUpgraders;
 using FabricUpgradeCmdlet.Utilities;
 using Newtonsoft.Json.Linq;
 
 namespace FabricUpgradeCmdlet.Upgraders.DatasetUpgraders
 {
-    public class JsonDatasetUpgrader : DatasetUpgrader
+    public class AzureSqlTableDatasetUpgrader : DatasetUpgrader
     {
-        private const string adfLocationPath = "properties.typeProperties.location";
-        private const string fabricLocationPath = "typeProperties.location";
-
         private readonly List<string> requiredAdfProperties = new List<string>
         {
-            adfLocationPath,
         };
 
-        public JsonDatasetUpgrader(
+        public AzureSqlTableDatasetUpgrader(
             JToken adfDatasetToken,
             IFabricUpgradeMachine machine)
             : base(adfDatasetToken, machine)
@@ -62,11 +59,30 @@ namespace FabricUpgradeCmdlet.Upgraders.DatasetUpgraders
                 JObject fabricActivityObject = (JObject)datasetSettingsSymbol.Value;
                 PropertyCopier copier = new PropertyCopier(this.Path, this.AdfResourceToken, fabricActivityObject, alerts);
 
-                copier.Copy(adfLocationPath, fabricLocationPath);
+                copier.Copy("properties.typeProperties", "typeProperties");
 
-                // Fabric UX always makes an empty schema for JSON datasets.
-                // Therefore, we will duplicate that behavior here.
-                copier.Set("schema", new JObject());
+                if (this.LinkedServiceUpgrader.ConnectionSettings.TryGetValue(
+                    AzureSqlDatabaseLinkedServiceUpgrader.DatabaseKey,
+                    out JToken databaseName))
+                {
+                    copier.Set("typeProperties.database", databaseName);
+                }
+                else
+                {
+                    // The LinkedService already alerted!
+                    copier.Set("typeProperties.database", "UNKNOWN");
+                }
+
+                // The datasetSettings should include at least an _empty_ Schema array.
+                //
+                // ADF uses the up-to-date "mappings" field in its translator, and Fabric will accept
+                // that field if (and only if?) the datasetSettings fields include a non-null Schema.
+                //
+                // If we ensure that there is at least an _empty_ Schema field,
+                // then the "Mappings" tab in the Fabric UX will create the supported "mappings" translator,
+                // rather than one of the deprecated translator forms.
+                JToken schema = this.AdfResourceToken.SelectToken("properties.schema") ?? new JArray();
+                copier.Set("schema", schema);
 
                 return Symbol.ReadySymbol(fabricActivityObject);
             }

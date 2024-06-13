@@ -12,7 +12,6 @@ namespace FabricUpgradeCmdlet.Exporters
     public class ConnectionExporter : ResourceExporter
     {
         private readonly ConnectionExportInstruction exportInstruction;
-        private string connectionId;
 
         public ConnectionExporter(
             JToken toExport,

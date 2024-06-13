@@ -1,0 +1,46 @@
+﻿{
+  "adfSupportFile": "PipelineWithCopy_SqlToSql_support_live.zip",
+
+  "resolutions": [
+    {
+      "type": "LinkedServiceToConnectionId",
+      "key": "AzureBlobStorage2",
+      "value": "36b22d4d-9f24-423c-a7c1-58765809e6dc"
+    },
+    {
+      "type": "LinkedServiceToConnectionId",
+      "key": "AzureBlobStorage3",
+      "value": "77cd8131-e33b-4888-a51a-4a35c30e0858"
+    },
+    {
+      "type": "LinkedServiceToConnectionId",
+      "key": "ArmtemplateStorageLinkedService",
+      "value": "a10b2808-2356-4fa6-92b7-fccc540006ef"
+    }
+  ],
+
+  "expectedResponse": {
+    "state": "Failed",
+    "alerts": [
+      {
+        "severity": "RequiresUserAction",
+        "details": "Please use the hint and template to create/find a new connection and add its ID to your resolutions.",
+        "connectionHint": {
+          "linkedServiceName": "rodenkewsql",
+          "connectionType": "AzureSqlDatabase",
+          "datasource": "rodenkew-sql-server.database.windows.net",
+          "template": {
+            "type": "LinkedServiceToConnectionId",
+            "key": "rodenkewsql",
+            "value": "<guid>"
+          }
+        }
+      }
+    ],
+    "resolutions": [],
+    "result": {}
+  },
+
+  "expectedItems": []
+
+}
