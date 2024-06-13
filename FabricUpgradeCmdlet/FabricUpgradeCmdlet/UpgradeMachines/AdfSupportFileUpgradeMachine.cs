@@ -1,9 +1,7 @@
-﻿// <copyright file="AdfSupportFilesUpgradeMachine.cs" company="Microsoft">
+﻿// <copyright file="AdfSupportFileUpgradeMachine.cs" company="Microsoft">
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-using System.Collections.Generic;
-using System.Linq;
 using FabricUpgradeCmdlet.Models;
 using FabricUpgradeCmdlet.Upgraders;
 using FabricUpgradeCmdlet.Upgraders.DatasetUpgraders;

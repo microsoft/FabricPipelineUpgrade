@@ -3,8 +3,6 @@
 // </copyright>
 
 using FabricUpgradeCmdlet.Models;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace FabricUpgradeCmdlet.UpgradeMachines
 {

@@ -1,10 +1,9 @@
-﻿using FabricUpgradeCmdlet;
+﻿// <copyright file="TestHttpClientFactory.cs" company="Microsoft">
+// Copyright (c) Microsoft. All rights reserved.
+// </copyright>
+
+using FabricUpgradeCmdlet;
 using FabricUpgradeCmdlet.Utilities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace FabricUpgradeTests.Utilities
 {

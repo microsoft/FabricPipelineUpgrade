@@ -2,15 +2,11 @@
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
+using System.IO.Compression;
+using System.Text;
+
 namespace FabricUpgradeCmdlet.Utilities
 {
-    using System;
-    using System.IO;
-    using System.IO.Compression;
-    using System.Text;
-    using System.Threading;
-    using System.Threading.Tasks;
-
     /// <summary>
     /// This class implements the Unzip operation used by the FabricUpgrader.
     /// </summary>

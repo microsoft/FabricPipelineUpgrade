@@ -2,17 +2,12 @@
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
+using FabricUpgradeCmdlet.Models;
+using FabricUpgradeCmdlet.Upgraders;
+using FabricUpgradeCmdlet.Utilities;
+
 namespace FabricUpgradeCmdlet.UpgradeMachines
 {
-    using FabricUpgradeCmdlet.Models;
-    using FabricUpgradeCmdlet.Upgraders;
-    using FabricUpgradeCmdlet.Utilities;
-    using Newtonsoft.Json;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Threading;
-    using System.Threading.Tasks;
-
     /// <summary>
     /// The base class for FabricUpgradeMachines.
     /// Each derived class will pre-process an UpgradePackage per its format,

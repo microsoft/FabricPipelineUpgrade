@@ -1,11 +1,10 @@
-﻿using Newtonsoft.Json.Converters;
+﻿// <copyright file="FabricUpgradeProgress.cs" company="Microsoft">
+// Copyright (c) Microsoft. All rights reserved.
+// </copyright>
+
+using Newtonsoft.Json.Converters;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.Serialization;
-using System.Text;
-using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using FabricUpgradeCmdlet.Utilities;
 

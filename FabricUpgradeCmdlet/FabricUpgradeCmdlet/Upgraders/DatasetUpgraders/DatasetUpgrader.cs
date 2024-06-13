@@ -1,16 +1,12 @@
-﻿using FabricUpgradeCmdlet.Models;
+﻿// <copyright file="DatasetUpgrader.cs" company="Microsoft">
+// Copyright (c) Microsoft. All rights reserved.
+// </copyright>
+
+using FabricUpgradeCmdlet.Models;
 using FabricUpgradeCmdlet.UpgradeMachines;
-using FabricUpgradeCmdlet.Upgraders.ActivityUpgraders;
 using FabricUpgradeCmdlet.Utilities;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static FabricUpgradeCmdlet.Upgraders.ActivityUpgraders.ActivityUpgrader;
 
 namespace FabricUpgradeCmdlet.Upgraders.DatasetUpgraders
 {

@@ -1,16 +1,11 @@
-﻿using FabricUpgradeCmdlet.Models;
+﻿// <copyright file="IfConditionActivityUpgrader.cs" company="Microsoft">
+// Copyright (c) Microsoft. All rights reserved.
+// </copyright>
+
+using FabricUpgradeCmdlet.Models;
 using FabricUpgradeCmdlet.UpgradeMachines;
 using FabricUpgradeCmdlet.Utilities;
-using Microsoft.Rest.Serialization;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
 {

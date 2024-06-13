@@ -1,9 +1,13 @@
+// <copyright file="HandlerTests.cs" company="Microsoft">
+// Copyright (c) Microsoft. All rights reserved.
+// </copyright>
+
 using FabricUpgradeCmdlet;
-using Newtonsoft.Json.Linq;
-using Newtonsoft.Json;
 using FabricUpgradeCmdlet.Models;
 using FabricUpgradeTests.Utilities;
 using FabricUpgradeTests.TestConfigModels;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace FabricUpgradeTests
 {
