@@ -148,8 +148,8 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
                 foreach (string dataset in new List<string> { "source", "sink" })
                 {
                     copier.Copy($"typeProperties.{dataset}.type");
-                    copier.Copy($"typeProperties.{dataset}.storeSettings");
-                    copier.Copy($"typeProperties.{dataset}.formatSettings");
+                    copier.Copy($"typeProperties.{dataset}.storeSettings", copyIfNull: false);
+                    copier.Copy($"typeProperties.{dataset}.formatSettings", copyIfNull: false);
                 }
 
                 this.AddDatasetSettings(copier, this.inputDatasetUpgrader, sourceDatasetSettingsPath, alerts);

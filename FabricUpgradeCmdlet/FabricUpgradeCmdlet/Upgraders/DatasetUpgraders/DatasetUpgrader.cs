@@ -4,6 +4,7 @@
 
 using FabricUpgradeCmdlet.Models;
 using FabricUpgradeCmdlet.UpgradeMachines;
+using FabricUpgradeCmdlet.Upgraders.LinkedServiceUpgraders;
 using FabricUpgradeCmdlet.Utilities;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -14,12 +15,15 @@ namespace FabricUpgradeCmdlet.Upgraders.DatasetUpgraders
     {
         public class DatasetTypes
         {
+            public const string AzureSqlTable = "AzureSqlTable";
             public const string Json = "Json";
             public const string Binary = "Binary";
         }
 
         protected const string AdfDatasetTypePath = "properties.type";
+        protected const string FabricDatasetTypePath = "type";
         protected const string AdfLinkedServiceNamePath = "properties.linkedServiceName.referenceName";
+        protected const string FabricLinkedServiceNamePath = "linkedServiceName.referenceName";
 
         protected const string FabricConnectionIdPath = "externalReferences.connection";
 
@@ -45,6 +49,8 @@ namespace FabricUpgradeCmdlet.Upgraders.DatasetUpgraders
 
         protected string DatasetType { get; set; }
 
+        protected LinkedServiceUpgrader LinkedServiceUpgrader { get; private set; }
+
         /// <summary>
         /// A "factory" function that creates the appropriate Upgrader from the ADF Dataset's Type.
         /// </summary>
@@ -59,6 +65,7 @@ namespace FabricUpgradeCmdlet.Upgraders.DatasetUpgraders
             string datasetType = AdfDatasetModel.Build(adfDatasetToken).Properties.DatasetType;
             return datasetType switch
             {
+                DatasetTypes.AzureSqlTable => new AzureSqlTableDatasetUpgrader(adfDatasetToken, machine),
                 DatasetTypes.Binary => new BinaryDatasetUpgrader(adfDatasetToken, machine),
                 DatasetTypes.Json => new JsonDatasetUpgrader(adfDatasetToken, machine),
                 _ => new UnsupportedDatasetUpgrader(adfDatasetToken, machine),
@@ -85,9 +92,11 @@ namespace FabricUpgradeCmdlet.Upgraders.DatasetUpgraders
                 AdfLinkedServiceNamePath,
                 alerts);
 
-            if (linkedServiceUpgrader != null)
+            this.LinkedServiceUpgrader = (LinkedServiceUpgrader)linkedServiceUpgrader;
+
+            if (this.LinkedServiceUpgrader != null)
             {
-                this.DependsOn.Add(linkedServiceUpgrader);
+                this.DependsOn.Add(this.LinkedServiceUpgrader);
             }
         }
 
@@ -122,8 +131,8 @@ namespace FabricUpgradeCmdlet.Upgraders.DatasetUpgraders
                 JObject datasetSettings = new JObject();
                 PropertyCopier copier = new PropertyCopier(this.Path, this.AdfResourceToken, datasetSettings, alerts);
 
-                copier.Copy("properties.annotations");
-                copier.Copy(AdfDatasetTypePath);
+                copier.Copy("properties.annotations", "annotations");
+                copier.Copy(AdfDatasetTypePath, FabricDatasetTypePath);
                 copier.Set(FabricConnectionIdPath, Guid.Empty.ToString());
 
                 return Symbol.ReadySymbol(datasetSettings);

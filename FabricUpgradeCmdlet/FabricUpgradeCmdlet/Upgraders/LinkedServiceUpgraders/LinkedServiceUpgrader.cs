@@ -14,6 +14,7 @@ namespace FabricUpgradeCmdlet.Upgraders.LinkedServiceUpgraders
         public class LinkedServiceTypes
         {
             public const string AzureBlobStorage = "AzureBlobStorage";
+            public const string AzureSqlDatabase = "AzureSqlDatabase";
         }
 
         protected const string AdfLinkedServiceTypePath = "properties.type";
@@ -58,6 +59,7 @@ namespace FabricUpgradeCmdlet.Upgraders.LinkedServiceUpgraders
             return linkedServiceType switch
             {
                 LinkedServiceTypes.AzureBlobStorage => new AzureBlobStorageLinkedServiceUpgrader(linkedServiceToken, machine),
+                LinkedServiceTypes.AzureSqlDatabase => new AzureSqlDatabaseLinkedServiceUpgrader(linkedServiceToken, machine),
                 _ => new UnsupportedLinkedServiceUpgrader(linkedServiceToken, machine),
             };
         }
@@ -69,11 +71,19 @@ namespace FabricUpgradeCmdlet.Upgraders.LinkedServiceUpgraders
 
             this.CheckRequiredAdfProperties(this.requiredAdfProperties, alerts);
 
-            JToken connectionString = this.AdfResourceToken.SelectToken(AdfConnectionStringPath);
+            JToken connectionStringToken = this.AdfResourceToken.SelectToken(AdfConnectionStringPath);
 
-            if ((connectionString != null) && (connectionString.Type == JTokenType.String))
+            if (connectionStringToken == null)
             {
-                this.BuildConnectionSettings(connectionString.ToString());
+                alerts.AddPermanentError($"Cannot upgrade LinkedService '{this.Path}' because its ConnectionString is missing.");
+            }
+            else if (connectionStringToken.Type != JTokenType.String)
+            {
+                alerts.AddPermanentError($"Cannot upgrade LinkedService '{this.Path}' because its ConnectionString is not a string.");
+            }
+            else
+            {
+                this.BuildConnectionSettings(connectionStringToken.ToString());
             }
         }
 

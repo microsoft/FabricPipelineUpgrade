@@ -1,0 +1,269 @@
+﻿{
+  "adfSupportFile": "PipelineWithCopy_SqlToSql_support_live.zip",
+
+  "resolutions": [
+    {
+      "type": "LinkedServiceToConnectionId",
+      "key": "rodenkewsql",
+      "value": "0f1083d3-8b19-44a2-bd3b-26a7e82ebe51"
+    },
+    {
+      "type": "LinkedServiceToConnectionId",
+      "key": "AzureBlobStorage2",
+      "value": "36b22d4d-9f24-423c-a7c1-58765809e6dc"
+    },
+    {
+      "type": "LinkedServiceToConnectionId",
+      "key": "AzureBlobStorage3",
+      "value": "77cd8131-e33b-4888-a51a-4a35c30e0858"
+    },
+    {
+      "type": "LinkedServiceToConnectionId",
+      "key": "ArmtemplateStorageLinkedService",
+      "value": "a10b2808-2356-4fa6-92b7-fccc540006ef"
+    }
+  ],
+
+  "expectedResponse": {
+    "state": "Succeeded",
+    "alerts": [],
+    "resolutions": [
+      {
+        "type": "LinkedServiceToConnectionId",
+        "key": "rodenkewsql",
+        "value": "0f1083d3-8b19-44a2-bd3b-26a7e82ebe51"
+      },
+      {
+        "type": "LinkedServiceToConnectionId",
+        "key": "AzureBlobStorage2",
+        "value": "36b22d4d-9f24-423c-a7c1-58765809e6dc"
+      },
+      {
+        "type": "LinkedServiceToConnectionId",
+        "key": "AzureBlobStorage3",
+        "value": "77cd8131-e33b-4888-a51a-4a35c30e0858"
+      },
+      {
+        "type": "LinkedServiceToConnectionId",
+        "key": "ArmtemplateStorageLinkedService",
+        "value": "a10b2808-2356-4fa6-92b7-fccc540006ef"
+      }
+    ],
+    "result": {
+      "rodenkewsql": {
+        "id": "0f1083d3-8b19-44a2-bd3b-26a7e82ebe51"
+      },
+      "CopyPipelineSqltoSql7": {
+        "type": "DataPipeline",
+        "displayName": "CopyPipelineSqltoSql7",
+        "description": null,
+        "workspaceId": "",
+        "id": 0
+      }
+    }
+  },
+
+  "expectedItems": [
+    {
+      "item": {
+        "workspaceId": "",
+        "id": "",
+        "type": "DataPipeline",
+        "displayName": "CopyPipelineSqltoSql7",
+        "description": null
+      },
+      "definition": {
+        "name": "CopyPipelineSqltoSql7",
+        "properties": {
+          "activities": [
+            {
+              "policy": {
+                "timeout": "0.12:00:00",
+                "retry": 0,
+                "retryIntervalInSeconds": 30,
+                "secureOutput": false,
+                "secureInput": false
+              },
+              "name": "Copy data1",
+              "type": "Copy",
+              "dependsOn": [],
+              "description": null,
+              "userProperties": [],
+              "typeProperties": {
+                "source": {
+                  "type": "AzureSqlSource",
+                  "datasetSettings": {
+                    "annotations": [],
+                    "type": "AzureSqlTable",
+                    "typeProperties": {
+                      "schema": "dxt",
+                      "table": "holidays",
+                      "database": "rodenkewSqlDb"
+                    },
+                    "schema": [
+                      {
+                        "name": "countryOrRegion",
+                        "type": "nvarchar"
+                      },
+                      {
+                        "name": "holidayName",
+                        "type": "nvarchar"
+                      },
+                      {
+                        "name": "normalizeHolidayName",
+                        "type": "nvarchar"
+                      },
+                      {
+                        "name": "isPaidTimeOff",
+                        "type": "bit"
+                      },
+                      {
+                        "name": "countryRegionCode",
+                        "type": "nvarchar"
+                      },
+                      {
+                        "name": "date",
+                        "type": "datetime2",
+                        "scale": 7
+                      }
+                    ],
+                    "externalReferences": {
+                      "connection": "0f1083d3-8b19-44a2-bd3b-26a7e82ebe51"
+                    }
+                  }
+                },
+                "sink": {
+                  "type": "AzureSqlSink",
+                  "datasetSettings": {
+                    "annotations": [],
+                    "type": "AzureSqlTable",
+                    "typeProperties": {
+                      "schema": "copy1",
+                      "table": "holidays",
+                      "database": "rodenkewSqlDb"
+                    },
+                    "schema": [
+                      {
+                        "name": "countryOrRegion",
+                        "type": "nvarchar"
+                      },
+                      {
+                        "name": "holidayName",
+                        "type": "nvarchar"
+                      },
+                      {
+                        "name": "normalizeHolidayName",
+                        "type": "nvarchar"
+                      },
+                      {
+                        "name": "isPaidTimeOff",
+                        "type": "bit"
+                      },
+                      {
+                        "name": "countryRegionCode",
+                        "type": "nvarchar"
+                      },
+                      {
+                        "name": "date",
+                        "type": "datetime2",
+                        "scale": 7
+                      }
+                    ],
+                    "externalReferences": {
+                      "connection": "0f1083d3-8b19-44a2-bd3b-26a7e82ebe51"
+                    }
+                  }
+                },
+                "enableStaging": false,
+                "translator": {
+                  "type": "TabularTranslator",
+                  "mappings": [
+                    {
+                      "source": {
+                        "name": "countryOrRegion",
+                        "type": "String",
+                        "physicalType": "nvarchar"
+                      },
+                      "sink": {
+                        "name": "countryOrRegion",
+                        "type": "String",
+                        "physicalType": "nvarchar"
+                      }
+                    },
+                    {
+                      "source": {
+                        "name": "holidayName",
+                        "type": "String",
+                        "physicalType": "nvarchar"
+                      },
+                      "sink": {
+                        "name": "holidayName",
+                        "type": "String",
+                        "physicalType": "nvarchar"
+                      }
+                    },
+                    {
+                      "source": {
+                        "name": "normalizeHolidayName",
+                        "type": "String",
+                        "physicalType": "nvarchar"
+                      },
+                      "sink": {
+                        "name": "normalizeHolidayName",
+                        "type": "String",
+                        "physicalType": "nvarchar"
+                      }
+                    },
+                    {
+                      "source": {
+                        "name": "isPaidTimeOff",
+                        "type": "Boolean",
+                        "physicalType": "bit"
+                      },
+                      "sink": {
+                        "name": "isPaidTimeOff",
+                        "type": "Boolean",
+                        "physicalType": "bit"
+                      }
+                    },
+                    {
+                      "source": {
+                        "name": "countryRegionCode",
+                        "type": "String",
+                        "physicalType": "nvarchar"
+                      },
+                      "sink": {
+                        "name": "countryRegionCode",
+                        "type": "String",
+                        "physicalType": "nvarchar"
+                      }
+                    },
+                    {
+                      "source": {
+                        "name": "date",
+                        "type": "DateTime",
+                        "physicalType": "datetime2"
+                      },
+                      "sink": {
+                        "name": "date",
+                        "type": "DateTime",
+                        "physicalType": "datetime2"
+                      }
+                    }
+                  ],
+                  "typeConversion": true,
+                  "typeConversionSettings": {
+                    "allowDataTruncation": true,
+                    "treatBooleanAsNumber": false
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "annotations": []
+      }
+    }
+  ]
+
+}

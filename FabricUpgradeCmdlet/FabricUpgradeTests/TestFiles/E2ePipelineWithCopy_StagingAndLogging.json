@@ -116,16 +116,14 @@
                     "type": "BinaryReadSettings"
                   },
                   "datasetSettings": {
-                    "properties": {
-                      "annotations": [],
-                      "type": "Binary",
-                      "typeProperties": {
-                        "location": {
-                          "type": "AzureBlobStorageLocation",
-                          "fileName": "ghi",
-                          "folderPath": "def",
-                          "container": "abc"
-                        }
+                    "annotations": [],
+                    "type": "Binary",
+                    "typeProperties": {
+                      "location": {
+                        "type": "AzureBlobStorageLocation",
+                        "fileName": "ghi",
+                        "folderPath": "def",
+                        "container": "abc"
                       }
                     },
                     "externalReferences": {
@@ -152,16 +150,14 @@
                     "filePattern": "setOfObjects"
                   },
                   "datasetSettings": {
-                    "properties": {
-                      "annotations": [],
-                      "type": "Json",
-                      "typeProperties": {
-                        "location": {
-                          "type": "AzureBlobStorageLocation",
-                          "fileName": "ccc",
-                          "folderPath": "bbb",
-                          "container": "aaa"
-                        }
+                    "annotations": [],
+                    "type": "Json",
+                    "typeProperties": {
+                      "location": {
+                        "type": "AzureBlobStorageLocation",
+                        "fileName": "ccc",
+                        "folderPath": "bbb",
+                        "container": "aaa"
                       }
                     },
                     "externalReferences": {

@@ -11,7 +11,7 @@ namespace FabricUpgradeCmdlet.Upgraders.DatasetUpgraders
     public class BinaryDatasetUpgrader : DatasetUpgrader
     {
         private const string adfLocationPath = "properties.typeProperties.location";
-        private const string fabricLocationPath = "properties.typeProperties.location";
+        private const string fabricLocationPath = "typeProperties.location";
 
         private readonly List<string> requiredAdfProperties = new List<string>
         {

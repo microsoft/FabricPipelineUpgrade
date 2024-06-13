@@ -61,6 +61,7 @@ namespace FabricUpgradeTests
 
         [DataRow("ConvertPipelineWithCopy_JsonToJson")]
         [DataRow("ConvertPipelineWithCopy_StagingAndLogging")]
+        [DataRow("ConvertPipelineWithCopy_SqlToSql")]
         public void ConvertToFabricPipeline_Test(
             string testConfigFilename,
             string workspaceId = null) // we can set ws in param or in progress.

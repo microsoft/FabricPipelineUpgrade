@@ -41,6 +41,13 @@ namespace FabricUpgradeTests
         [DataRow("E2ePipelineWithCopy_JsonToJson")]
         [DataRow("E2ePipelineWithCopy_JsonToJson_MissingResolution")]
         [DataRow("E2ePipelineWithCopy_StagingAndLogging")]
+
+        [DataRow("E2ePipelineWithCopy_SqlToSql")]
+        [DataRow("E2ePipelineWithCopy_SqlToSql_MissingResolution")]
+        [DataRow("E2ePipelineWithCopy_SqlToSql_NoConnectionString")]
+        [DataRow("E2ePipelineWithCopy_SqlToSql_ExpressionConnectionString")]
+        [DataRow("E2ePipelineWithCopy_SqlToSql_ConnectionStringLacksInitialCatalog")]
+        [DataRow("E2ePipelineWithCopy_SqlToSql_ConnectionStringExpressionInitialCatalog")]
         public async Task ExportFabricPipeline_TestAsync(
             string testConfigFilename)
         {
@@ -82,6 +89,7 @@ namespace FabricUpgradeTests
                 workspaceId.ToString(),
                 "123").ConfigureAwait(false);
 
+            string q = runningProgress.ToString();
             Assert.AreEqual(testConfig.ExpectedResponse.State, runningProgress.State, runningProgress.ToString());
             Assert.AreEqual(testConfig.ExpectedResponse.Alerts.Count, runningProgress.Alerts.Count, runningProgress.ToString());
             for (int nAlert = 0; nAlert <  testConfig.ExpectedResponse.Alerts.Count; nAlert++)
