@@ -19,8 +19,8 @@
     {
       "item": {
         "type": "DataPipeline",
-        "workspaceId": "c8c4d721-10c0-45d1-86cd-ed2678960ed9",
-        "id": "9b3501cc-dc07-4cf1-a5e5-28069cf9c620",
+        "workspaceId": "",
+        "id": 0,
         "displayName": "PipelineWithWaitAndIf",
         "description": null
       },
@@ -104,5 +104,10 @@
         "annotations": []
       }
     }
+  ],
+
+  "expectedEndpointEvents": [
+    "LIST DataPipeline",
+    "CREATE DataPipeline $0"
   ]
 }

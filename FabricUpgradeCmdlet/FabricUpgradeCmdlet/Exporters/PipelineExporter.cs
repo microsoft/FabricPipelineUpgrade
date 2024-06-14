@@ -50,7 +50,10 @@ namespace FabricUpgradeCmdlet.Exporters
             this.ResolveResolutions(alerts);
 
             string exportResult = await new PublicApiClient(cluster, workspaceId, fabricToken)
-                .CreateOrUpdatePipelineAsync(
+                .CreateOrUpdateArtifactAsync(
+                    FabricUpgradeResourceTypes.DataPipeline,
+                    this.exportInstruction.ResourceName,
+                    this.exportInstruction.ResourceDescription,
                     this.exportInstruction.Export,
                     cancellationToken).ConfigureAwait(false);
 

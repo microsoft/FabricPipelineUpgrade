@@ -64,7 +64,7 @@ namespace FabricUpgradeCmdlet.Upgraders
         {
             if (symbolName == Symbol.CommonNames.FabricResource)
             {
-                PipelineExportInstruction exportInstruction = new PipelineExportInstruction(this.Name);
+                PipelineExportInstruction exportInstruction = new PipelineExportInstruction(this.Name, this.adfModel.Description);
 
                 this.AddExportLinks(exportInstruction, alerts);
 

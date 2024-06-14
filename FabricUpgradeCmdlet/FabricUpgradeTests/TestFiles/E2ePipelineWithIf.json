@@ -151,5 +151,12 @@
         "annotations": []
       }
     }
+  ],
+
+  "expectedEndpointEvents": [
+    "LIST DataPipeline",
+    "CREATE DataPipeline $0",
+    "LIST DataPipeline",
+    "CREATE DataPipeline $1"
   ]
 }

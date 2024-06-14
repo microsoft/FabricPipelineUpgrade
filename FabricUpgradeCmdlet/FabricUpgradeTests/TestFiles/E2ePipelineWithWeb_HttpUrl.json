@@ -83,5 +83,10 @@
       }
     }
 
+  ],
+
+  "expectedEndpointEvents": [
+    "LIST DataPipeline",
+    "CREATE DataPipeline $0"
   ]
 }
