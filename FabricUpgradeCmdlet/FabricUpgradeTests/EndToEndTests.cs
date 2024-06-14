@@ -17,7 +17,9 @@ namespace FabricUpgradeTests
     {
         [TestMethod]
         [DataRow("E2eNoSuchSupportFile")]
+
         [DataRow("E2eEmptyPipeline")]
+        [DataRow("E2eEmptyPipeline_Update")]
         [DataRow("E2ePipelineWithUnsupportedActivity")]
 
         [DataRow("E2ePipelineWithWait")]
@@ -48,10 +50,15 @@ namespace FabricUpgradeTests
         [DataRow("E2ePipelineWithCopy_SqlToSql_ExpressionConnectionString")]
         [DataRow("E2ePipelineWithCopy_SqlToSql_ConnectionStringLacksInitialCatalog")]
         [DataRow("E2ePipelineWithCopy_SqlToSql_ConnectionStringExpressionInitialCatalog")]
+
+        [DataRow("E2ePipelineWithExecutePipeline_PrestockFirst")]
+        [DataRow("E2ePipelineWithExecutePipeline_PrestockSecond")]
+        [DataRow("E2ePipelineWithExecutePipeline_PrestockBoth")]
         public async Task ExportFabricPipeline_TestAsync(
             string testConfigFilename)
         {
             Guid workspaceId = Guid.NewGuid();
+            string pbiAadToken = Guid.NewGuid().ToString();
 
             List<Guid> expectedGuids = new List<Guid>
             {
@@ -64,6 +71,10 @@ namespace FabricUpgradeTests
 
             TestPublicApiEndpoints endpoints = new TestPublicApiEndpoints("https://dailyapi.fabric.microsoft.com/v1/");
             endpoints.PrepareGuids(expectedGuids);
+            endpoints.RequireUserToken(pbiAadToken);
+            endpoints.Prestock((JArray)UpgradeSerialization.ToJToken(testConfig.Prestocks));
+            //testConfig.ReservedDisplayNames.ForEach(rdn => this.testEndpoints.ReserveDisplayName(rdn));
+
             TestHttpClientFactory.RegisterTestHttpClientFactory(endpoints);
 
             FabricUpgradeProgress runningProgress = testConfig.Progress;
@@ -87,10 +98,9 @@ namespace FabricUpgradeTests
                 runningProgress?.ToString(),
                 "daily",
                 workspaceId.ToString(),
-                "123",
+                pbiAadToken,
                 CancellationToken.None).ConfigureAwait(false);
 
-            string q = runningProgress.ToString();
             Assert.AreEqual(testConfig.ExpectedResponse.State, runningProgress.State, runningProgress.ToString());
             Assert.AreEqual(testConfig.ExpectedResponse.Alerts.Count, runningProgress.Alerts.Count, runningProgress.ToString());
             for (int nAlert = 0; nAlert <  testConfig.ExpectedResponse.Alerts.Count; nAlert++)
@@ -146,6 +156,20 @@ namespace FabricUpgradeTests
 
                 nItem++;
             }
+
+            List<string> actualEndpointEvents = endpoints.FetchEvents();
+
+            Assert.AreEqual(testConfig.ExpectedEndpointEvents.Count, actualEndpointEvents.Count);
+            for (int nEvent = 0; nEvent < testConfig.ExpectedEndpointEvents.Count; nEvent++)
+            {
+                string expectedEvent = testConfig.ExpectedEndpointEvents[nEvent];
+                for (int nGuid = expectedGuids.Count - 1; nGuid >= 0; nGuid--)
+                {
+                    expectedEvent = expectedEvent.Replace($"${nGuid}", expectedGuids[nGuid].ToString());
+                }
+
+                Assert.AreEqual(expectedEvent, actualEndpointEvents[nEvent]);
+            }
         }
 
         private class EndToEndTestConfig
@@ -159,7 +183,7 @@ namespace FabricUpgradeTests
             [JsonProperty(PropertyName = "resolutions")]
             public List<FabricUpgradeResolution> Resolutions { get; set; } = new List<FabricUpgradeResolution>();
 
-            [JsonProperty(PropertyName = "prestock")]
+            [JsonProperty(PropertyName = "prestocks")]
             public List<Prestock> Prestocks { get; set; } = new List<Prestock>();
 
             [JsonProperty(PropertyName = "guidSubstitutions")]
@@ -170,6 +194,9 @@ namespace FabricUpgradeTests
 
             [JsonProperty(PropertyName = "expectedItems")]
             public JArray ExpectedItems { get; set; } = new JArray();
+
+            [JsonProperty(PropertyName = "expectedEndpointEvents")]
+            public List<string> ExpectedEndpointEvents { get; set; } = new List<string>();
 
             public static EndToEndTestConfig LoadFromFile(string testFilename)
             {
@@ -193,31 +220,20 @@ namespace FabricUpgradeTests
                     }
                 }
 
-                int numItem = 0;
                 foreach (JToken expectedItemToken in this.ExpectedItems)
                 {
-                    Guid itemId = itemIds[numItem];
                     JObject expectedItem = (JObject)expectedItemToken;
                     expectedItem["item"]["workspaceId"] = workspaceId.ToString();
-                    expectedItem["item"]["id"] = itemId.ToString();
-                    numItem++;
-
-                    foreach (Prestock prestock in this.Prestocks)
+                    if (expectedItem["item"]["id"].Type == JTokenType.Integer)
                     {
-                        // Find a prestock of the same type and name.
-                        if (prestock.Type != expectedItem.SelectToken("$.item.type").ToString())
-                        {
-                            continue;
-                        }
-
-                        if (prestock.DisplayName != expectedItem.SelectToken("$.item.displayName").ToString())
-                        {
-                            continue;
-                        }
-
-                        prestock.WorkspaceId = workspaceId.ToString();
-                        prestock.Id = itemId.ToString();
+                        int guidIndex = expectedItem["item"]["id"].ToObject<int>();
+                        expectedItem["item"]["id"] = itemIds[guidIndex].ToString();
                     }
+                }
+
+                foreach (Prestock prestock in this.Prestocks)
+                {
+                    prestock.WorkspaceId = workspaceId.ToString();
                 }
 
                 // In an ExecutePipeline Activity, we need to tweak one of the expected fields to point at another pipeline.

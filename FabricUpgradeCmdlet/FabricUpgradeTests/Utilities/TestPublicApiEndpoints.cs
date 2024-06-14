@@ -12,6 +12,8 @@ namespace FabricUpgradeTests.Utilities
 {
     public class TestPublicApiEndpoints
     {
+        private List<string> events = new List<string>();
+
         private readonly Dictionary<string, HttpStatusCode> responseStatusCodes = new Dictionary<string, HttpStatusCode>();
         private readonly Dictionary<string, string> responsePayloads = new Dictionary<string, string>();
 
@@ -93,13 +95,36 @@ namespace FabricUpgradeTests.Utilities
             return this;
         }
 
+        private Guid GenerateNextGuid()
+        {
+            Guid newItemId;
+            if (this.guids.Count > 0)
+            {
+                newItemId = this.guids[0];
+                this.guids.RemoveAt(0);
+            }
+            else
+            {
+                newItemId = Guid.NewGuid();
+            }
+
+            return newItemId;
+        }
+
+        /// <summary>
+        /// Add an artifact to the test endpoints, to induce an Update.
+        /// </summary>
+        /// <param name="prestocks"></param>
+        /// <returns></returns>
         public TestPublicApiEndpoints Prestock(JArray prestocks)
         {
             foreach (JToken prestock in prestocks)
             {
+                string itemId = this.GenerateNextGuid().ToString();
+
+                prestock["id"] = itemId;
                 this.storedItems.Add((JObject)prestock);
 
-                string itemId = prestock.SelectToken("$.id").ToString();
                 this.storedItemDefinitions[itemId] = new JObject();
             }
 
@@ -142,6 +167,11 @@ namespace FabricUpgradeTests.Utilities
 
             itemObject["definition"] = this.storedItemDefinitions[itemId.ToString()];
             return itemObject;
+        }
+
+        public List<string> FetchEvents()
+        {
+            return new List<string>(this.events);
         }
 
         public async Task<HttpResponseMessage> HandleRequestAsync(HttpRequestMessage request)
@@ -252,6 +282,8 @@ namespace FabricUpgradeTests.Utilities
                 Content = new StringContent(responsePayload.ToString()),
             };
 
+            this.events.Add($"LIST {itemType}");
+
             return response;
         }
 
@@ -290,16 +322,7 @@ namespace FabricUpgradeTests.Utilities
                 };
             }
 
-            Guid newItemId;
-            if (this.guids.Count > 0)
-            {
-                newItemId = this.guids[0];
-                this.guids.RemoveAt(0);
-            }
-            else
-            {
-                newItemId = Guid.NewGuid();
-            }
+            Guid newItemId = this.GenerateNextGuid();
 
             JObject itemModel = new JObject();
             itemModel["type"] = createItemPayload.ItemType.ToString();
@@ -314,6 +337,8 @@ namespace FabricUpgradeTests.Utilities
             byte[] itemDefinitionBytes = System.Convert.FromBase64String(itemDefinition64);
             string itemDefinition = System.Text.Encoding.UTF8.GetString(itemDefinitionBytes);
             this.storedItemDefinitions[newItemId.ToString()] = JObject.Parse(itemDefinition);
+
+            this.events.Add($"CREATE {createItemPayload.ItemType} {newItemId}");
 
             return new HttpResponseMessage(HttpStatusCode.OK)
             {
@@ -342,10 +367,7 @@ namespace FabricUpgradeTests.Utilities
             JObject matchingItem = matchingItems.First();
 
             matchingItem["displayName"] = displayName;
-            if (description != null)
-            {
-                matchingItem["description"] = description;
-            }
+            matchingItem["description"] = description;
 
             JsonSerializerSettings serializerSettings = new JsonSerializerSettings()
             {
@@ -353,6 +375,8 @@ namespace FabricUpgradeTests.Utilities
             };
 
             string responsePayload = JsonConvert.SerializeObject(matchingItem, serializerSettings);
+
+            this.events.Add($"UPDATE ITEM {matchingItem.SelectToken("type")} {itemId}");
 
             return new HttpResponseMessage(HttpStatusCode.OK)
             {
@@ -379,6 +403,8 @@ namespace FabricUpgradeTests.Utilities
             byte[] itemDefinitionBytes = System.Convert.FromBase64String(itemDefinition64);
             string itemDefinition = System.Text.Encoding.UTF8.GetString(itemDefinitionBytes);
             this.storedItemDefinitions[itemId.ToString()] = JObject.Parse(itemDefinition);
+
+            this.events.Add($"UPDATE ITEM DEFINITION {itemId}");
 
             return new HttpResponseMessage(HttpStatusCode.OK);
         }

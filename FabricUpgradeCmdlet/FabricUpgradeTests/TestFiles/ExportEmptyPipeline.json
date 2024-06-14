@@ -8,6 +8,7 @@
         {
           "resourceName": "EmptyPipeline",
           "resourceType": "DataPipeline",
+          "resourceDescription": "This is an empty pipeline",
           "link": [],
           "export": {
             "name": "EmptyPipeline",

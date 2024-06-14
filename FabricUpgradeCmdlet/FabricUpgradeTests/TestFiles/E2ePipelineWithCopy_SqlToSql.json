@@ -67,7 +67,7 @@
     {
       "item": {
         "workspaceId": "",
-        "id": "",
+        "id": 0,
         "type": "DataPipeline",
         "displayName": "CopyPipelineSqltoSql7",
         "description": null
@@ -264,6 +264,11 @@
         "annotations": []
       }
     }
+  ],
+
+  "expectedEndpointEvents": [
+    "LIST DataPipeline",
+    "CREATE DataPipeline $0"
   ]
 
 }

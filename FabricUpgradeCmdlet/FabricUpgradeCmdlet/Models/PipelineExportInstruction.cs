@@ -23,8 +23,10 @@ namespace FabricUpgradeCmdlet.Models
         [JsonProperty(PropertyName = "export", Order = 102)]
         public JObject Export { get; set; } = new JObject();
 
-        public PipelineExportInstruction(string name)
-            : base(FabricUpgradeResourceTypes.DataPipeline, name)
+        public PipelineExportInstruction(
+            string name,
+            string description)
+            : base(FabricUpgradeResourceTypes.DataPipeline, name, description)
         {
         }
 
