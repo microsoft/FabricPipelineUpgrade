@@ -126,7 +126,7 @@
 
   "expectedEndpointEvents": [
     "LIST DataPipeline",
-    "CREATE DataPipeline $0"
+    "CREATE DataPipeline 'PipelineWithCopy_JsonToJson' => $0"
   ]
 
 }

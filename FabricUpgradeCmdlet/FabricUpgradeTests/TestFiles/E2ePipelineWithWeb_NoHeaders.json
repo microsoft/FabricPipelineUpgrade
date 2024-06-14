@@ -79,6 +79,6 @@
 
   "expectedEndpointEvents": [
     "LIST DataPipeline",
-    "CREATE DataPipeline $0"
+    "CREATE DataPipeline 'PipelineWithWebActivity_NoHeaders' => $0"
   ]
 }

@@ -54,6 +54,10 @@ namespace FabricUpgradeTests
         [DataRow("E2ePipelineWithExecutePipeline_PrestockFirst")]
         [DataRow("E2ePipelineWithExecutePipeline_PrestockSecond")]
         [DataRow("E2ePipelineWithExecutePipeline_PrestockBoth")]
+
+        [DataRow("E2eEmptyPipeline_DisplayNameAlreadyInUse")]
+        [DataRow("E2ePipelineWithExecutePipeline_ReserveFirst")]
+        [DataRow("E2ePipelineWithExecutePipeline_ReserveSecond")]
         public async Task ExportFabricPipeline_TestAsync(
             string testConfigFilename)
         {
@@ -70,10 +74,16 @@ namespace FabricUpgradeTests
             testConfig.UpdateItemGuids(workspaceId, expectedGuids);
 
             TestPublicApiEndpoints endpoints = new TestPublicApiEndpoints("https://dailyapi.fabric.microsoft.com/v1/");
+            // Tell the endpoints which guids to use when creating artifacts, so that we can validate them in tests.
             endpoints.PrepareGuids(expectedGuids);
             endpoints.RequireUserToken(pbiAadToken);
+
+            // Pre-create some pipelines to force an update.
             endpoints.Prestock((JArray)UpgradeSerialization.ToJToken(testConfig.Prestocks));
-            //testConfig.ReservedDisplayNames.ForEach(rdn => this.testEndpoints.ReserveDisplayName(rdn));
+
+            // Pretend that the user has recently deleted a pipeline with these display names.
+            // Currently, it takes a little while before display names become re-useable.
+            testConfig.ReservedDisplayNames.ForEach(rdn => endpoints.ReserveDisplayName(rdn));
 
             TestHttpClientFactory.RegisterTestHttpClientFactory(endpoints);
 
@@ -185,6 +195,9 @@ namespace FabricUpgradeTests
 
             [JsonProperty(PropertyName = "prestocks")]
             public List<Prestock> Prestocks { get; set; } = new List<Prestock>();
+
+            [JsonProperty(PropertyName = "reservedDisplayNames")]
+            public List<string> ReservedDisplayNames { get; set; } = new List<string>();
 
             [JsonProperty(PropertyName = "guidSubstitutions")]
             public List<GuidSubstitution> GuidSubstitutions { get; set; } = new List<GuidSubstitution>();

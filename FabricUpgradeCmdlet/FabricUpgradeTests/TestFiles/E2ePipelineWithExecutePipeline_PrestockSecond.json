@@ -1,4 +1,12 @@
 ﻿{
+  "prestocks": [
+    {
+      "workspaceId": "",
+      "type": "DataPipeline",
+      "displayName": "ExecutePipelinePipeline"
+    }
+  ],
+
   "adfSupportFile": "PipelineWithExecutePipeline_support_live.zip",
 
   "resolutions": [
@@ -12,12 +20,12 @@
   "guidSubstitutions": [
     {
       "comment": "Set the pipelineId of the ExecutePipeline activity to the Guid assigned to the WaitPipeline.",
-      "path": "[1].definition.properties.activities[1].typeProperties.pipelineId",
-      "guidIndex": 0
+      "path": "[0].definition.properties.activities[1].typeProperties.pipelineId",
+      "guidIndex": 1
     },
     {
       "comment": "Set the workspaceId of the ExecutePipeline activity to the workspaceId (-1 means 'workspaceId').",
-      "path": "[1].definition.properties.activities[1].typeProperties.workspaceId",
+      "path": "[0].definition.properties.activities[1].typeProperties.workspaceId",
       "guidIndex": -1
     }
   ],
@@ -36,14 +44,14 @@
       "WaitPipeline": {
         "type": "DataPipeline",
         "workspaceId": "",
-        "id": 0,
+        "id": 1,
         "displayName": "WaitPipeline",
         "description": null
       },
       "ExecutePipelinePipeline": {
         "type": "DataPipeline",
         "workspaceId": "",
-        "id": 1,
+        "id": 0,
         "displayName": "ExecutePipelinePipeline",
         "description": null
       }
@@ -56,38 +64,6 @@
         "type": "DataPipeline",
         "workspaceId": "",
         "id": 0,
-        "displayName": "WaitPipeline",
-        "description": null
-      },
-      "definition": {
-        "name": "WaitPipeline",
-        "properties": {
-          "activities": [
-            {
-              "name": "Wait10Seconds",
-              "type": "Wait",
-              "description": "This activity waits 10 seconds",
-              "dependsOn": [],
-              "userProperties": [
-                {
-                  "name": "UserProperty1",
-                  "value": "\"Value1\""
-                }
-              ],
-              "typeProperties": {
-                "waitTimeInSeconds": 10
-              }
-            }
-          ]
-        },
-        "annotations": []
-      }
-    },
-    {
-      "item": {
-        "type": "DataPipeline",
-        "workspaceId": "",
-        "id": 1,
         "displayName": "ExecutePipelinePipeline",
         "description": null
       },
@@ -126,7 +102,7 @@
                 "parameters": null,
                 "operationType": "InvokeFabricPipeline",
                 "workspaceId": "00000000-0000-0000-0000-000000000000",
-                "pipelineId": "00000000-0000-0000-0000-000000000000"
+                "pipelineId": "e69e651e-b8c2-42f6-9071-2d0664dc0e82"
               },
               "externalReferences": {
                 "connection": "d9c82ff5-bb3e-46d6-9e35-a84872ad550f"
@@ -136,15 +112,47 @@
         },
         "annotations": []
       }
+    },
+    {
+      "item": {
+        "type": "DataPipeline",
+        "workspaceId": "",
+        "id": 1,
+        "displayName": "WaitPipeline",
+        "description": null
+      },
+      "definition": {
+        "name": "WaitPipeline",
+        "properties": {
+          "activities": [
+            {
+              "name": "Wait10Seconds",
+              "type": "Wait",
+              "description": "This activity waits 10 seconds",
+              "dependsOn": [],
+              "userProperties": [
+                {
+                  "name": "UserProperty1",
+                  "value": "\"Value1\""
+                }
+              ],
+              "typeProperties": {
+                "waitTimeInSeconds": 10
+              }
+            }
+          ]
+        },
+        "annotations": []
+      }
     }
-
   ],
 
   "expectedEndpointEvents": [
     "LIST DataPipeline",
-    "CREATE DataPipeline 'WaitPipeline' => $0",
+    "CREATE DataPipeline 'WaitPipeline' => $1",
     "LIST DataPipeline",
-    "CREATE DataPipeline 'ExecutePipelinePipeline' => $1"
+    "UPDATE ITEM DataPipeline 'ExecutePipelinePipeline' @ $0",
+    "UPDATE ITEM DEFINITION $0"
   ]
 
 }

@@ -2,6 +2,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
+using FabricUpgradeCmdlet.Exceptions;
 using FabricUpgradeCmdlet.Models;
 using FabricUpgradeCmdlet.Upgraders;
 using FabricUpgradeCmdlet.Utilities;

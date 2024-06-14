@@ -2,7 +2,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-namespace FabricUpgradeCmdlet
+namespace FabricUpgradeCmdlet.Exceptions
 {
     public class UpgradeFailureException : Exception
     {

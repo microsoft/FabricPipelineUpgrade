@@ -1,6 +1,14 @@
 ﻿{
   "adfSupportFile": "EmptyPipeline_support_live.zip",
 
+  "prestocks": [
+    {
+      "workspaceId": "",
+      "type": "DataPipeline",
+      "displayName": "EmptyPipeline"
+    }
+  ],
+
   "expectedResponse": {
     "state": "Succeeded",
     "alerts": [],
@@ -56,7 +64,8 @@
 
   "expectedEndpointEvents": [
     "LIST DataPipeline",
-    "CREATE DataPipeline 'EmptyPipeline' => $0"
+    "UPDATE ITEM DataPipeline 'EmptyPipeline' @ $0",
+    "UPDATE ITEM DEFINITION $0"
   ]
 
 }

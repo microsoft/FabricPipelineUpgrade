@@ -2,6 +2,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
+using FabricUpgradeCmdlet.Exceptions;
 using FabricUpgradeCmdlet.Exporters;
 using FabricUpgradeCmdlet.Models;
 using FabricUpgradeCmdlet.Utilities;
@@ -12,6 +13,7 @@ namespace FabricUpgradeCmdlet.ExportMachines
     public class FabricExportMachine : ExportMachine
     {
         private List<ResourceExporter> exporters = new List<ResourceExporter>();
+        private JObject exportResults = new JObject();
         private Dictionary<string, string> fabricResourceIds = new Dictionary<string, string>();
 
         public FabricExportMachine(
@@ -46,6 +48,7 @@ namespace FabricUpgradeCmdlet.ExportMachines
                 {
                     State = FabricUpgradeProgress.FabricUpgradeState.Failed,
                     Alerts = this.Alerts.ToList(),
+                    Result = this.exportResults,
                 };
             }
         }
@@ -100,8 +103,6 @@ namespace FabricUpgradeCmdlet.ExportMachines
 
         private async Task<FabricUpgradeProgress> ExportAllExportersAsync(CancellationToken cancellationToken)
         {
-            JObject results = new JObject();
-
             foreach (ResourceExporter exporter in this.exporters)
             {
                 JObject uploadResult = await exporter.ExportAsync(
@@ -111,15 +112,13 @@ namespace FabricUpgradeCmdlet.ExportMachines
                     this.Alerts,
                     cancellationToken).ConfigureAwait(false);
 
-                // TODO: Handle an error here! Throw an exception from ExportAsync.
+                if (this.AlertsIndicateFailure())
+                {
+                    throw new UpgradeFailureException("Export");
+                }
 
-                results[$"{exporter.Name}"] = uploadResult;
+                this.exportResults[$"{exporter.Name}"] = uploadResult;
                 this.fabricResourceIds[$"{exporter.ResourceType}:{exporter.Name}"] = uploadResult.SelectToken("$.id")?.ToString();
-            }
-
-            if (this.AlertsIndicateFailure())
-            {
-                throw new UpgradeFailureException("Export");
             }
 
             return new FabricUpgradeProgress()
@@ -127,7 +126,7 @@ namespace FabricUpgradeCmdlet.ExportMachines
                 State = FabricUpgradeProgress.FabricUpgradeState.Succeeded,
                 Alerts = this.Alerts.ToList(),
                 Resolutions = this.Resolutions,
-                Result = results,
+                Result = this.exportResults,
             };
         }
 
