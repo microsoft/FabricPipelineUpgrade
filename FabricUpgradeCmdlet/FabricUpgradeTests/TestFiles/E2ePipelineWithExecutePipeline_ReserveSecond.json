@@ -1,9 +1,27 @@
 ﻿{
-  "adfSupportFile": "PipelineWithWait_support_live.zip",
+  "reservedDisplayNames": [
+    "ExecutePipelinePipeline"
+  ],
+
+  "adfSupportFile": "PipelineWithExecutePipeline_support_live.zip",
+
+  "resolutions": [
+    {
+      "type": "CredentialConnectionId",
+      "key": "user",
+      "value": "d9c82ff5-bb3e-46d6-9e35-a84872ad550f"
+    }
+  ],
 
   "expectedResponse": {
-    "state": "Succeeded",
-    "alerts": [],
+    "state": "Failed",
+    "alerts": [
+      {
+        "severity": "Permanent",
+        "details": "The item name 'ExecutePipelinePipeline' is already in use."
+      }
+    ],
+    "resolutions": [],
     "result": {
       "WaitPipeline": {
         "type": "DataPipeline",
@@ -43,16 +61,19 @@
                 "waitTimeInSeconds": 10
               }
             }
-          ],
-          "concurrency": 3
+          ]
         },
         "annotations": []
       }
     }
+
   ],
 
   "expectedEndpointEvents": [
     "LIST DataPipeline",
-    "CREATE DataPipeline 'WaitPipeline' => $0"
+    "CREATE DataPipeline 'WaitPipeline' => $0",
+    "LIST DataPipeline",
+    "CREATE DataPipeline 'ExecutePipelinePipeline' DisplayNameAlreadyInUse"
   ]
+
 }

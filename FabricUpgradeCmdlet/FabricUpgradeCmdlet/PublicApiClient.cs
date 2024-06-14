@@ -4,6 +4,7 @@
 
 using System.Net;
 using System.Text;
+using FabricUpgradeCmdlet.Exceptions;
 using FabricUpgradeCmdlet.Utilities;
 using Microsoft.Rest.Serialization;
 using Newtonsoft.Json;
@@ -227,7 +228,9 @@ namespace FabricUpgradeCmdlet
 
                     if (errorMessages.ErrorCode == PublicApiErrorModel.ItemDisplayNameAlreadyInUse)
                     {
-                        throw new Exception("ItemDisplayNameAlreadyInUse"); // new ItemDisplayNameAlreadyInUseException(displayName);
+                        // TODO: Find a better way of handling this?
+                        // Maybe try a different display name, and alert the caller?
+                        throw new ItemDisplayNameAlreadyInUseException(displayName);
                     }
 
                     throw new Exception(errorMessages.ExceptionMessage);

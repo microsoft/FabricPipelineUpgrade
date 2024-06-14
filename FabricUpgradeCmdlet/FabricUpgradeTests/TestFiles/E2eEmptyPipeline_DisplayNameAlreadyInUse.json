@@ -1,0 +1,26 @@
+﻿{
+  "adfSupportFile": "EmptyPipeline_support_live.zip",
+
+  "reservedDisplayNames": [
+    "EmptyPipeline"
+  ],
+
+  "expectedResponse": {
+    "state": "Failed",
+    "alerts": [
+      {
+        "severity": "Permanent",
+        "details": "The item name 'EmptyPipeline' is already in use."
+      }
+    ],
+    "result": {}
+  },
+
+  "expectedItems": [],
+
+  "expectedEndpointEvents": [
+    "LIST DataPipeline",
+    "CREATE DataPipeline 'EmptyPipeline' DisplayNameAlreadyInUse"
+  ]
+
+}

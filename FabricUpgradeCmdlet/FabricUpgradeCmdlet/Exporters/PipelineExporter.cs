@@ -2,6 +2,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
+using FabricUpgradeCmdlet.Exceptions;
 using FabricUpgradeCmdlet.ExportMachines;
 using FabricUpgradeCmdlet.Models;
 using FabricUpgradeCmdlet.Utilities;
@@ -49,15 +50,23 @@ namespace FabricUpgradeCmdlet.Exporters
             this.ResolveLinks(alerts);
             this.ResolveResolutions(alerts);
 
-            string exportResult = await new PublicApiClient(cluster, workspaceId, fabricToken)
-                .CreateOrUpdateArtifactAsync(
-                    FabricUpgradeResourceTypes.DataPipeline,
-                    this.exportInstruction.ResourceName,
-                    this.exportInstruction.ResourceDescription,
-                    this.exportInstruction.Export,
-                    cancellationToken).ConfigureAwait(false);
+            try
+            {
+                string exportResult = await new PublicApiClient(cluster, workspaceId, fabricToken)
+                    .CreateOrUpdateArtifactAsync(
+                        FabricUpgradeResourceTypes.DataPipeline,
+                        this.exportInstruction.ResourceName,
+                        this.exportInstruction.ResourceDescription,
+                        this.exportInstruction.Export,
+                        cancellationToken).ConfigureAwait(false);
 
-            return JObject.Parse(exportResult);
+                return JObject.Parse(exportResult);
+            }
+            catch (Exception ex)
+            {
+                alerts.AddPermanentError(ex.Message);
+                return new JObject();
+            }
         }
 
         private void ResolveLinks(AlertCollector alerts)

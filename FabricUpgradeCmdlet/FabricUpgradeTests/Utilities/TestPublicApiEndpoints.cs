@@ -313,8 +313,10 @@ namespace FabricUpgradeTests.Utilities
                 {
                     ["requestId"] = Guid.NewGuid().ToString(),
                     ["errorCode"] = "ItemDisplayNameAlreadyInUse",
-                    ["message"] = $"Requested '{createItemPayload}' is already in use",
+                    ["message"] = $"Requested '{createItemPayload.DisplayName}' is already in use",
                 };
+
+                this.events.Add($"CREATE {createItemPayload.ItemType} '{createItemPayload.DisplayName}' DisplayNameAlreadyInUse");
 
                 return new HttpResponseMessage(HttpStatusCode.BadRequest)
                 {
@@ -338,7 +340,7 @@ namespace FabricUpgradeTests.Utilities
             string itemDefinition = System.Text.Encoding.UTF8.GetString(itemDefinitionBytes);
             this.storedItemDefinitions[newItemId.ToString()] = JObject.Parse(itemDefinition);
 
-            this.events.Add($"CREATE {createItemPayload.ItemType} {newItemId}");
+            this.events.Add($"CREATE {createItemPayload.ItemType} '{createItemPayload.DisplayName}' => {newItemId}");
 
             return new HttpResponseMessage(HttpStatusCode.OK)
             {
@@ -376,7 +378,7 @@ namespace FabricUpgradeTests.Utilities
 
             string responsePayload = JsonConvert.SerializeObject(matchingItem, serializerSettings);
 
-            this.events.Add($"UPDATE ITEM {matchingItem.SelectToken("type")} {itemId}");
+            this.events.Add($"UPDATE ITEM {matchingItem.SelectToken("type")} '{displayName}' @ {itemId}");
 
             return new HttpResponseMessage(HttpStatusCode.OK)
             {

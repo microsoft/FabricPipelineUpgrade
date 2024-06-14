@@ -1,4 +1,12 @@
 ﻿{
+  "prestocks": [
+    {
+      "workspaceId": "",
+      "type": "DataPipeline",
+      "displayName": "WaitPipeline"
+    }
+  ],
+
   "adfSupportFile": "PipelineWithExecutePipeline_support_live.zip",
 
   "resolutions": [
@@ -126,7 +134,7 @@
                 "parameters": null,
                 "operationType": "InvokeFabricPipeline",
                 "workspaceId": "00000000-0000-0000-0000-000000000000",
-                "pipelineId": "00000000-0000-0000-0000-000000000000"
+                "pipelineId": "e69e651e-b8c2-42f6-9071-2d0664dc0e82"
               },
               "externalReferences": {
                 "connection": "d9c82ff5-bb3e-46d6-9e35-a84872ad550f"
@@ -142,7 +150,8 @@
 
   "expectedEndpointEvents": [
     "LIST DataPipeline",
-    "CREATE DataPipeline 'WaitPipeline' => $0",
+    "UPDATE ITEM DataPipeline 'WaitPipeline' @ $0",
+    "UPDATE ITEM DEFINITION $0",
     "LIST DataPipeline",
     "CREATE DataPipeline 'ExecutePipelinePipeline' => $1"
   ]
