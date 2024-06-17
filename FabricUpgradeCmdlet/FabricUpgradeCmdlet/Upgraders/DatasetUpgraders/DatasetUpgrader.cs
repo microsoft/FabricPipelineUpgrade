@@ -25,6 +25,8 @@ namespace FabricUpgradeCmdlet.Upgraders.DatasetUpgraders
         protected const string AdfLinkedServiceNamePath = "properties.linkedServiceName.referenceName";
         protected const string FabricLinkedServiceNamePath = "linkedServiceName.referenceName";
 
+        protected Dictionary<string, UpgradeParameter> DatasetParameters { get; set; } = new Dictionary<string, UpgradeParameter>();
+
         protected const string FabricConnectionIdPath = "externalReferences.connection";
 
         private readonly List<string> requiredAdfProperties = new List<string>
@@ -76,7 +78,14 @@ namespace FabricUpgradeCmdlet.Upgraders.DatasetUpgraders
         {
             base.Compile(alerts);
 
+            string q = this.AdfResourceToken.ToString(Newtonsoft.Json.Formatting.Indented);
+
             this.CheckRequiredAdfProperties(this.requiredAdfProperties, alerts);
+
+            foreach (var param in this.AdfModel.Properties.Parameters)
+            {
+                this.DatasetParameters["dataset()." + param.Key] = UpgradeParameter.FromJToken(param.Value);
+            }
         }
 
         public override void PreLink(
@@ -129,7 +138,12 @@ namespace FabricUpgradeCmdlet.Upgraders.DatasetUpgraders
                 // Populate the common dataset settings.
 
                 JObject datasetSettings = new JObject();
-                PropertyCopier copier = new PropertyCopier(this.Path, this.AdfResourceToken, datasetSettings, alerts);
+                PropertyCopier copier = new PropertyCopier(
+                    this.Path,
+                    this.AdfResourceToken,
+                    datasetSettings,
+                    this.DatasetParameters,
+                    alerts);
 
                 copier.Copy("properties.annotations", "annotations");
                 copier.Copy(AdfDatasetTypePath, FabricDatasetTypePath);
@@ -171,6 +185,9 @@ namespace FabricUpgradeCmdlet.Upgraders.DatasetUpgraders
 
             [JsonProperty(PropertyName = "linkedService")]
             public AdfDatasetLinkedServiceModel LinkedService { get; set; }
+
+            [JsonProperty(PropertyName = "parameters")]
+            public Dictionary<string, JToken> Parameters { get; set; } = new Dictionary<string, JToken>();
         }
 
         protected class AdfDatasetLinkedServiceModel

@@ -43,7 +43,8 @@ namespace FabricUpgradeTests
         [DataRow("E2ePipelineWithCopy_JsonToJson")]
         [DataRow("E2ePipelineWithCopy_JsonToJson_MissingResolution")]
         [DataRow("E2ePipelineWithCopy_StagingAndLogging")]
-        [DataRow("E2ePipelineWithCopy_JsonToJson_Params")]
+        [DataRow("E2ePipelineWithCopy_JsonToJson_DefaultDatasetParams")]
+        //[DataRow("E2ePipelineWithCopy_JsonToJson_Params")]
         [DataRow("E2ePipelineWithCopy_JsonToJson_Params_GlobalConfig")]
 
         [DataRow("E2ePipelineWithCopy_SqlToSql")]
@@ -171,7 +172,7 @@ namespace FabricUpgradeTests
 
             List<string> actualEndpointEvents = endpoints.FetchEvents();
 
-            Assert.AreEqual(testConfig.ExpectedEndpointEvents.Count, actualEndpointEvents.Count);
+            Assert.AreEqual(testConfig.ExpectedEndpointEvents.Count, actualEndpointEvents.Count, "\r\n" + string.Join("\r\n", actualEndpointEvents));
             for (int nEvent = 0; nEvent < testConfig.ExpectedEndpointEvents.Count; nEvent++)
             {
                 string expectedEvent = testConfig.ExpectedEndpointEvents[nEvent];

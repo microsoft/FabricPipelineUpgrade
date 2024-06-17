@@ -30,8 +30,6 @@ namespace FabricUpgradeCmdlet.Upgraders.DatasetUpgraders
         {
             base.Compile(alerts);
 
-            string q = this.AdfResourceToken.ToString(Newtonsoft.Json.Formatting.Indented);
-
             this.CheckRequiredAdfProperties(this.requiredAdfProperties, alerts);
         }
 
@@ -62,7 +60,12 @@ namespace FabricUpgradeCmdlet.Upgraders.DatasetUpgraders
                 }
 
                 JObject fabricActivityObject = (JObject)datasetSettingsSymbol.Value;
-                PropertyCopier copier = new PropertyCopier(this.Path, this.AdfResourceToken, fabricActivityObject, alerts);
+                PropertyCopier copier = new PropertyCopier(
+                    this.Path,
+                    this.AdfResourceToken,
+                    fabricActivityObject,
+                    this.DatasetParameters,
+                    alerts);
 
                 copier.Copy(adfLocationPath, fabricLocationPath);
 

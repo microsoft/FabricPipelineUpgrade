@@ -2,12 +2,8 @@
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System.Management.Automation.Language;
-using System.Reflection;
 using System.Text.RegularExpressions;
-using static System.Formats.Asn1.AsnWriter;
 
 namespace FabricUpgradeCmdlet.Utilities
 {
@@ -38,6 +34,40 @@ namespace FabricUpgradeCmdlet.Utilities
             this.expression = expression;
         }
 
+        public void ApplyParameters(
+            Dictionary<string, UpgradeParameter> parameters)
+        {
+           
+            // TODO: Deal with Object parameters.
+
+            this.TokenizeExpression();
+
+            List<string> updatedTokens = new List<string>();
+
+            if ((this.tokens.Count == 2) && (this.tokens[0] == "@") && (parameters.ContainsKey(this.tokens[1])))
+            {
+                // "@dataset().fileName" => "otter.json".
+                updatedTokens.Add(parameters[this.tokens[1]].StandaloneValue?.ToString());
+            }
+            else
+            {
+                // "@concat(dataset().fileName, '.json')" => "@concat('otter', '.json')".
+                foreach (string token in this.tokens)
+                {
+                    if (parameters.ContainsKey(token))
+                    {
+                        updatedTokens.Add(parameters[token].IntegratedValue.ToString());
+                    }
+                    else
+                    {
+                        updatedTokens.Add(token);
+                    }
+                }
+            }
+
+            this.tokens = updatedTokens;
+        }
+
         public bool Validate(
             AlertCollector alerts)
         {
@@ -49,33 +79,23 @@ namespace FabricUpgradeCmdlet.Utilities
             return isValid;
         }
 
-        public string Replace(Dictionary<string, string> replacements)
+
+        public JToken RebuildExpression()
         {
-            this.TokenizeExpression();
-
-            string replace = string.Empty;
-
-            foreach (string token in this.tokens)
+            if (this.tokens.All(t => t == null))
             {
-                string replaceWith = null;
-                foreach (var r in replacements)
-                {
-                    if (token == r.Key)
-                    {
-                        replaceWith = r.Value;
-                        break;
-                    }
-                    else if (token.StartsWith(r.Key + "."))
-                    {
-                        replaceWith = r.Value + "." + token[(r.Key.Length + 1)..];
-                        break;
-                    }
-                }
- 
-                replace += replaceWith ?? token;
+                return null;
             }
 
-            return replace;
+            if ((this.tokens.Count == 1) || (this.tokens[0] != "@"))
+            {
+                return string.Join(string.Empty, this.tokens);
+            }
+
+            JObject newExpression = new JObject();
+            newExpression["value"] = string.Join(string.Empty, this.tokens);
+            newExpression["type"] = "Expression";
+            return newExpression;
         }
 
         /// <summary>
@@ -90,6 +110,8 @@ namespace FabricUpgradeCmdlet.Utilities
             bool isValid = true;
             foreach (string token in this.tokens)
             {
+                if (token == null) continue;
+
                 isValid &= this.CheckForReferencesToGlobalParameters(token, alerts);
                 isValid &= this.CheckForReferencesToPipelineName(token, alerts);
                 isValid &= this.CheckForReferencesToDatasetParameters(token, alerts);
