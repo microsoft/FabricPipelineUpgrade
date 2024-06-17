@@ -187,14 +187,15 @@ namespace FabricUpgradeCmdlet.Utilities
 
         private bool ValidateExpression(
             string path,
-            JToken expression)
+            JToken expressionToken)
         {
-            // TODO: Ensure that this expression does not include global configuration, dataset parameters, etc.
-            // TODO: Make dataset parameters work!
+            if (!this.IsExpression(expressionToken))
+            {
+                return true;
+            }
+            string expression = ((JObject)expressionToken)["value"].ToString();
 
-            // this.alerts.AddPermanentError($"Cannot process expression found at {this.resourcePath}/{path}.");
-            // return false;
-            return true;
+            return new UpgradeExpression(this.resourcePath + "." + path, expression).Validate(this.alerts);
         }
     }
 }

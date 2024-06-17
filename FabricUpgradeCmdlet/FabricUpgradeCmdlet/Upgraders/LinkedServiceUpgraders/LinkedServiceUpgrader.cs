@@ -85,6 +85,7 @@ namespace FabricUpgradeCmdlet.Upgraders.LinkedServiceUpgraders
             {
                 this.BuildConnectionSettings(connectionStringToken.ToString());
             }
+
         }
 
         /// <inheritdoc/>

@@ -1,0 +1,48 @@
+﻿{
+  "adfSupportFile": "PipelineWithCopy_JsonToJson_Params_support_live.zip",
+
+  "resolutions": [
+    {
+      "type": "LinkedServiceToConnectionId",
+      "key": "ArmtemplateStorageLinkedService",
+      "value": "d1fcfcfa-0b8c-469d-af92-5dcb300c8e6e"
+    }
+  ],
+
+  "expectedResponse": {
+    "state": "Failed",
+    "alerts": [
+      {
+        "severity": "Permanent",
+        "details": "Json1.properties.typeProperties.location.fileName references Dataset Parameters and that is not allowed in an Upgrade"
+      },
+      {
+        "severity": "Permanent",
+        "details": "Json1.properties.typeProperties.location.folderPath references Dataset Parameters and that is not allowed in an Upgrade"
+      },
+      {
+        "severity": "Permanent",
+        "details": "Json1.properties.typeProperties.location.container references Dataset Parameters and that is not allowed in an Upgrade"
+      },
+      {
+        "severity": "Permanent",
+        "details": "Json1.properties.typeProperties.location.fileName references Dataset Parameters and that is not allowed in an Upgrade"
+      },
+      {
+        "severity": "Permanent",
+        "details": "Json1.properties.typeProperties.location.folderPath references Dataset Parameters and that is not allowed in an Upgrade"
+      },
+      {
+        "severity": "Permanent",
+        "details": "Json1.properties.typeProperties.location.container references Dataset Parameters and that is not allowed in an Upgrade"
+      }
+    ],
+    "resolutions": [],
+    "result": {}
+  },
+
+  "expectedItems": [],
+
+  "expectedEndpointEvents": []
+
+}

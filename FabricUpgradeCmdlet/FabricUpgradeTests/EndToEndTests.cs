@@ -43,6 +43,8 @@ namespace FabricUpgradeTests
         [DataRow("E2ePipelineWithCopy_JsonToJson")]
         [DataRow("E2ePipelineWithCopy_JsonToJson_MissingResolution")]
         [DataRow("E2ePipelineWithCopy_StagingAndLogging")]
+        [DataRow("E2ePipelineWithCopy_JsonToJson_Params")]
+        [DataRow("E2ePipelineWithCopy_JsonToJson_Params_GlobalConfig")]
 
         [DataRow("E2ePipelineWithCopy_SqlToSql")]
         [DataRow("E2ePipelineWithCopy_SqlToSql_MissingResolution")]

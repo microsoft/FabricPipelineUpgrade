@@ -30,6 +30,8 @@ namespace FabricUpgradeCmdlet.Upgraders.DatasetUpgraders
         {
             base.Compile(alerts);
 
+            string q = this.AdfResourceToken.ToString(Newtonsoft.Json.Formatting.Indented);
+
             this.CheckRequiredAdfProperties(this.requiredAdfProperties, alerts);
         }
 
