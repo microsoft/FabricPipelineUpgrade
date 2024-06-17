@@ -15,18 +15,30 @@ namespace FabricUpgradeCmdlet.Utilities
         private readonly string resourcePath;
         private readonly JToken adfResourceToken;
         private readonly JObject fabricResourceObject;
+        private readonly Dictionary<string, UpgradeParameter> parameters;
         private readonly AlertCollector alerts;
 
         public PropertyCopier(
             string resourcePath,
             JToken adfResourceToken,
             JObject fabricResourceObject,
+            Dictionary<string, UpgradeParameter> parameters,
             AlertCollector alerts)
         {
             this.resourcePath = resourcePath;
             this.adfResourceToken = adfResourceToken;
             this.fabricResourceObject = fabricResourceObject;
+            this.parameters = parameters ?? new Dictionary<string, UpgradeParameter>();
             this.alerts = alerts;
+        }
+
+        public PropertyCopier(
+            string resourcePath,
+            JToken adfResourceToken,
+            JObject fabricResourceObject,
+            AlertCollector alerts)
+            : this(resourcePath, adfResourceToken, fabricResourceObject, null, alerts)
+        {
         }
 
         /// <summary>
@@ -83,8 +95,8 @@ namespace FabricUpgradeCmdlet.Utilities
 
             if (copyIfNull || value != null)
             {
-                ValidateAdfToken(from, value);
-                Set(to, value);
+                ValidateAdfToken(from, value, out JToken newValue);
+                Set(to, newValue);
             }
         }
 
@@ -113,45 +125,54 @@ namespace FabricUpgradeCmdlet.Utilities
         /// <param name="token">The token to recursively validate.</param>
         /// <returns></returns>
         private bool ValidateAdfToken(
-             string path,
-             JToken token)
+            string path,
+            JToken token,
+            out JToken finalExpression)
         {
             if (IsAtom(token))
             {
+                finalExpression = token;
                 return true;
             }
 
             if (IsExpression(token))
             {
                 // ValidateExpression will add an alert for any invalid expression.
-                return ValidateExpression(path, token);
+                return this.ValidateExpression(path, token, out finalExpression);
             }
 
             if (token.Type == JTokenType.Object)
             {
                 JObject valueObject = (JObject)token;
 
+                JObject newValueObject = new JObject();
+
                 bool valid = true;
                 foreach (var subToken in valueObject)
                 {
-                    valid &= ValidateAdfToken(path + "." + subToken.Key, subToken.Value);
+                    valid &= this.ValidateAdfToken(path + "." + subToken.Key, subToken.Value, out JToken newToken);
+                    newValueObject[subToken.Key] = newToken;
                 }
-
+                finalExpression = newValueObject;
                 return valid;
             }
             else if (token.Type == JTokenType.Array)
             {
                 JArray valueArray = (JArray)token;
 
+                JArray newValueArray = new JArray();
+
                 bool valid = true;
                 for (int n = 0; n < valueArray.Count; n++)
                 {
-                    valid &= ValidateAdfToken(path + $"[{n}]", valueArray[n]);
+                    valid &= this.ValidateAdfToken(path + $"[{n}]", valueArray[n], out JToken newToken);
+                    newValueArray.Add(newToken);
                 }
+                finalExpression = newValueArray;
                 return valid;
             }
 
-
+            finalExpression = token;
             return false;
         }
 
@@ -187,15 +208,26 @@ namespace FabricUpgradeCmdlet.Utilities
 
         private bool ValidateExpression(
             string path,
-            JToken expressionToken)
+            JToken expressionToken,
+            out JToken finalExpression)
         {
+            finalExpression = expressionToken;
             if (!this.IsExpression(expressionToken))
             {
                 return true;
             }
-            string expression = ((JObject)expressionToken)["value"].ToString();
 
-            return new UpgradeExpression(this.resourcePath + "." + path, expression).Validate(this.alerts);
+            string originalExpression = ((JObject)expressionToken)["value"].ToString();
+            UpgradeExpression expressionModel = new UpgradeExpression(this.resourcePath + "." + path, originalExpression);
+            expressionModel.ApplyParameters(this.parameters);
+
+            if (expressionModel.Validate(this.alerts))
+            {
+                finalExpression = expressionModel.RebuildExpression();
+                return true;
+            }
+
+            return false;
         }
     }
 }

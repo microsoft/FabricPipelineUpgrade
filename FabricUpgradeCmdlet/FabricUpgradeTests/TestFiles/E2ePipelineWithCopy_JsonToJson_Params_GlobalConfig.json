@@ -15,30 +15,6 @@
       {
         "severity": "Permanent",
         "details": "PipelineWithCopy_JsonToJson_Params_GlobalParams/Copy data1.typeProperties.sink.formatSettings.filePattern references GlobalParameters and that is not allowed in an Upgrade"
-      },
-      {
-        "severity": "Permanent",
-        "details": "Json1.properties.typeProperties.location.fileName references Dataset Parameters and that is not allowed in an Upgrade"
-      },
-      {
-        "severity": "Permanent",
-        "details": "Json1.properties.typeProperties.location.folderPath references Dataset Parameters and that is not allowed in an Upgrade"
-      },
-      {
-        "severity": "Permanent",
-        "details": "Json1.properties.typeProperties.location.container references Dataset Parameters and that is not allowed in an Upgrade"
-      },
-      {
-        "severity": "Permanent",
-        "details": "Json1.properties.typeProperties.location.fileName references Dataset Parameters and that is not allowed in an Upgrade"
-      },
-      {
-        "severity": "Permanent",
-        "details": "Json1.properties.typeProperties.location.folderPath references Dataset Parameters and that is not allowed in an Upgrade"
-      },
-      {
-        "severity": "Permanent",
-        "details": "Json1.properties.typeProperties.location.container references Dataset Parameters and that is not allowed in an Upgrade"
       }
     ],
     "resolutions": [],

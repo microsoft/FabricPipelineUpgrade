@@ -3,6 +3,7 @@
 // </copyright>
 
 using FabricUpgradeCmdlet.Utilities;
+using Newtonsoft.Json.Linq;
 using System.Linq.Expressions;
 using System.Text.RegularExpressions;
 
@@ -58,24 +59,24 @@ namespace FabricUpgradeTests
         }
 
         [TestMethod]
-        [DataRow("@concat(dataset().param1.prop1,dataset().param2, dataset().param3)", "@concat(pipeline().param1.prop1, pipeline().param2, 'filter')")]
-        public void ReplaceExpression_Test(
+        [DataRow("@concat(dataset().fileName, string(dataset().fileIndex), '.json')", "@concat('otter', string(0), '.json')")]
+        public void ApplyParameter_Test(
             string originalExpression,
-            string expectedReplacement)
+            string expectedUpdatedExpression)
         {
             AlertCollector alerts = new AlertCollector();
+
             UpgradeExpression ex = new UpgradeExpression("<path>", originalExpression);
 
-            Dictionary<string, string> replace = new Dictionary<string, string>()
-            {
-                { "dataset().param1", "pipeline().param1" },
-                { "dataset().param2", "pipeline().param2" },
-                { "dataset().param3", "'filter'" }
-            };
+            Dictionary<string, UpgradeParameter> parameters = new Dictionary<string, UpgradeParameter>();
+            parameters.Add("dataset().fileName", UpgradeParameter.FromJToken(JObject.Parse("{'type':'string','defaultValue':'otter'}")));
+            parameters.Add("dataset().fileIndex", UpgradeParameter.FromJToken(JObject.Parse("{'type':'integer','defaultValue':0}")));
 
-            string actualReplacement = ex.Replace(replace);
+            ex.ApplyParameters(parameters);
 
-            Assert.AreEqual(expectedReplacement, actualReplacement);
+            string actualUpdatedExpression = string.Join(string.Empty, ex.Tokens());
+
+            Assert.AreEqual(expectedUpdatedExpression, actualUpdatedExpression);
         }
     }
 }
