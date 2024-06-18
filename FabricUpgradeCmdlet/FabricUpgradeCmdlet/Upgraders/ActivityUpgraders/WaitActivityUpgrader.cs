@@ -25,11 +25,12 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
 
         public override Symbol ResolveExportedSymbol(
             string symbolName,
+            Dictionary<string, JToken> parameters,
             AlertCollector alerts)
         {
             if (symbolName == Symbol.CommonNames.Activity)
             {
-                Symbol activitySymbol = base.ResolveExportedSymbol(Symbol.CommonNames.Activity, alerts);
+                Symbol activitySymbol = base.ResolveExportedSymbol(Symbol.CommonNames.Activity, parameters, alerts);
 
                 if (activitySymbol.State != Symbol.SymbolState.Ready)
                 {
@@ -46,7 +47,7 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
                 return Symbol.ReadySymbol(fabricActivityObject);
             }
 
-            return base.ResolveExportedSymbol(symbolName, alerts);
+            return base.ResolveExportedSymbol(symbolName, parameters, alerts);
         }
     }
 }

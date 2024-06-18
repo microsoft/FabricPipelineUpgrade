@@ -112,6 +112,7 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
 
         public override Symbol ResolveExportedSymbol(
             string symbolName,
+            Dictionary<string, JToken> parameters,
             AlertCollector alerts)
         {
             if (symbolName == Symbol.CommonNames.ExportLinks)
@@ -129,7 +130,7 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
 
             if (symbolName == Symbol.CommonNames.Activity)
             {
-                Symbol activitySymbol = base.ResolveExportedSymbol(Symbol.CommonNames.Activity, alerts);
+                Symbol activitySymbol = base.ResolveExportedSymbol(Symbol.CommonNames.Activity, parameters, alerts);
 
                 if (activitySymbol.State != Symbol.SymbolState.Ready)
                 {
@@ -152,8 +153,8 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
                     copier.Copy($"typeProperties.{dataset}.formatSettings", copyIfNull: false);
                 }
 
-                this.AddDatasetSettings(copier, this.inputDatasetUpgrader, sourceDatasetSettingsPath, alerts);
-                this.AddDatasetSettings(copier, this.outputDatasetUpgrader, sinkDatasetSettingsPath, alerts);
+                this.AddDatasetSettings(copier, "inputs", this.inputDatasetUpgrader, sourceDatasetSettingsPath, alerts);
+                this.AddDatasetSettings(copier, "outputs", this.outputDatasetUpgrader, sinkDatasetSettingsPath, alerts);
 
                 this.AddStagingSettings(copier, alerts);
                 this.AddLogSettings(copier, alerts);
@@ -163,7 +164,7 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
                 return Symbol.ReadySymbol(fabricActivityObject);
             }
 
-            return base.ResolveExportedSymbol(symbolName, alerts);
+            return base.ResolveExportedSymbol(symbolName, parameters, alerts);
         }
 
         private string GetStagingSettingsLinkedServiceName()
@@ -234,11 +235,25 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
 
         private void AddDatasetSettings(
             PropertyCopier copier,
+            string datasetPath,
             Upgrader datasetUpgrader,
             string datasetSettingsPath,
             AlertCollector alerts)
         {
-            Symbol datasetSettingsSymbol = datasetUpgrader.ResolveExportedSymbol(Symbol.CommonNames.DatasetSettings, alerts);
+            string q = this.AdfResourceToken.ToString(Newtonsoft.Json.Formatting.Indented);
+
+            JObject parameters = (JObject)this.AdfResourceToken.SelectToken($"{datasetPath}[0].parameters") ?? new JObject();
+            Dictionary<string, JToken> parametersToPass = new Dictionary<string, JToken>();
+            foreach (var p in parameters)
+            {
+                parametersToPass["dataset()." + p.Key] = p.Value;
+            }
+
+            Symbol datasetSettingsSymbol = datasetUpgrader.ResolveExportedSymbol(
+                Symbol.CommonNames.DatasetSettings,
+                parametersToPass,
+                alerts);
+
             if (datasetSettingsSymbol.State != Symbol.SymbolState.Ready)
             {
                 // TODO!

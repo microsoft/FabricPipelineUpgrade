@@ -1,0 +1,154 @@
+﻿{
+  "comments": [
+    "This support file has dataset parameters, and the Copy activity overrides some of them.",
+    "Therefore, we should see the datasetSettings use the dataset's default parameter values and the Copy Activity's overrides."
+  ],
+
+  "adfSupportFile": "PipelineWithCopy_JsonToJson_OverrideDefaultDatasetParamsToPipelineParams_support_live.zip",
+
+  "resolutions": [
+    {
+      "type": "LinkedServiceToConnectionId",
+      "key": "AzureBlobStorage2",
+      "value": "aa090a13-26a9-47f5-91f6-a8edc0c3e452"
+    }
+  ],
+
+  "expectedResponse": {
+    "state": "Succeeded",
+    "alerts": [],
+    "resolutions": [
+      {
+        "type": "LinkedServiceToConnectionId",
+        "key": "AzureBlobStorage2",
+        "value": "aa090a13-26a9-47f5-91f6-a8edc0c3e452"
+      }
+    ],
+    "result": {
+      "AzureBlobStorage2": {
+        "id": "aa090a13-26a9-47f5-91f6-a8edc0c3e452"
+      },
+      "PipelineWithCopy_JsonToJson_OverrideDefaultDatasetParamsToPipelineParams": {
+        "type": "DataPipeline",
+        "displayName": "PipelineWithCopy_JsonToJson_OverrideDefaultDatasetParamsToPipelineParams",
+        "description": null,
+        "workspaceId": "",
+        "id": 0
+      }
+    }
+  },
+
+  "expectedItems": [
+    {
+      "item": {
+        "type": "DataPipeline",
+        "displayName": "PipelineWithCopy_JsonToJson_OverrideDefaultDatasetParamsToPipelineParams",
+        "description": null,
+        "workspaceId": "",
+        "id": 0
+      },
+      "definition": {
+        "name": "PipelineWithCopy_JsonToJson_OverrideDefaultDatasetParamsToPipelineParams",
+        "properties": {
+          "activities": [
+            {
+              "name": "Copy data1",
+              "type": "Copy",
+              "dependsOn": [],
+              "userProperties": [],
+              "description": null,
+              "policy": {
+                "timeout": "0.12:00:00",
+                "retry": 0,
+                "retryIntervalInSeconds": 30,
+                "secureOutput": false,
+                "secureInput": false
+              },
+              "typeProperties": {
+                "source": {
+                  "type": "JsonSource",
+                  "storeSettings": {
+                    "type": "AzureBlobStorageReadSettings",
+                    "recursive": true,
+                    "enablePartitionDiscovery": false
+                  },
+                  "formatSettings": {
+                    "type": "JsonReadSettings"
+                  },
+                  "datasetSettings": {
+                    "annotations": [],
+                    "type": "Json",
+                    "externalReferences": {
+                      "connection": "aa090a13-26a9-47f5-91f6-a8edc0c3e452"
+                    },
+                    "typeProperties": {
+                      "location": {
+                        "type": "AzureBlobStorageLocation",
+                        "fileName": {
+                          "value": "@concat('otter', string(1), '.json')",
+                          "type": "Expression"
+                        },
+                        "folderPath": null,
+                        "container": {
+                          "value": "@pipeline().parameters.sourceContainer",
+                          "type": "Expression"
+                        }
+                      }
+                    },
+                    "schema": {}
+                  }
+                },
+                "sink": {
+                  "type": "JsonSink",
+                  "storeSettings": {
+                    "type": "AzureBlobStorageWriteSettings"
+                  },
+                  "formatSettings": {
+                    "type": "JsonWriteSettings"
+                  },
+                  "datasetSettings": {
+                    "annotations": [],
+                    "type": "Json",
+                    "externalReferences": {
+                      "connection": "aa090a13-26a9-47f5-91f6-a8edc0c3e452"
+                    },
+                    "typeProperties": {
+                      "location": {
+                        "type": "AzureBlobStorageLocation",
+                        "fileName": {
+                          "value": "@concat(pipeline().parameters.sinkFile, string(2), '.json')",
+                          "type": "Expression"
+                        },
+                        "folderPath": "sinkFolder",
+                        "container": "sinkContainer"
+                      }
+                    },
+                    "schema": {}
+                  }
+                },
+                "enableStaging": false
+              }
+            }
+          ],
+          "parameters": {
+            "sourceContainer": {
+              "type": "string",
+              "defaultValue": "TheSourceContainer"
+            },
+            "sinkFile": {
+              "type": "string",
+              "defaultValue": "muskrat"
+            }
+          }
+        },
+        "annotations": []
+      }
+    }
+  ],
+
+  "expectedEndpointEvents": [
+    "LIST DataPipeline",
+    "CREATE DataPipeline 'PipelineWithCopy_JsonToJson_OverrideDefaultDatasetParamsToPipelineParams' => $0"
+  ]
+
+}

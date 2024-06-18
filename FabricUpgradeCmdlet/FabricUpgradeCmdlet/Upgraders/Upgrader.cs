@@ -108,8 +108,16 @@ namespace FabricUpgradeCmdlet.Upgraders
         {
         }
 
+        public Symbol ResolveExportedSymbol(
+            string symbolName,
+            AlertCollector alerts)
+        {
+            return this.ResolveExportedSymbol(symbolName, null, alerts);
+        }
+
         public virtual Symbol ResolveExportedSymbol(
             string symbolName,
+            Dictionary<string, JToken> parameters,
             AlertCollector alerts)
         {
             if (symbolName == Symbol.CommonNames.FabricResource)
