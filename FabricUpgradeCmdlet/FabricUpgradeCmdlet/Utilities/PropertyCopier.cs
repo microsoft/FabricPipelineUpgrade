@@ -15,20 +15,20 @@ namespace FabricUpgradeCmdlet.Utilities
         private readonly string resourcePath;
         private readonly JToken adfResourceToken;
         private readonly JObject fabricResourceObject;
-        private readonly Dictionary<string, UpgradeParameter> parameters;
+        private readonly ResourceParameters parameters;
         private readonly AlertCollector alerts;
 
         public PropertyCopier(
             string resourcePath,
             JToken adfResourceToken,
             JObject fabricResourceObject,
-            Dictionary<string, UpgradeParameter> parameters,
+            ResourceParameters parameters,
             AlertCollector alerts)
         {
             this.resourcePath = resourcePath;
             this.adfResourceToken = adfResourceToken;
             this.fabricResourceObject = fabricResourceObject;
-            this.parameters = parameters ?? new Dictionary<string, UpgradeParameter>();
+            this.parameters = parameters ?? new ResourceParameters();
             this.alerts = alerts;
         }
 

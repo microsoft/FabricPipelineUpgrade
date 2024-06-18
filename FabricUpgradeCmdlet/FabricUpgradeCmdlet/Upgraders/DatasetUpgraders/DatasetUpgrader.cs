@@ -26,7 +26,7 @@ namespace FabricUpgradeCmdlet.Upgraders.DatasetUpgraders
         protected const string AdfLinkedServiceNamePath = "properties.linkedServiceName.referenceName";
         protected const string FabricLinkedServiceNamePath = "linkedServiceName.referenceName";
 
-        protected Dictionary<string, UpgradeParameter> DatasetParameters { get; set; } = new Dictionary<string, UpgradeParameter>();
+        protected ResourceParameters DatasetParameters { get; set; }
 
         protected const string FabricConnectionIdPath = "externalReferences.connection";
 
@@ -83,10 +83,9 @@ namespace FabricUpgradeCmdlet.Upgraders.DatasetUpgraders
 
             this.CheckRequiredAdfProperties(this.requiredAdfProperties, alerts);
 
-            foreach (var param in this.AdfModel.Properties.Parameters)
-            {
-                this.DatasetParameters["dataset()." + param.Key] = UpgradeParameter.FromDefaultValueToken(param.Value);
-            }
+            this.DatasetParameters = ResourceParameters.FromResourceDeclaration(
+                this.AdfModel.Properties.Parameters,
+                "dataset()");
         }
 
         public override void PreLink(
@@ -157,23 +156,10 @@ namespace FabricUpgradeCmdlet.Upgraders.DatasetUpgraders
             return base.ResolveExportedSymbol(symbolName, parametersFromCaller, alerts);
         }
 
-        protected Dictionary<string, UpgradeParameter> BuildActiveParameters(
-            Dictionary<string, JToken> fromCaller)
+        protected ResourceParameters BuildActiveParameters(
+            Dictionary<string, JToken> callerValues)
         {
-            Dictionary<string, UpgradeParameter> activeParameters = new Dictionary<string, UpgradeParameter>();
-
-            foreach (var myParam in this.DatasetParameters)
-            {
-                activeParameters[myParam.Key] = myParam.Value?.Clone();
-            }
-
-            foreach (var incomingParam in fromCaller ?? new Dictionary<string, JToken>())
-            {
-                // TODO: if the incomingParam is null, should we override the default value?
-                activeParameters[incomingParam.Key] = activeParameters[incomingParam.Key].WithValue(incomingParam.Value);
-            }
-
-            return activeParameters;
+            return this.DatasetParameters.BuildResolutionContext(callerValues);
         }
 
         /// <summary>

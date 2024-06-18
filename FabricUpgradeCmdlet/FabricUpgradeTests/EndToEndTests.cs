@@ -121,7 +121,7 @@ namespace FabricUpgradeTests
             {
                 var expectedAlert = testConfig.ExpectedResponse.Alerts[nAlert].ToJToken();
                 var actualAlert = runningProgress.Alerts[nAlert].ToJToken();
-                var alertMismatches = this.DeepCompare(expectedAlert, actualAlert);
+                var alertMismatches = JsonUtils.DeepCompare(expectedAlert, actualAlert);
                 Assert.IsNull(
                     alertMismatches,
                     $"Alert[{nAlert}] MISMATCHES:\n{alertMismatches?.ToString(Formatting.Indented)}\n\nEXPECTED:\n{expectedAlert}\n\nACTUAL:\n{actualAlert}");
@@ -132,7 +132,7 @@ namespace FabricUpgradeTests
             {
                 var expectedResolution = testConfig.ExpectedResponse.Resolutions[nResolution].ToJToken();
                 var actualResolution = runningProgress.Resolutions[nResolution].ToJToken();
-                var alertMismatches = this.DeepCompare(expectedResolution, actualResolution);
+                var alertMismatches = JsonUtils.DeepCompare(expectedResolution, actualResolution);
                 Assert.IsNull(
                     alertMismatches,
                     $"Resolution[{nResolution}] MISMATCHES:\n{alertMismatches?.ToString(Formatting.Indented)}\n\nEXPECTED:\n{expectedResolution}\n\nACTUAL:\n{actualResolution}");
@@ -142,7 +142,7 @@ namespace FabricUpgradeTests
             JObject expectedResult = testConfig.ExpectedResponse.Result;
             JObject actualResult = runningProgress.Result;
 
-            var resultMismatches = this.DeepCompare(expectedResult, actualResult);
+            var resultMismatches = JsonUtils.DeepCompare(expectedResult, actualResult);
             Assert.IsNull(
                     resultMismatches,
                     $"MISMATCHES:\n{resultMismatches?.ToString(Formatting.Indented)}\n\nEXPECTED:\n{expectedResult}\n\nACTUAL:\n{actualResult}");
@@ -162,7 +162,7 @@ namespace FabricUpgradeTests
                 string eis = UpgradeSerialization.Serialize(expectedItem);
                 string ais = UpgradeSerialization.Serialize(actualItem);
 
-                JObject mismatches = this.DeepCompare(expectedItem, actualItem);
+                JObject mismatches = JsonUtils.DeepCompare(expectedItem, actualItem);
 
                 Assert.IsNull(
                     mismatches,
@@ -286,91 +286,6 @@ namespace FabricUpgradeTests
                 [JsonProperty(PropertyName = "displayName")]
                 public string DisplayName { get; set; }
             }
-        }
-
-        /// <summary>
-        /// Execute a "deep" comparison of two JTokens, and report the mismatches.
-        /// </summary>
-        /// <param name="expected">The expected JToken.</param>
-        /// <param name="actual">The actual JToken.</param>
-        /// <param name="key">The key being compared, for recursion.</param>
-        /// <returns>A JObject describing the mismatches.</returns>
-        private JObject DeepCompare(JToken expected, JToken actual, string key = "")
-        {
-            JObject mismatches = new JObject();
-
-            if (expected.Type != actual.Type)
-            {
-                if (!(expected.Type == JTokenType.Null && actual.Type == JTokenType.String && actual.Value<string>() == null))
-                {
-                    mismatches["typeMismatch"] = $"Expected type {expected.Type}, Actual type {actual.Type}";
-                }
-            }
-            else if (expected.Type == JTokenType.Object)
-            {
-                JObject eObj = (JObject)expected;
-                JObject aObj = (JObject)actual;
-
-                foreach (var x in eObj)
-                {
-                    string expectedKey = x.Key;
-
-                    if (aObj.ContainsKey(expectedKey))
-                    {
-                        JObject childMismatches = this.DeepCompare(eObj[expectedKey], aObj[expectedKey], expectedKey);
-                        if (childMismatches != null)
-                        {
-                            mismatches[expectedKey] = childMismatches;
-                        }
-                    }
-                    else
-                    {
-                        mismatches[expectedKey] = "Missing in Actual";
-                    }
-                }
-
-                foreach (var x in aObj)
-                {
-                    string actualKey = x.Key;
-
-                    if (!eObj.ContainsKey(actualKey))
-                    {
-                        mismatches[actualKey] = "Only in Actual";
-                    }
-                }
-            }
-            else if (expected.Type == JTokenType.Array)
-            {
-                JArray eArr = (JArray)expected;
-                JArray aArr = (JArray)actual;
-
-                if (eArr.Count() != actual.Count())
-                {
-                    mismatches["countMismatch"] = $"Expected has {eArr.Count()} elements, Actual has {aArr.Count()} elements";
-                }
-
-                int count = Math.Min(eArr.Count(), aArr.Count());
-
-                for (int index = 0; index < count; index++)
-                {
-                    JObject elementMismatch = this.DeepCompare(eArr[index], aArr[index]);
-                    if (elementMismatch != null)
-                    {
-                        mismatches[$"{index}"] = elementMismatch;
-                    }
-                }
-            }
-            else if (!JToken.DeepEquals(expected, actual))
-            {
-                mismatches["valueMismatch"] = $"Expected value {expected}, Actual value {actual}";
-            }
-
-            if (mismatches.Count > 0)
-            {
-                return mismatches;
-            }
-
-            return null;
         }
     }
 }

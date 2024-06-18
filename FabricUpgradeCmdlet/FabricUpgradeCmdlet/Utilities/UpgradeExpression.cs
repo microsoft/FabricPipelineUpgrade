@@ -35,7 +35,7 @@ namespace FabricUpgradeCmdlet.Utilities
         }
 
         public void ApplyParameters(
-            Dictionary<string, UpgradeParameter> parameters)
+            ResourceParameters parameters)
         {
            
             // TODO: Deal with Object parameters and Object parameter values.
@@ -44,12 +44,9 @@ namespace FabricUpgradeCmdlet.Utilities
 
             List<string> updatedTokens = new List<string>();
 
-            if ((this.tokens.Count == 2) && (this.tokens[0] == "@") && (parameters.ContainsKey(this.tokens[1])))
+            if ((this.tokens.Count == 2) && (this.tokens[0] == "@") && (parameters.ContainsParameterName(this.tokens[1])))
             {
-                string key = this.tokens[1];
-                UpgradeParameter param = parameters[key];
-
-                JToken standaloneValue = param.StandaloneValue;
+                JToken standaloneValue = parameters.StandaloneValue(this.tokens[1]);
 
                 if (TokenIsExpressionObject(standaloneValue))
                 {
@@ -59,7 +56,7 @@ namespace FabricUpgradeCmdlet.Utilities
                 }
                 else
                 {
-                    updatedTokens.Add(parameters[this.tokens[1]].StandaloneValue?.ToString());
+                    updatedTokens.Add(standaloneValue?.ToString());
                 }
             }
             else
@@ -67,10 +64,9 @@ namespace FabricUpgradeCmdlet.Utilities
                 // "@concat(dataset().fileName, '.json')" => "@concat('otter', '.json')".
                 foreach (string token in this.tokens)
                 {
-                    if (parameters.ContainsKey(token))
+                    if (parameters.ContainsParameterName(token))
                     {
-                        UpgradeParameter param = parameters[token];
-                        JToken standaloneValue = param.StandaloneValue;
+                        JToken standaloneValue = parameters.StandaloneValue(token);
 
                         if (TokenIsExpressionObject(standaloneValue))
                         {
@@ -84,7 +80,7 @@ namespace FabricUpgradeCmdlet.Utilities
                         }
                         else
                         {
-                            updatedTokens.Add(parameters[token].IntegratedValue.ToString());
+                            updatedTokens.Add(parameters.IntegratedValue(token).ToString());
                         }
                     }
                     else

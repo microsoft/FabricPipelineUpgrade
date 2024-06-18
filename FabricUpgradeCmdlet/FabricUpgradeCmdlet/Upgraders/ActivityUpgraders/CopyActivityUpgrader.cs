@@ -242,16 +242,12 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
         {
             string q = this.AdfResourceToken.ToString(Newtonsoft.Json.Formatting.Indented);
 
-            JObject parameters = (JObject)this.AdfResourceToken.SelectToken($"{datasetPath}[0].parameters") ?? new JObject();
-            Dictionary<string, JToken> parametersToPass = new Dictionary<string, JToken>();
-            foreach (var p in parameters)
-            {
-                parametersToPass["dataset()." + p.Key] = p.Value;
-            }
+            JObject parametersObject = (JObject)this.AdfResourceToken.SelectToken($"{datasetPath}[0].parameters") ?? new JObject();
+            Dictionary<string, JToken> parameters = parametersObject.ToObject<Dictionary<string, JToken>>();
 
             Symbol datasetSettingsSymbol = datasetUpgrader.ResolveExportedSymbol(
                 Symbol.CommonNames.DatasetSettings,
-                parametersToPass,
+                parameters,
                 alerts);
 
             if (datasetSettingsSymbol.State != Symbol.SymbolState.Ready)

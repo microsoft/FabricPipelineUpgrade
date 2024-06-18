@@ -3,6 +3,8 @@
 // </copyright>
 
 using FabricUpgradeCmdlet.Utilities;
+using FabricUpgradeTests.Utilities;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Linq.Expressions;
 using System.Text.RegularExpressions;
@@ -58,6 +60,7 @@ namespace FabricUpgradeTests
             }
         }
 
+        /*
         [TestMethod]
         [DataRow("@concat(dataset().fileName, string(dataset().fileIndex), '.json')", "@concat('otter', string(0), '.json')")]
         public void ApplyParameter_Test(
@@ -72,11 +75,61 @@ namespace FabricUpgradeTests
             parameters.Add("dataset().fileName", UpgradeParameter.FromDefaultValueToken(JObject.Parse("{'type':'string','defaultValue':'otter'}")));
             parameters.Add("dataset().fileIndex", UpgradeParameter.FromDefaultValueToken(JObject.Parse("{'type':'integer','defaultValue':0}")));
 
-            ex.ApplyParameters(parameters);
+            ex.ApplyParameters(new ResourceParameters(parameters));
 
             string actualUpdatedExpression = string.Join(string.Empty, ex.Tokens());
 
             Assert.AreEqual(expectedUpdatedExpression, actualUpdatedExpression);
+        }
+        */
+
+        [TestMethod]
+        [DataRow("ApplyParameters_SingletonString_DefaultOnly")]
+        //[DataRow("ApplyParameters_SingletonInt_DefaultOnly")]
+
+        [DataRow("ApplyParameters_DefaultOnly")]
+        [DataRow("ApplyParameters_DefaultAndConstOverride")]
+        [DataRow("ApplyParameters_DefaultAndPipelineParamOverride")]
+        public void ApplyParameter_Test(
+            string testConfigFile)
+        {
+            var testConfig = ApplyParameterTestConfig.LoadFromFile(testConfigFile);
+
+            ResourceParameters declaredParameters = ResourceParameters.FromResourceDeclaration(testConfig.ParameterDeclarations, "dataset()");
+            ResourceParameters activeParameters = declaredParameters.BuildResolutionContext(testConfig.ValuesFromCaller);
+
+            UpgradeExpression expressionModel = new UpgradeExpression("", testConfig.OriginalExpression);
+
+            expressionModel.ApplyParameters(activeParameters);
+
+            var actualExpression = expressionModel.RebuildExpression();
+
+            var mismatches = JsonUtils.DeepCompare(testConfig.ExpectedExpression, actualExpression);
+            Assert.IsNull(
+                    mismatches,
+                    $"MISMATCHES:\n{mismatches?.ToString(Formatting.Indented)}\n\nEXPECTED:\n{testConfig.ExpectedExpression}\n\nACTUAL:\n{actualExpression}");
+        }
+
+        private class ApplyParameterTestConfig
+        {
+            [JsonProperty(PropertyName = "originalExpression")]
+            public string OriginalExpression { get; set; }
+
+            [JsonProperty(PropertyName = "parameterDeclarations")]
+            public Dictionary<string, JToken> ParameterDeclarations { get; set; } = new Dictionary<string, JToken>();
+
+            [JsonProperty(PropertyName = "valuesFromCaller")]
+            public Dictionary<string, JToken> ValuesFromCaller { get; set; } = new Dictionary<string, JToken>();
+
+            [JsonProperty(PropertyName = "expectedExpression")]
+            public JToken ExpectedExpression { get; set; }
+
+            public static ApplyParameterTestConfig LoadFromFile(string testFilename)
+            {
+                string testConfig = File.ReadAllText("./TestFiles/" + testFilename + ".json");
+                return JsonConvert.DeserializeObject<ApplyParameterTestConfig>(testConfig);
+            }
+
         }
     }
 }
