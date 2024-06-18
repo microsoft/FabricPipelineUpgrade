@@ -60,6 +60,7 @@ namespace FabricUpgradeCmdlet.Upgraders
         /// <inheritdoc/>
         public override Symbol ResolveExportedSymbol(
             string symbolName,
+            Dictionary<string, JToken> parameters,
             AlertCollector alerts)
         {
             if (symbolName == Symbol.CommonNames.FabricResource)
@@ -89,7 +90,7 @@ namespace FabricUpgradeCmdlet.Upgraders
                 return Symbol.ReadySymbol(exportInstruction.ToJObject());
             }
 
-            return base.ResolveExportedSymbol(symbolName, alerts);
+            return base.ResolveExportedSymbol(symbolName, parameters, alerts);
         }
 
         private void AddExportLinks(

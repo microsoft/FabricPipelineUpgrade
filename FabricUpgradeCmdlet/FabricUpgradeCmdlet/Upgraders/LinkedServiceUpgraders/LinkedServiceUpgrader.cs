@@ -91,6 +91,7 @@ namespace FabricUpgradeCmdlet.Upgraders.LinkedServiceUpgraders
         /// <inheritdoc/>
         public override Symbol ResolveExportedSymbol(
             string symbolName,
+            Dictionary<string, JToken> parameters,
             AlertCollector alerts)
         {
             if (symbolName == Symbol.CommonNames.ExportResolves)
@@ -119,7 +120,7 @@ namespace FabricUpgradeCmdlet.Upgraders.LinkedServiceUpgraders
             {
                 ConnectionExportInstruction exportInstruction = new ConnectionExportInstruction(this.Name);
 
-                Symbol resolvesSymbol = this.ResolveExportedSymbol(Symbol.CommonNames.ExportResolves, alerts);
+                Symbol resolvesSymbol = this.ResolveExportedSymbol(Symbol.CommonNames.ExportResolves, parameters, alerts);
                 if (resolvesSymbol.State != Symbol.SymbolState.Ready)
                 {
                     // TODO!
@@ -137,7 +138,7 @@ namespace FabricUpgradeCmdlet.Upgraders.LinkedServiceUpgraders
                 return Symbol.ReadySymbol(exportInstruction.ToJObject());
             }
 
-            return base.ResolveExportedSymbol(symbolName, alerts);
+            return base.ResolveExportedSymbol(symbolName, parameters, alerts);
         }
 
         /// <summary>

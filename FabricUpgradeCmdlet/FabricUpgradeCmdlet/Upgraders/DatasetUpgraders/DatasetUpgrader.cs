@@ -6,6 +6,7 @@ using FabricUpgradeCmdlet.Models;
 using FabricUpgradeCmdlet.UpgradeMachines;
 using FabricUpgradeCmdlet.Upgraders.LinkedServiceUpgraders;
 using FabricUpgradeCmdlet.Utilities;
+using Microsoft.PowerShell.Commands;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -84,7 +85,7 @@ namespace FabricUpgradeCmdlet.Upgraders.DatasetUpgraders
 
             foreach (var param in this.AdfModel.Properties.Parameters)
             {
-                this.DatasetParameters["dataset()." + param.Key] = UpgradeParameter.FromJToken(param.Value);
+                this.DatasetParameters["dataset()." + param.Key] = UpgradeParameter.FromDefaultValueToken(param.Value);
             }
         }
 
@@ -112,6 +113,7 @@ namespace FabricUpgradeCmdlet.Upgraders.DatasetUpgraders
         /// <inheritdoc/>
         public override Symbol ResolveExportedSymbol(
             string symbolName,
+            Dictionary<string, JToken> parametersFromCaller,
             AlertCollector alerts)
         {
             if (symbolName == Symbol.CommonNames.ExportLinks)
@@ -142,7 +144,7 @@ namespace FabricUpgradeCmdlet.Upgraders.DatasetUpgraders
                     this.Path,
                     this.AdfResourceToken,
                     datasetSettings,
-                    this.DatasetParameters,
+                    this.BuildActiveParameters(parametersFromCaller),
                     alerts);
 
                 copier.Copy("properties.annotations", "annotations");
@@ -152,7 +154,26 @@ namespace FabricUpgradeCmdlet.Upgraders.DatasetUpgraders
                 return Symbol.ReadySymbol(datasetSettings);
             }
 
-            return base.ResolveExportedSymbol(symbolName, alerts);
+            return base.ResolveExportedSymbol(symbolName, parametersFromCaller, alerts);
+        }
+
+        protected Dictionary<string, UpgradeParameter> BuildActiveParameters(
+            Dictionary<string, JToken> fromCaller)
+        {
+            Dictionary<string, UpgradeParameter> activeParameters = new Dictionary<string, UpgradeParameter>();
+
+            foreach (var myParam in this.DatasetParameters)
+            {
+                activeParameters[myParam.Key] = myParam.Value?.Clone();
+            }
+
+            foreach (var incomingParam in fromCaller ?? new Dictionary<string, JToken>())
+            {
+                // TODO: if the incomingParam is null, should we override the default value?
+                activeParameters[incomingParam.Key] = activeParameters[incomingParam.Key].WithValue(incomingParam.Value);
+            }
+
+            return activeParameters;
         }
 
         /// <summary>

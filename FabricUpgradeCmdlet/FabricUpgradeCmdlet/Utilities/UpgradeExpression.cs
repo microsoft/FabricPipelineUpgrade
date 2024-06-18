@@ -38,7 +38,7 @@ namespace FabricUpgradeCmdlet.Utilities
             Dictionary<string, UpgradeParameter> parameters)
         {
            
-            // TODO: Deal with Object parameters.
+            // TODO: Deal with Object parameters and Object parameter values.
 
             this.TokenizeExpression();
 
@@ -46,8 +46,21 @@ namespace FabricUpgradeCmdlet.Utilities
 
             if ((this.tokens.Count == 2) && (this.tokens[0] == "@") && (parameters.ContainsKey(this.tokens[1])))
             {
-                // "@dataset().fileName" => "otter.json".
-                updatedTokens.Add(parameters[this.tokens[1]].StandaloneValue?.ToString());
+                string key = this.tokens[1];
+                UpgradeParameter param = parameters[key];
+
+                JToken standaloneValue = param.StandaloneValue;
+
+                if (TokenIsExpressionObject(standaloneValue))
+                {
+                    var newUE = new UpgradeExpression("", standaloneValue.SelectToken("value")?.ToString());
+                    newUE.TokenizeExpression();
+                    updatedTokens = newUE.Tokens();
+                }
+                else
+                {
+                    updatedTokens.Add(parameters[this.tokens[1]].StandaloneValue?.ToString());
+                }
             }
             else
             {
@@ -56,7 +69,23 @@ namespace FabricUpgradeCmdlet.Utilities
                 {
                     if (parameters.ContainsKey(token))
                     {
-                        updatedTokens.Add(parameters[token].IntegratedValue.ToString());
+                        UpgradeParameter param = parameters[token];
+                        JToken standaloneValue = param.StandaloneValue;
+
+                        if (TokenIsExpressionObject(standaloneValue))
+                        {
+                            var newUE = new UpgradeExpression("", standaloneValue.SelectToken("value")?.ToString());
+                            newUE.TokenizeExpression();
+                            List<string> insertTokens = newUE.Tokens();
+                            foreach (string insertToken in insertTokens[1..])
+                            {
+                                updatedTokens.Add(insertToken);
+                            }
+                        }
+                        else
+                        {
+                            updatedTokens.Add(parameters[token].IntegratedValue.ToString());
+                        }
                     }
                     else
                     {
@@ -431,6 +460,23 @@ namespace FabricUpgradeCmdlet.Utilities
             string tail = matches[0].Groups["tail"].Value;
 
             return Tuple.Create(token, tail);
+        }
+
+        private static bool TokenIsExpressionObject(JToken token)
+        {
+            if ((token == null) || (token.Type != JTokenType.Object))
+            {
+                return false;
+            }
+
+            JObject expressionObject = (JObject)token;
+            if ((expressionObject.SelectToken("type")?.ToString() == "Expression") &&
+                (expressionObject.ContainsKey("value")))
+            {
+                return true;
+            }
+
+            return false;
         }
 
     }

@@ -40,14 +40,15 @@ namespace FabricUpgradeCmdlet.Upgraders.LinkedServiceUpgraders
 
         public override Symbol ResolveExportedSymbol(
             string symbolName,
+            Dictionary<string, JToken> parameters,
             AlertCollector alerts)
         {
             if (symbolName == Symbol.CommonNames.ExportLinks)
             {
-                return base.ResolveExportedSymbol(Symbol.CommonNames.ExportLinks, alerts);
+                return base.ResolveExportedSymbol(Symbol.CommonNames.ExportLinks, parameters, alerts);
             }
 
-            return base.ResolveExportedSymbol(symbolName, alerts);
+            return base.ResolveExportedSymbol(symbolName, parameters, alerts);
         }
 
         protected override FabricUpgradeConnectionHint BuildFabricConnectionHint()

@@ -69,8 +69,8 @@ namespace FabricUpgradeTests
             UpgradeExpression ex = new UpgradeExpression("<path>", originalExpression);
 
             Dictionary<string, UpgradeParameter> parameters = new Dictionary<string, UpgradeParameter>();
-            parameters.Add("dataset().fileName", UpgradeParameter.FromJToken(JObject.Parse("{'type':'string','defaultValue':'otter'}")));
-            parameters.Add("dataset().fileIndex", UpgradeParameter.FromJToken(JObject.Parse("{'type':'integer','defaultValue':0}")));
+            parameters.Add("dataset().fileName", UpgradeParameter.FromDefaultValueToken(JObject.Parse("{'type':'string','defaultValue':'otter'}")));
+            parameters.Add("dataset().fileIndex", UpgradeParameter.FromDefaultValueToken(JObject.Parse("{'type':'integer','defaultValue':0}")));
 
             ex.ApplyParameters(parameters);
 

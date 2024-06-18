@@ -40,16 +40,17 @@ namespace FabricUpgradeCmdlet.Upgraders.DatasetUpgraders
 
         public override Symbol ResolveExportedSymbol(
             string symbolName,
+            Dictionary<string, JToken> parameters,
             AlertCollector alerts)
         {
             if (symbolName == Symbol.CommonNames.ExportLinks)
             {
-                return base.ResolveExportedSymbol(Symbol.CommonNames.ExportLinks, alerts);
+                return base.ResolveExportedSymbol(Symbol.CommonNames.ExportLinks, parameters, alerts);
             }
 
             if (symbolName == Symbol.CommonNames.DatasetSettings)
             {
-                Symbol datasetSettingsSymbol = base.ResolveExportedSymbol(Symbol.CommonNames.DatasetSettings, alerts);
+                Symbol datasetSettingsSymbol = base.ResolveExportedSymbol(Symbol.CommonNames.DatasetSettings, parameters, alerts);
 
                 if (datasetSettingsSymbol.State != Symbol.SymbolState.Ready)
                 {
@@ -87,7 +88,7 @@ namespace FabricUpgradeCmdlet.Upgraders.DatasetUpgraders
                 return Symbol.ReadySymbol(fabricActivityObject);
             }
 
-            return base.ResolveExportedSymbol(symbolName, alerts);
+            return base.ResolveExportedSymbol(symbolName, parameters, alerts);
         }
     }
 }
