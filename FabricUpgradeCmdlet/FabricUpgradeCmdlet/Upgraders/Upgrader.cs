@@ -3,6 +3,7 @@
 // </copyright>
 
 using FabricUpgradeCmdlet.UpgradeMachines;
+using FabricUpgradeCmdlet.Upgraders.DatasetUpgraders;
 using FabricUpgradeCmdlet.Utilities;
 using Newtonsoft.Json.Linq;
 
