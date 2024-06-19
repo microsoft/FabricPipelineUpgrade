@@ -1,0 +1,23 @@
+﻿{
+  "originalExpression": "@concat(dataset().fileName, string(dataset().fileIndex), '.json')",
+
+  "parameterDeclarations": {
+    "fileName": {
+      "type": "string",
+      "defaultValue": "otter"
+    },
+    "fileIndex": {
+      "type": "int",
+      "defaultValue": 0
+    }
+  },
+
+  "valuesFromCaller": {
+    "fileName": "muskrat"
+  },
+
+  "expectedExpression": {
+    "value": "@concat('muskrat', string(0), '.json')",
+    "type": "Expression"
+  }
+}

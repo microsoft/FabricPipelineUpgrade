@@ -1,0 +1,40 @@
+﻿{
+  "comments": [
+    "The CopyActivity sends some dataset parameters.",
+    "One of those is a string and one is an int."
+  ],
+
+  "originalExpression": "@concat(dataset().fileName, string(dataset().fileIndex), dataset().major, string(dataset().minor), '.json')",
+
+  "parameterDeclarations": {
+    "fileName": {
+      "type": "string",
+      "defaultValue": "otter"
+    },
+    "fileIndex": {
+      "type": "int",
+      "defaultValue": 0
+    },
+    "major": {
+      "type": "string",
+      "defaultValue": "A"
+    },
+    "minor": {
+      "type": "int",
+      "defaultValue": 0
+    }
+  },
+
+  "valuesFromCaller": {
+    "fileName": {
+      "type": "Expression",
+      "value": "@pipeline().useThisFilename"
+    },
+    "minor": 3
+  },
+
+  "expectedExpression": {
+    "value": "@concat(pipeline().useThisFilename, string(0), 'A', string(3), '.json')",
+    "type": "Expression"
+  }
+}

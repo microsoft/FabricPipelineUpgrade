@@ -1,0 +1,12 @@
+﻿{
+  "originalExpression": "@dataset().fileName",
+
+  "parameterDeclarations": {
+    "fileName": {
+      "type": "string",
+      "defaultValue": "otter"
+    }
+  },
+
+  "expectedExpression": "otter"
+}

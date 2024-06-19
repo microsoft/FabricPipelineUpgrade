@@ -19,11 +19,11 @@ namespace FabricUpgradeCmdlet.Utilities
 
         private readonly string expression;
 
-        private List<string> tokens = null;
+        private List<JToken> tokens = null;
 
-        public List<string> Tokens()
+        public List<JToken> Tokens()
         {
-            return new List<string>(this.tokens);
+            return new List<JToken>(this.tokens);
         }
 
         public UpgradeExpression(
@@ -42,11 +42,13 @@ namespace FabricUpgradeCmdlet.Utilities
 
             this.TokenizeExpression();
 
-            List<string> updatedTokens = new List<string>();
+            List<JToken> updatedTokens = new List<JToken>();
 
-            if ((this.tokens.Count == 2) && (this.tokens[0] == "@") && (parameters.ContainsParameterName(this.tokens[1])))
+            if ((this.tokens.Count == 2) &&
+                (this.tokens[0].ToString() == "@") &&
+                (parameters.ContainsParameterName(this.tokens[1].ToString())))
             {
-                JToken standaloneValue = parameters.StandaloneValue(this.tokens[1]);
+                JToken standaloneValue = parameters.StandaloneValue(this.tokens[1].ToString());
 
                 if (TokenIsExpressionObject(standaloneValue))
                 {
@@ -56,7 +58,7 @@ namespace FabricUpgradeCmdlet.Utilities
                 }
                 else
                 {
-                    updatedTokens.Add(standaloneValue?.ToString());
+                    updatedTokens.Add(standaloneValue);
                 }
             }
             else
@@ -72,7 +74,7 @@ namespace FabricUpgradeCmdlet.Utilities
                         {
                             var newUE = new UpgradeExpression("", standaloneValue.SelectToken("value")?.ToString());
                             newUE.TokenizeExpression();
-                            List<string> insertTokens = newUE.Tokens();
+                            List<JToken> insertTokens = newUE.Tokens();
                             foreach (string insertToken in insertTokens[1..])
                             {
                                 updatedTokens.Add(insertToken);
@@ -80,7 +82,7 @@ namespace FabricUpgradeCmdlet.Utilities
                         }
                         else
                         {
-                            updatedTokens.Add(parameters.IntegratedValue(token).ToString());
+                            updatedTokens.Add(parameters.IntegratedValue(token));
                         }
                     }
                     else
@@ -112,7 +114,12 @@ namespace FabricUpgradeCmdlet.Utilities
                 return null;
             }
 
-            if ((this.tokens.Count == 1) || (this.tokens[0] != "@"))
+            if (this.tokens.Count == 1)
+            {
+                return this.tokens[0];
+            }
+
+            if (this.tokens[0].ToString() != "@")
             {
                 return string.Join(string.Empty, this.tokens);
             }
@@ -262,7 +269,7 @@ namespace FabricUpgradeCmdlet.Utilities
                 return;
             }
 
-            this.tokens = new List<string>();
+            this.tokens = new List<JToken>();
 
             string parsing = this.expression?[..] ?? string.Empty;
             parsing = StripSpacesExceptInStrings(parsing);

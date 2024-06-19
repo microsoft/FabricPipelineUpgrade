@@ -1,0 +1,16 @@
+﻿{
+  "originalExpression": "@dataset().fileName",
+
+  "parameterDeclarations": {
+    "fileName": {
+      "type": "string",
+      "defaultValue": "otter"
+    }
+  },
+
+  "valuesFromCaller": {
+    "fileName": "beaver"
+  },
+
+  "expectedExpression": "beaver"
+}
