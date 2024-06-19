@@ -1,0 +1,19 @@
+﻿{
+  "originalExpression": "@concat(dataset().fileName, string(add(dataset().fileIndex, 3)), '.json')",
+
+  "parameterDeclarations": {
+    "fileName": {
+      "type": "string",
+      "defaultValue": "otter"
+    },
+    "fileIndex": {
+      "type": "int",
+      "defaultValue": 0
+    }
+  },
+
+  "expectedExpression": {
+    "value": "@concat('otter', string(add(0, 3)), '.json')",
+    "type": "Expression"
+  }
+}

@@ -50,7 +50,7 @@ namespace FabricUpgradeTests
 
             Assert.AreEqual(expectedValid, actualValid);
 
-            List<string> tokens = ex.Tokens();
+            List<JToken> tokens = ex.Tokens();
 
             Assert.AreEqual(expectedTokens.Count(), tokens.Count);
 
@@ -85,11 +85,16 @@ namespace FabricUpgradeTests
 
         [TestMethod]
         [DataRow("ApplyParameters_SingletonString_DefaultOnly")]
-        //[DataRow("ApplyParameters_SingletonInt_DefaultOnly")]
+        [DataRow("ApplyParameters_SingletonString_DefaultAndConstOverride")]
+        [DataRow("ApplyParameters_SingletonString_DefaultAndExpressionOverride")]
 
+        [DataRow("ApplyParameters_SingletonInt_DefaultOnly")]
+        [DataRow("ApplyParameters_SingletonInt_DefaultAndConstOverride")]
+        [DataRow("ApplyParameters_SingletonInt_DefaultAndExpressionOverride")]
+        
         [DataRow("ApplyParameters_DefaultOnly")]
         [DataRow("ApplyParameters_DefaultAndConstOverride")]
-        [DataRow("ApplyParameters_DefaultAndPipelineParamOverride")]
+        [DataRow("ApplyParameters_DefaultAndExpressionOverride")]
         public void ApplyParameter_Test(
             string testConfigFile)
         {

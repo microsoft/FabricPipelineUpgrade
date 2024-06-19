@@ -1,0 +1,12 @@
+﻿{
+  "originalExpression": "@dataset().fileIndex",
+
+  "parameterDeclarations": {
+    "fileIndex": {
+      "type": "int",
+      "defaultValue": 4
+    }
+  },
+
+  "expectedExpression": 4
+}
