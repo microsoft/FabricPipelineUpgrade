@@ -6,6 +6,7 @@ using FabricUpgradeCmdlet.UpgradeMachines;
 using FabricUpgradeCmdlet.Upgraders.LinkedServiceUpgraders;
 using FabricUpgradeCmdlet.Utilities;
 using Newtonsoft.Json.Linq;
+using System.Diagnostics;
 
 namespace FabricUpgradeCmdlet.Upgraders.DatasetUpgraders
 {
@@ -40,17 +41,17 @@ namespace FabricUpgradeCmdlet.Upgraders.DatasetUpgraders
 
         public override Symbol ResolveExportedSymbol(
             string symbolName,
-            Dictionary<string, JToken> parameters,
+            Dictionary<string, JToken> parametersFromCaller,
             AlertCollector alerts)
         {
             if (symbolName == Symbol.CommonNames.ExportLinks)
             {
-                return base.ResolveExportedSymbol(Symbol.CommonNames.ExportLinks, parameters, alerts);
+                return base.ResolveExportedSymbol(Symbol.CommonNames.ExportLinks, parametersFromCaller, alerts);
             }
 
             if (symbolName == Symbol.CommonNames.DatasetSettings)
             {
-                Symbol datasetSettingsSymbol = base.ResolveExportedSymbol(Symbol.CommonNames.DatasetSettings, parameters, alerts);
+                Symbol datasetSettingsSymbol = base.ResolveExportedSymbol(Symbol.CommonNames.DatasetSettings, parametersFromCaller, alerts);
 
                 if (datasetSettingsSymbol.State != Symbol.SymbolState.Ready)
                 {
@@ -58,15 +59,25 @@ namespace FabricUpgradeCmdlet.Upgraders.DatasetUpgraders
                 }
 
                 JObject fabricActivityObject = (JObject)datasetSettingsSymbol.Value;
-                PropertyCopier copier = new PropertyCopier(this.Path, this.AdfResourceToken, fabricActivityObject, alerts);
+                PropertyCopier copier = new PropertyCopier(
+                    this.Path,
+                    this.AdfResourceToken,
+                    fabricActivityObject,
+                    this.BuildActiveParameters(parametersFromCaller),
+                    alerts);
 
                 copier.Copy("properties.typeProperties", "typeProperties");
 
-                if (this.LinkedServiceUpgrader.ConnectionSettings.TryGetValue(
-                    AzureSqlDatabaseLinkedServiceUpgrader.DatabaseKey,
-                    out JToken databaseName))
+                Dictionary<string, JToken> parametersToLinkedService = this.BuildParametersToPassToLinkedService(parametersFromCaller, alerts);
+
+                Symbol databaseNameSymbol = this.LinkedServiceUpgrader.ResolveExportedSymbol(
+                    Symbol.CommonNames.LinkedServiceDatabaseName,
+                    parametersToLinkedService,
+                    alerts);
+
+                if (databaseNameSymbol.State == Symbol.SymbolState.Ready)
                 {
-                    copier.Set("typeProperties.database", databaseName);
+                    copier.Set("typeProperties.database", databaseNameSymbol.Value);
                 }
                 else
                 {
@@ -88,7 +99,50 @@ namespace FabricUpgradeCmdlet.Upgraders.DatasetUpgraders
                 return Symbol.ReadySymbol(fabricActivityObject);
             }
 
-            return base.ResolveExportedSymbol(symbolName, parameters, alerts);
+            return base.ResolveExportedSymbol(symbolName, parametersFromCaller, alerts);
+        }
+
+        /// <summary>
+        /// Combine this dataset's default parameter values with the values passed in from the 
+        /// caller to produce a set of values to send to the LinkedService.
+        /// </summary>
+        /// <param name="parametersFromCaller">The values passed in from the caller (like Copy Activity).</param>
+        /// <param name="alerts">Add any generated alerts to this collector.</param>
+        /// <returns></returns>
+        private Dictionary<string, JToken> BuildParametersToPassToLinkedService(
+            Dictionary<string, JToken> parametersFromCaller,
+            AlertCollector alerts)
+        {
+            // TODO: This will stop working when the Dataset needs to both accept and forward parameters.
+
+            JObject linkedServiceParametersObject = (JObject)this.AdfResourceToken.SelectToken($"properties.linkedServiceName.parameters") ?? new JObject();
+            Dictionary<string, JToken> linkedServiceParameters = linkedServiceParametersObject.ToObject<Dictionary<string, JToken>>();
+
+            var localParameters = this.BuildActiveParameters(parametersFromCaller);
+
+            JObject parametersToSend = new JObject();
+
+            PropertyCopier copier = new PropertyCopier("", linkedServiceParametersObject, parametersToSend, localParameters, alerts);
+
+            foreach (var p in linkedServiceParametersObject)
+            {
+                copier.Copy(p.Key);
+            }
+
+            return parametersToSend.ToObject<Dictionary<string, JToken>>();
+
+            /*
+            JObject targetParams = new JObject();
+            PropertyCopier paramCopier = new PropertyCopier(
+                "",
+                parametersFromCaller,
+                targetParams,
+                this.DatasetParameters,
+                alerts);
+
+            return null;
+            */
+
         }
     }
 }

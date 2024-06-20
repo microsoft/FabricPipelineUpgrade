@@ -60,14 +60,12 @@ namespace FabricUpgradeCmdlet.Upgraders.DatasetUpgraders
                     // TODO!
                 }
 
-                var activeParameters = this.BuildActiveParameters(parametersFromCaller);
-
                 JObject fabricActivityObject = (JObject)datasetSettingsSymbol.Value;
                 PropertyCopier copier = new PropertyCopier(
                     this.Path,
                     this.AdfResourceToken,
                     fabricActivityObject,
-                    activeParameters,
+                    this.BuildActiveParameters(parametersFromCaller),
                     alerts);
 
                 copier.Copy(adfLocationPath, fabricLocationPath);

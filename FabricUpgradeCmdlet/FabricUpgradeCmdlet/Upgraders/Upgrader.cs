@@ -157,7 +157,7 @@ namespace FabricUpgradeCmdlet.Upgraders
                 JToken value = this.AdfResourceToken.SelectToken(property);
                 if (value == null)
                 {
-                    alerts.AddPermanentError($"{this.Path}.{property} must not be null.");
+                    alerts.AddPermanentError($"{this.Path} property {property} must not be null.");
                 }
             }
         }

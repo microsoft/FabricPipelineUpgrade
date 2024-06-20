@@ -43,17 +43,17 @@ namespace FabricUpgradeCmdlet.Upgraders.DatasetUpgraders
 
         public override Symbol ResolveExportedSymbol(
             string symbolName,
-            Dictionary<string, JToken> parameters,
+            Dictionary<string, JToken> parametersFromCaller,
             AlertCollector alerts)
         {
             if (symbolName == Symbol.CommonNames.ExportLinks)
             {
-                return base.ResolveExportedSymbol(Symbol.CommonNames.ExportLinks, parameters, alerts);
+                return base.ResolveExportedSymbol(Symbol.CommonNames.ExportLinks, parametersFromCaller, alerts);
             }
 
             if (symbolName == Symbol.CommonNames.DatasetSettings)
             {
-                Symbol datasetSettingsSymbol = base.ResolveExportedSymbol(Symbol.CommonNames.DatasetSettings, parameters, alerts);
+                Symbol datasetSettingsSymbol = base.ResolveExportedSymbol(Symbol.CommonNames.DatasetSettings, parametersFromCaller, alerts);
 
                 if (datasetSettingsSymbol.State != Symbol.SymbolState.Ready)
                 {
@@ -61,14 +61,19 @@ namespace FabricUpgradeCmdlet.Upgraders.DatasetUpgraders
                 }
 
                 JObject fabricActivityObject = (JObject)datasetSettingsSymbol.Value;
-                PropertyCopier copier = new PropertyCopier(this.Path, this.AdfResourceToken, fabricActivityObject, alerts);
+                PropertyCopier copier = new PropertyCopier(
+                    this.Path,
+                    this.AdfResourceToken,
+                    fabricActivityObject,
+                    this.BuildActiveParameters(parametersFromCaller),
+                    alerts);
 
                 copier.Copy(adfLocationPath, fabricLocationPath);
 
                 return Symbol.ReadySymbol(fabricActivityObject);
             }
 
-            return base.ResolveExportedSymbol(symbolName, parameters, alerts);
+            return base.ResolveExportedSymbol(symbolName, parametersFromCaller, alerts);
         }
     }
 }

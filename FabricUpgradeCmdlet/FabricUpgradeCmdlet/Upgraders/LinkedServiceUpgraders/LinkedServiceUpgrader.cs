@@ -18,6 +18,7 @@ namespace FabricUpgradeCmdlet.Upgraders.LinkedServiceUpgraders
         }
 
         protected const string AdfLinkedServiceTypePath = "properties.type";
+        protected const string AdfParametersPath = "properties.parameters";
         protected const string AdfConnectionStringPath = "properties.typeProperties.connectionString";
 
         private readonly List<string> requiredAdfProperties = new List<string>
@@ -32,7 +33,7 @@ namespace FabricUpgradeCmdlet.Upgraders.LinkedServiceUpgraders
             this.Name = adfToken.SelectToken("name")?.ToString();
             this.UpgraderType = FabricUpgradeResourceTypes.LinkedService;
             this.LinkedServiceType = adfToken.SelectToken(AdfLinkedServiceTypePath)?.ToString();
-            this.Path = this.Name;
+            this.Path = "LinkedService " + this.Name;
         }
 
         protected string LinkedServiceType { get; set; }
@@ -40,7 +41,7 @@ namespace FabricUpgradeCmdlet.Upgraders.LinkedServiceUpgraders
         // This dictionary is used by some DatasetUpgraders.
         // For example, the AzureSqlTableDatasetUpgrader uses it to fill in the "database"
         // field in the datasetSettings of a CopyActivity.
-        public Dictionary<string, JToken> ConnectionSettings { get; set; } = new Dictionary<string, JToken>();
+        protected Dictionary<string, JToken> ConnectionSettings { get; set; } = new Dictionary<string, JToken>();
 
         /// <summary>
         /// Create the appropriate subclass of LinkedServiceUpgrader, based on the type of the ADF LinkedService.
@@ -70,22 +71,6 @@ namespace FabricUpgradeCmdlet.Upgraders.LinkedServiceUpgraders
             base.Compile(alerts);
 
             this.CheckRequiredAdfProperties(this.requiredAdfProperties, alerts);
-
-            JToken connectionStringToken = this.AdfResourceToken.SelectToken(AdfConnectionStringPath);
-
-            if (connectionStringToken == null)
-            {
-                alerts.AddPermanentError($"Cannot upgrade LinkedService '{this.Path}' because its ConnectionString is missing.");
-            }
-            else if (connectionStringToken.Type != JTokenType.String)
-            {
-                alerts.AddPermanentError($"Cannot upgrade LinkedService '{this.Path}' because its ConnectionString is not a string.");
-            }
-            else
-            {
-                this.BuildConnectionSettings(connectionStringToken.ToString());
-            }
-
         }
 
         /// <inheritdoc/>
@@ -183,6 +168,40 @@ namespace FabricUpgradeCmdlet.Upgraders.LinkedServiceUpgraders
             }
 
             this.ConnectionSettings = settings;
+        }
+
+        /// <summary>
+        /// In LinkedServices, expressions look like "@{...}" for some reason.
+        /// This method detects that form and converts it to a more form that can be transformed by UpgradeExpression.
+        /// </summary>
+        /// <param name="possibleExpression">A string that might be an expression.</param>
+        /// <param name="canonicalValue">
+        /// If 'possibleExpression' is not an expression, the original string.
+        /// If 'possibleExpression' is an expression, then the expression converted to a "canonical" form.
+        /// </param>
+        /// <returns>If this is an expression.</returns>
+        protected bool FixupLinkedServiceExpression(
+            string possibleExpression,
+            out JToken canonicalValue)
+        {
+            canonicalValue = possibleExpression;
+            if (!possibleExpression.StartsWith("@{"))
+            {
+                return false;
+            }
+
+            string canonicalString = possibleExpression.Substring(2);
+            if (canonicalString.EndsWith("}")) canonicalString = canonicalString.Substring(0, canonicalString.Length - 1);
+            canonicalString = "@" + canonicalString;
+
+            JObject expressionObject = new JObject();
+            expressionObject["type"] = "Expression";
+            expressionObject["value"] = canonicalString;
+
+            canonicalValue = expressionObject;
+
+            return true;
+
         }
     }
 }

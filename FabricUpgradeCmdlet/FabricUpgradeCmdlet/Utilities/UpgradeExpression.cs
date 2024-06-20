@@ -146,8 +146,8 @@ namespace FabricUpgradeCmdlet.Utilities
 
                 isValid &= this.CheckForReferencesToGlobalParameters(token, alerts);
                 isValid &= this.CheckForReferencesToPipelineName(token, alerts);
-                isValid &= this.CheckForReferencesToDatasetParameters(token, alerts);
-                isValid &= this.CheckForReferencesToLinkedServiceParameters(token, alerts);
+                //isValid &= this.CheckForReferencesToDatasetParameters(token, alerts);
+                //isValid &= this.CheckForReferencesToLinkedServiceParameters(token, alerts);
             }
             return isValid;
         }

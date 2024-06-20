@@ -14,7 +14,7 @@
     "alerts": [
       {
         "severity": "Permanent",
-        "details": "PipelineWithWebActivity_NullUrl/Web1.typeProperties.url must not be null."
+        "details": "PipelineWithWebActivity_NullUrl/Web1 property typeProperties.url must not be null."
       }
     ],
     "resolutions": [],
