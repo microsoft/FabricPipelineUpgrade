@@ -1,0 +1,175 @@
+﻿{
+  "comments": [
+    "The LinkedService has one parameter, InitialCatalog, whose default value is rodenkew1.",
+    "The SourceDataset has two parameters:",
+    "   databaseName, whose default value is alfalfa, and",
+    "   databaseTable, whose default value is alpaca.",
+    "The SinkDataset has no parameters.",
+
+    "The CopyActivity sends SourceDataset.databaseName = @pipeline().parameters.FromDatabase",
+    "  and SourceDataset.databaseTable = vicuña.",
+    "The SourceDataset sends linkedService.InitialCatalog = @dataset().databaseName.",
+
+    "The SinkDataset sends linkedService.InitialCatalog = saffron.",
+
+    "Therefore, we expect a Fabric Pipeline:",
+    "  the source datasetSettings to include 'schema':'db', 'table':'vicuña', 'database':'@pipeline().parameters.FromDatabase', and",
+    "  the sink datasetSettings to include 'schema':'db', 'table':'coriander', 'database':'saffron'."
+  ],
+
+  "adfSupportFile": "PipelineWithCopy_SqlToSql_PipelineParamToDatasetToLinkedServiceParams3_support_live.zip",
+
+  "resolutions": [
+    {
+      "type": "LinkedServiceToConnectionId",
+      "key": "rodenkewsql",
+      "value": "0f1083d3-8b19-44a2-bd3b-26a7e82ebe51"
+    },
+    {
+      "type": "LinkedServiceToConnectionId",
+      "key": "AzureBlobStorage2",
+      "value": "36b22d4d-9f24-423c-a7c1-58765809e6dc"
+    },
+    {
+      "type": "LinkedServiceToConnectionId",
+      "key": "AzureBlobStorage3",
+      "value": "77cd8131-e33b-4888-a51a-4a35c30e0858"
+    },
+    {
+      "type": "LinkedServiceToConnectionId",
+      "key": "ArmtemplateStorageLinkedService",
+      "value": "a10b2808-2356-4fa6-92b7-fccc540006ef"
+    }
+  ],
+
+  "expectedResponse": {
+    "state": "Succeeded",
+    "alerts": [],
+    "resolutions": [
+      {
+        "type": "LinkedServiceToConnectionId",
+        "key": "rodenkewsql",
+        "value": "0f1083d3-8b19-44a2-bd3b-26a7e82ebe51"
+      },
+      {
+        "type": "LinkedServiceToConnectionId",
+        "key": "AzureBlobStorage2",
+        "value": "36b22d4d-9f24-423c-a7c1-58765809e6dc"
+      },
+      {
+        "type": "LinkedServiceToConnectionId",
+        "key": "AzureBlobStorage3",
+        "value": "77cd8131-e33b-4888-a51a-4a35c30e0858"
+      },
+      {
+        "type": "LinkedServiceToConnectionId",
+        "key": "ArmtemplateStorageLinkedService",
+        "value": "a10b2808-2356-4fa6-92b7-fccc540006ef"
+      }
+    ],
+    "result": {
+      "rodenkewsql": {
+        "id": "0f1083d3-8b19-44a2-bd3b-26a7e82ebe51"
+      },
+      "PipelineWithCopy_SqlToSql_PipelineParamToDatasetToLinkedServiceParams3": {
+        "type": "DataPipeline",
+        "displayName": "PipelineWithCopy_SqlToSql_PipelineParamToDatasetToLinkedServiceParams3",
+        "description": null,
+        "workspaceId": "",
+        "id": 0
+      }
+    }
+  },
+
+  "expectedItems": [
+    {
+      "item": {
+        "workspaceId": "",
+        "id": 0,
+        "type": "DataPipeline",
+        "displayName": "PipelineWithCopy_SqlToSql_PipelineParamToDatasetToLinkedServiceParams3",
+        "description": null
+      },
+      "definition": {
+        "name": "PipelineWithCopy_SqlToSql_PipelineParamToDatasetToLinkedServiceParams3",
+        "properties": {
+          "activities": [
+            {
+              "policy": {
+                "timeout": "0.12:00:00",
+                "retry": 0,
+                "retryIntervalInSeconds": 30,
+                "secureOutput": false,
+                "secureInput": false
+              },
+              "name": "Copy data1",
+              "type": "Copy",
+              "dependsOn": [],
+              "description": null,
+              "userProperties": [],
+              "typeProperties": {
+                "source": {
+                  "type": "AzureSqlSource",
+                  "datasetSettings": {
+                    "annotations": [],
+                    "type": "AzureSqlTable",
+                    "typeProperties": {
+                      "schema": "db",
+                      "table": "vicuña",
+                      "database": {
+                        "value": "@pipeline().parameters.FromDatabase",
+                        "type": "Expression"
+                      }
+                    },
+                    "schema": [],
+                    "externalReferences": {
+                      "connection": "0f1083d3-8b19-44a2-bd3b-26a7e82ebe51"
+                    }
+                  }
+                },
+                "sink": {
+                  "type": "AzureSqlSink",
+                  "datasetSettings": {
+                    "annotations": [],
+                    "type": "AzureSqlTable",
+                    "typeProperties": {
+                      "schema": "db",
+                      "table": "coriander",
+                      "database": "saffron"
+                    },
+                    "schema": [],
+                    "externalReferences": {
+                      "connection": "0f1083d3-8b19-44a2-bd3b-26a7e82ebe51"
+                    }
+                  }
+                },
+                "enableStaging": false,
+                "translator": {
+                  "type": "TabularTranslator",
+                  "typeConversion": true,
+                  "typeConversionSettings": {
+                    "allowDataTruncation": true,
+                    "treatBooleanAsNumber": false
+                  }
+                }
+              }
+            }
+          ],
+          "parameters": {
+            "FromDatabase": {
+              "type": "string",
+              "defaultValue": "orpington"
+            }
+          }
+        },
+        "annotations": []
+      }
+    }
+  ],
+
+  "expectedEndpointEvents": [
+    "LIST DataPipeline",
+    "CREATE DataPipeline 'PipelineWithCopy_SqlToSql_PipelineParamToDatasetToLinkedServiceParams3' => $0"
+  ]
+
+}

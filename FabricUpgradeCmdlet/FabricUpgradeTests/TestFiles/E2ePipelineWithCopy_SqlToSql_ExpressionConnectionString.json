@@ -33,7 +33,11 @@
       },
       {
         "severity": "Permanent",
-        "details": "LinkedService property rodenkewsql.connectionSettings.'initial catalog' must not be null."
+        "details": "LinkedService rodenkewsql property properties.typeProperties.server must not be null."
+      },
+      {
+        "severity": "Permanent",
+        "details": "LinkedService rodenkewsql property properties.typeProperties.database must not be null."
       }
     ],
     "resolutions": [],

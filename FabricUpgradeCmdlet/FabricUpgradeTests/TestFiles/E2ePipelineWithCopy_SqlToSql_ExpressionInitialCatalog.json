@@ -1,0 +1,148 @@
+﻿{
+  "adfSupportFile": "PipelineWithCopy_SqlToSql_ExpressionInitialCatalog_support_live.zip",
+
+  "resolutions": [
+    {
+      "type": "LinkedServiceToConnectionId",
+      "key": "rodenkewsql",
+      "value": "0f1083d3-8b19-44a2-bd3b-26a7e82ebe51"
+    },
+    {
+      "type": "LinkedServiceToConnectionId",
+      "key": "AzureBlobStorage2",
+      "value": "36b22d4d-9f24-423c-a7c1-58765809e6dc"
+    },
+    {
+      "type": "LinkedServiceToConnectionId",
+      "key": "AzureBlobStorage3",
+      "value": "77cd8131-e33b-4888-a51a-4a35c30e0858"
+    },
+    {
+      "type": "LinkedServiceToConnectionId",
+      "key": "ArmtemplateStorageLinkedService",
+      "value": "a10b2808-2356-4fa6-92b7-fccc540006ef"
+    }
+  ],
+
+  "expectedResponse": {
+    "state": "Succeeded",
+    "alerts": [],
+    "resolutions": [
+      {
+        "type": "LinkedServiceToConnectionId",
+        "key": "rodenkewsql",
+        "value": "0f1083d3-8b19-44a2-bd3b-26a7e82ebe51"
+      },
+      {
+        "type": "LinkedServiceToConnectionId",
+        "key": "AzureBlobStorage2",
+        "value": "36b22d4d-9f24-423c-a7c1-58765809e6dc"
+      },
+      {
+        "type": "LinkedServiceToConnectionId",
+        "key": "AzureBlobStorage3",
+        "value": "77cd8131-e33b-4888-a51a-4a35c30e0858"
+      },
+      {
+        "type": "LinkedServiceToConnectionId",
+        "key": "ArmtemplateStorageLinkedService",
+        "value": "a10b2808-2356-4fa6-92b7-fccc540006ef"
+      }
+    ],
+    "result": {
+      "rodenkewsql": {
+        "id": "0f1083d3-8b19-44a2-bd3b-26a7e82ebe51"
+      },
+      "CopyPipelineSqltoSql8": {
+        "type": "DataPipeline",
+        "displayName": "CopyPipelineSqltoSql8",
+        "description": null,
+        "workspaceId": "",
+        "id": 0
+      }
+    }
+  },
+
+  "expectedItems": [
+    {
+      "item": {
+        "type": "DataPipeline",
+        "displayName": "CopyPipelineSqltoSql8",
+        "description": null,
+        "workspaceId": "",
+        "id": 0
+      },
+      "definition": {
+        "name": "CopyPipelineSqltoSql8",
+        "properties": {
+          "activities": [
+            {
+              "name": "Copy data1",
+              "type": "Copy",
+              "dependsOn": [],
+              "userProperties": [],
+              "description": null,
+              "policy": {
+                "timeout": "0.12:00:00",
+                "retry": 0,
+                "retryIntervalInSeconds": 30,
+                "secureOutput": false,
+                "secureInput": false
+              },
+              "typeProperties": {
+                "source": {
+                  "type": "AzureSqlSource",
+                  "datasetSettings": {
+                    "annotations": [],
+                    "type": "AzureSqlTable",
+                    "externalReferences": {
+                      "connection": "0f1083d3-8b19-44a2-bd3b-26a7e82ebe51"
+                    },
+                    "typeProperties": {
+                      "schema": "dxt",
+                      "table": "holidays",
+                      "database": "rodenkew1"
+                    },
+                    "schema": []
+                  }
+                },
+                "sink": {
+                  "type": "AzureSqlSink",
+                  "datasetSettings": {
+                    "annotations": [],
+                    "type": "AzureSqlTable",
+                    "externalReferences": {
+                      "connection": "0f1083d3-8b19-44a2-bd3b-26a7e82ebe51"
+                    },
+                    "typeProperties": {
+                      "schema": "copy1",
+                      "table": "holidays",
+                      "database": "rodenkew1"
+                    },
+                    "schema": []
+                  }
+                },
+                "enableStaging": false,
+                "translator": {
+                  "type": "TabularTranslator",
+                  "typeConversion": true,
+                  "typeConversionSettings": {
+                    "allowDataTruncation": true,
+                    "treatBooleanAsNumber": false
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "annotations": []
+      }
+    }
+  ],
+
+  "expectedEndpointEvents": [
+    "LIST DataPipeline",
+    "CREATE DataPipeline 'CopyPipelineSqltoSql8' => $0"
+  ]
+
+}

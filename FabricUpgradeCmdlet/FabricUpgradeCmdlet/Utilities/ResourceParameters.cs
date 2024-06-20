@@ -37,7 +37,7 @@ namespace FabricUpgradeCmdlet.Utilities
             string prefix)
         {
             Dictionary<string, Parameter> declaredParameters = new Dictionary<string, Parameter>();
-            foreach (var declaration in parameterDeclaration)
+            foreach (var declaration in parameterDeclaration ?? new Dictionary<string, JToken>())
             {
                 declaredParameters[prefix + "." + declaration.Key] = Parameter.FromDefaultValueToken(declaration.Value);
             }
@@ -63,6 +63,17 @@ namespace FabricUpgradeCmdlet.Utilities
             }
 
             return new ResourceParameters(this.prefix, activeParameters);
+        }
+
+        public Dictionary<string, JToken> ParametersToCallee()
+        {
+            Dictionary<string, JToken> parametersToCallee = new Dictionary<string, JToken>();
+            foreach (var parameter in this.parameters)
+            {
+                parametersToCallee[parameter.Key] = this.parameters[parameter.Key].StandaloneValue;
+            }
+
+            return parametersToCallee;
         }
 
         public bool ContainsParameterName(string parameterName)

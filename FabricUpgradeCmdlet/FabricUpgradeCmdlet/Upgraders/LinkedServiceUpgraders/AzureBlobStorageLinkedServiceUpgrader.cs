@@ -28,6 +28,21 @@ namespace FabricUpgradeCmdlet.Upgraders.LinkedServiceUpgraders
             base.Compile(alerts);
 
             this.CheckRequiredAdfProperties(this.requiredAdfProperties, alerts);
+
+            JToken connectionStringToken = this.AdfResourceToken.SelectToken(AdfConnectionStringPath);
+
+            if (connectionStringToken == null)
+            {
+                alerts.AddPermanentError($"Cannot upgrade LinkedService '{this.Path}' because its ConnectionString is missing.");
+            }
+            else if (connectionStringToken.Type != JTokenType.String)
+            {
+                alerts.AddPermanentError($"Cannot upgrade LinkedService '{this.Path}' because its ConnectionString is not a string.");
+            }
+            else
+            {
+                this.BuildConnectionSettings(connectionStringToken.ToString());
+            }
         }
 
         /// <inheritdoc/>

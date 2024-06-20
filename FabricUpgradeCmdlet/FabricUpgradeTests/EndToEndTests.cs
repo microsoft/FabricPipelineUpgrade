@@ -40,6 +40,8 @@ namespace FabricUpgradeTests
         [DataRow("E2ePipelineWithWeb_BadUrl")]
         [DataRow("E2ePipelineWithWeb_WithLinkedServicesAndDatasets")]
 
+        [DataRow("E2ePipelineWithCopy_Binary_DatasetParams")]
+
         [DataRow("E2ePipelineWithCopy_JsonToJson")]
         [DataRow("E2ePipelineWithCopy_JsonToJson_MissingResolution")]
         [DataRow("E2ePipelineWithCopy_StagingAndLogging")]
@@ -52,10 +54,17 @@ namespace FabricUpgradeTests
 
         [DataRow("E2ePipelineWithCopy_SqlToSql")]
         [DataRow("E2ePipelineWithCopy_SqlToSql_MissingResolution")]
-        [DataRow("E2ePipelineWithCopy_SqlToSql_NoConnectionString")]
+        [DataRow("E2ePipelineWithCopy_SqlToSql_NoConnectionStringAndNoServer")]
         [DataRow("E2ePipelineWithCopy_SqlToSql_ExpressionConnectionString")]
         [DataRow("E2ePipelineWithCopy_SqlToSql_ConnectionStringLacksInitialCatalog")]
-        [DataRow("E2ePipelineWithCopy_SqlToSql_ConnectionStringExpressionInitialCatalog")]
+        [DataRow("E2ePipelineWithCopy_SqlToSql_ExpressionInitialCatalog")]
+
+        [DataRow("E2ePipelineWithCopy_SqlToSql_DefaultLinkedServiceParams")]
+        [DataRow("E2ePipelineWithCopy_SqlToSql_DatasetConstToLinkedServiceParams")]
+        [DataRow("E2ePipelineWithCopy_SqlToSql_ActivityConstToDatasetToLinkedServiceParams")]
+        [DataRow("E2ePipelineWithCopy_SqlToSql_PipelineParamToDatasetToLinkedServiceParams")]
+        [DataRow("E2ePipelineWithCopy_SqlToSql_PipelineParamToDatasetToLinkedServiceParams2")]
+        [DataRow("E2ePipelineWithCopy_SqlToSql_PipelineParamToDatasetToLinkedServiceParams3")]
 
         [DataRow("E2ePipelineWithExecutePipeline_PrestockFirst")]
         [DataRow("E2ePipelineWithExecutePipeline_PrestockSecond")]

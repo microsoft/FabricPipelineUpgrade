@@ -45,7 +45,7 @@ namespace FabricUpgradeCmdlet.Upgraders.DatasetUpgraders
             this.DatasetType = this.AdfModel.Properties.DatasetType;
             this.Name = AdfModel.Name;
             this.UpgraderType = FabricUpgradeResourceTypes.Dataset;
-            this.Path = this.Name;
+            this.Path = "Dataset " + this.Name;
         }
 
         protected AdfDatasetModel AdfModel { get; set; }
@@ -201,6 +201,9 @@ namespace FabricUpgradeCmdlet.Upgraders.DatasetUpgraders
         {
             [JsonProperty(PropertyName = "referenceName")]
             public string ReferenceName { get; set; }
+
+            [JsonProperty(PropertyName = "parameters")]
+            public Dictionary<string, JToken> Parameters { get; set; } = new Dictionary<string, JToken>();
         }
     }
 }

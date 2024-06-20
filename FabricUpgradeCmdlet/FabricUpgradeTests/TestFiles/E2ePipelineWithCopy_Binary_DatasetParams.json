@@ -1,0 +1,182 @@
+﻿{
+  "comments": [
+    "The LinkedService has no parameters.",
+
+    "Each Dataset has three parameters:",
+    "   container, whose default value is 'aaa',",
+    "   folder, whose default value is <null>,",
+    "   filename, whose default value is 'ccc'.",
+
+    "Each dataset sets:",
+    "  container = @dataset().container",
+    "  folder = @dataset().folder",
+    "  fileName = @concat(dataset().filename, 'def')",
+
+    "The CopyActivity sends:",
+    "  SourceDataset.container = @pipeline().parameters.SourceContainer,",
+    "  SourceDataset.folder = <null>,",
+    "  SourceDataset.filename = @concat('ccc', 'def'),",
+
+    "  SinkDataset.container = 'containerFromActivity',",
+    "  SinkDataset.folder = @concat(pipeline().parameters.SinkFolder, '_abc'),",
+    "  SinkDataset.filename = @if(equals(dayOfWeek(utcNow()),1), pipeline().parameters.SinkFilename, 'nothing').",
+
+    "Therefore, we expect a Fabric Pipeline:",
+    " source.datasetSettings.container = @pipeline().parameters.SourceContainer",
+    " source.datasetSettings.folder = <null>",
+    " source.datasetSettings.fileName = @concat('ccc', 'def')"
+
+  ],
+  
+  "adfSupportFile": "PipelineWithCopy_Binary_DatasetParams_support_live.zip",
+
+  "resolutions": [
+    {
+      "type": "LinkedServiceToConnectionId",
+      "key": "AzureBlobStorage1",
+      "value": "99379220-ae1a-467f-b9f5-537cc3142b9f"
+    }
+  ],
+
+  "expectedResponse": {
+    "state": "Succeeded",
+    "alerts": [],
+    "resolutions": [
+      {
+        "type": "LinkedServiceToConnectionId",
+        "key": "AzureBlobStorage1",
+        "value": "99379220-ae1a-467f-b9f5-537cc3142b9f"
+      }
+    ],
+    "result": {
+      "AzureBlobStorage1": {
+        "id": "99379220-ae1a-467f-b9f5-537cc3142b9f"
+      },
+      "PipelineWithCopy_Binary_DatasetParams": {
+        "type": "DataPipeline",
+        "displayName": "PipelineWithCopy_Binary_DatasetParams",
+        "description": null,
+        "workspaceId": "",
+        "id": 0
+      }
+    }
+  },
+
+  "expectedItems": [
+    {
+      "item": {
+        "type": "DataPipeline",
+        "workspaceId": "",
+        "id": 0,
+        "displayName": "PipelineWithCopy_Binary_DatasetParams",
+        "description": null
+      },
+      "definition": {
+        "name": "PipelineWithCopy_Binary_DatasetParams",
+        "properties": {
+          "activities": [
+            {
+              "name": "Copy data1",
+              "type": "Copy",
+              "dependsOn": [],
+              "userProperties": [],
+              "description": null,
+              "policy": {
+                "timeout": "0.12:00:00",
+                "retry": 0,
+                "retryIntervalInSeconds": 30,
+                "secureOutput": false,
+                "secureInput": false
+              },
+              "typeProperties": {
+                "source": {
+                  "type": "BinarySource",
+                  "storeSettings": {
+                    "type": "AzureBlobStorageReadSettings",
+                    "recursive": true
+                  },
+                  "formatSettings": {
+                    "type": "BinaryReadSettings"
+                  },
+                  "datasetSettings": {
+                    "annotations": [],
+                    "type": "Binary",
+                    "typeProperties": {
+                      "location": {
+                        "type": "AzureBlobStorageLocation",
+                        "container": {
+                          "value": "@pipeline().parameters.SourceContainer",
+                          "type": "Expression"
+                        },
+                        "folderPath": null,
+                        "fileName": {
+                          "value": "@concat('ccc', 'def')",
+                          "type": "Expression"
+                        }
+                      }
+                    },
+                    "externalReferences": {
+                      "connection": "99379220-ae1a-467f-b9f5-537cc3142b9f"
+                    }
+                  }
+                },
+                "sink": {
+                  "type": "BinarySink",
+                  "storeSettings": {
+                    "type": "AzureBlobStorageWriteSettings"
+                  },
+                  "datasetSettings": {
+                    "annotations": [],
+                    "type": "Binary",
+                    "typeProperties": {
+                      "location": {
+                        "type": "AzureBlobStorageLocation",
+                        "container": "containerFromActivity",
+                        "folderPath": {
+                          "value": "@concat(pipeline().parameters.SinkFolder, '_abc')",
+                          "type": "Expression"
+                        },
+                        "fileName": {
+                          "value": "@concat(if(equals(dayOfWeek(utcNow()), 1), pipeline().parameters.SinkFilename, 'nothing'), 'def')",
+                          "type": "Expression"
+                        }
+                      }
+                    },
+                    "externalReferences": {
+                      "connection": "99379220-ae1a-467f-b9f5-537cc3142b9f"
+                    }
+                  }
+                },
+                "enableStaging": false
+              }
+            }
+          ],
+          "parameters": {
+            "SourceFolder": {
+              "type": "string",
+              "defaultValue": "folderFrom"
+            },
+            "SinkFolder": {
+              "type": "string",
+              "defaultValue": "folderTo"
+            },
+            "SourceContainer": {
+              "type": "string",
+              "defaultValue": "containerFrom"
+            },
+            "SinkFilename": {
+              "type": "string"
+            }
+          }
+        },
+        "annotations": []
+      }
+    }
+  ],
+
+  "expectedEndpointEvents": [
+    "LIST DataPipeline",
+    "CREATE DataPipeline 'PipelineWithCopy_Binary_DatasetParams' => $0"
+  ]
+
+}
