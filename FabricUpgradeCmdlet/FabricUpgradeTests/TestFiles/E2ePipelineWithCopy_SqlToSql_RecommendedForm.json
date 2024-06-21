@@ -1,0 +1,118 @@
+﻿{
+  "adfSupportFile": "PipelineWithCopy_SqlToSql_RecommendedForm_support_live.zip",
+
+  "resolutions": [
+    {
+      "type": "LinkedServiceToConnectionId",
+      "key": "AzureSqlDatabase1",
+      "value": "4ceb8bb8-8506-42cf-856c-55aaa4a3452b"
+    }
+  ],
+
+  "expectedResponse": {
+    "state": "Succeeded",
+    "alerts": [],
+    "result": {
+      "AzureSqlDatabase1": {
+        "id": "4ceb8bb8-8506-42cf-856c-55aaa4a3452b"
+      },
+      "PipelineWithCopy_SqlToSql_RecommendedForm": {
+        "type": "DataPipeline",
+        "displayName": "PipelineWithCopy_SqlToSql_RecommendedForm",
+        "description": null,
+        "workspaceId": "",
+        "id": 0
+      }
+    },
+    "resolutions": [
+      {
+        "type": "LinkedServiceToConnectionId",
+        "key": "AzureSqlDatabase1",
+        "value": "4ceb8bb8-8506-42cf-856c-55aaa4a3452b"
+      }
+    ]
+  },
+
+  "expectedItems": [
+    {
+      "item": {
+        "workspaceId": "",
+        "id": 0,
+        "type": "DataPipeline",
+        "displayName": "PipelineWithCopy_SqlToSql_RecommendedForm",
+        "description": null
+      },
+      "definition": {
+        "name": "PipelineWithCopy_SqlToSql_RecommendedForm",
+        "properties": {
+          "activities": [
+            {
+              "policy": {
+                "timeout": "0.13:00:00",
+                "retry": 2,
+                "retryIntervalInSeconds": 21,
+                "secureOutput": true,
+                "secureInput": true
+              },
+              "name": "CopySqlToSql",
+              "type": "Copy",
+              "dependsOn": [],
+              "description": "This is my description.",
+              "userProperties": [],
+              "typeProperties": {
+                "source": {
+                  "type": "AzureSqlSource",
+                  "datasetSettings": {
+                    "annotations": [],
+                    "type": "AzureSqlTable",
+                    "typeProperties": {
+                      "schema": "abc",
+                      "table": "def",
+                      "database": "rodenkewSqlDb"
+                    },
+                    "schema": [],
+                    "externalReferences": {
+                      "connection": "4ceb8bb8-8506-42cf-856c-55aaa4a3452b"
+                    }
+                  }
+                },
+                "sink": {
+                  "type": "AzureSqlSink",
+                  "datasetSettings": {
+                    "annotations": [],
+                    "type": "AzureSqlTable",
+                    "typeProperties": {
+                      "schema": "abc",
+                      "table": "def",
+                      "database": "rodenkewSqlDb"
+                    },
+                    "schema": [],
+                    "externalReferences": {
+                      "connection": "4ceb8bb8-8506-42cf-856c-55aaa4a3452b"
+                    }
+                  }
+                },
+                "enableStaging": false,
+                "translator": {
+                  "type": "TabularTranslator",
+                  "typeConversion": true,
+                  "typeConversionSettings": {
+                    "allowDataTruncation": true,
+                    "treatBooleanAsNumber": false
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "annotations": []
+      }
+    }
+  ],
+
+  "expectedEndpointEvents": [
+    "LIST DataPipeline",
+    "CREATE DataPipeline 'PipelineWithCopy_SqlToSql_RecommendedForm' => $0"
+  ]
+
+}

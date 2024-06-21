@@ -1,10 +1,11 @@
 ﻿{
   "comments": [
     "The LinkedService has expressions in server, username, and password.",
-    "These are all errors."
+    "These are all errors.",
+    "This support file uses the new 'Recommended' JSON format for the AzureSqlDatabase LinkedService."
   ],
 
-  "adfSupportFile": "PipelineWithCopy_MisplacedExpressionsInAzureSqlLinkedService_support_live.zip",
+  "adfSupportFile": "PipelineWithCopy_MisplacedExpressionsInAzureSqlLinkedService_RecommendedForm_support_live.zip",
 
   "resolutions": [
     {
