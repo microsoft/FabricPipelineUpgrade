@@ -108,9 +108,7 @@ namespace FabricUpgradeTests
                 runningProgress?.ToString(),
                 "./TestFiles/AdfSupportFiles/" + testConfig.AdfSupportFile);
 
-            runningProgress = new FabricUpgradeHandler().ConvertToFabricPipeline(
-                runningProgress?.ToString(),
-                null);
+            runningProgress = new FabricUpgradeHandler().ConvertToFabricPipeline(runningProgress?.ToString());
 
             foreach (FabricUpgradeResolution resolution in testConfig.Resolutions)
             {

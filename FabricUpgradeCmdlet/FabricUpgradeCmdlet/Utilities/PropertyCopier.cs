@@ -9,13 +9,22 @@ namespace FabricUpgradeCmdlet.Utilities
     /// <summary>
     /// This class is used by Upgraders to accelerate copying properties from
     /// the ADF resource JSON to the Fabric resource JSON.
+    /// This class takes care of validating and resolving expressions.
     /// </summary>
     public class PropertyCopier
     {
+        // The path to the ADF resource, for alerting.
         private readonly string resourcePath;
+
+        // Copy values from this object.
         private readonly JToken adfResourceToken;
+
+        // Copy values to this object.
         private readonly JObject fabricResourceObject;
+
+        // Parameters that can be used to resolve Dataset or LinkedSevice parameters in an Expression.
         private readonly ResourceParameters parameters;
+
         private readonly AlertCollector alerts;
 
         public PropertyCopier(
@@ -42,8 +51,11 @@ namespace FabricUpgradeCmdlet.Utilities
         }
 
         /// <summary>
-        /// Set the Fabric resource property described by 'targetPath' to the token.
+        /// Set the Fabric resource property described by 'targetPath' to the value token.
         /// </summary>
+        /// <remarks>
+        /// This method does not validate nor resolve the value token.
+        /// </remarks>
         /// <param name="targetPath">Where to put the value.</param>
         /// <param name="value">The value to put there.</param>
         public void Set(
@@ -51,7 +63,10 @@ namespace FabricUpgradeCmdlet.Utilities
             JToken value)
         {
             // Ensure that the target path exists in the Fabric resource JSON.
-            // TODO: This doesn't handle Arrays!
+            // If it does not, then build that target path.
+
+            // TODO: Handle Arrays!
+
             string[] targetPathParts = targetPath.Split(".");
 
             JObject target = fabricResourceObject;
@@ -73,7 +88,8 @@ namespace FabricUpgradeCmdlet.Utilities
 
         /// <summary>
         /// Copy a property from the ADF resource JSON to the Fabric resource JSON.
-        /// Also, validate the property, to ensure that it does not contain any forbidden expression values.
+        /// Validate the property, to ensure that it does not contain any forbidden expression values.
+        /// "Resolve" the property to remove references to Dataset or LinkedService parameters.
         /// </summary>
         /// <param name="from">Where to get the value in the ADF resource JSON.</param>
         /// <param name="to">Where to put the value in the Fabric resource JSON.</param>
@@ -95,7 +111,7 @@ namespace FabricUpgradeCmdlet.Utilities
 
             if (copyIfNull || value != null)
             {
-                ValidateAdfToken(from, value, out JToken newValue);
+                this.ValidateAndResolveAdfToken(from, value, out JToken newValue);
                 Set(to, newValue);
             }
         }
@@ -120,11 +136,16 @@ namespace FabricUpgradeCmdlet.Utilities
         /// <summary>
         /// Ensure that the token value does not contain an invalid expression.
         /// The definition of "invalid" can be found in TODO.
+        /// If the token is valid, then resolve any references to Dataset or LinkedService parameters.
         /// </summary>
         /// <param name="path">The path to the token, for Alerting purposes.</param>
         /// <param name="token">The token to recursively validate.</param>
-        /// <returns></returns>
-        private bool ValidateAdfToken(
+        /// <param name="finalExpression">
+        /// If the original token was an expression with Dataset or LinkedService parameter,
+        /// then this holds the expression that resolves those parameters.
+        /// </param>
+        /// <returns>True if and only if the expression is valid.</returns>
+        private bool ValidateAndResolveAdfToken(
             string path,
             JToken token,
             out JToken finalExpression)
@@ -137,8 +158,8 @@ namespace FabricUpgradeCmdlet.Utilities
 
             if (IsExpression(token))
             {
-                // ValidateExpression will add an alert for any invalid expression.
-                return this.ValidateExpression(path, token, out finalExpression);
+                // ValidateAndResolveExpression will add an alert for any invalid expression.
+                return this.ValidateAndResolveExpression(path, token, out finalExpression);
             }
 
             if (token.Type == JTokenType.Object)
@@ -150,7 +171,7 @@ namespace FabricUpgradeCmdlet.Utilities
                 bool valid = true;
                 foreach (var subToken in valueObject)
                 {
-                    valid &= this.ValidateAdfToken(path + "." + subToken.Key, subToken.Value, out JToken newToken);
+                    valid &= this.ValidateAndResolveAdfToken(path + "." + subToken.Key, subToken.Value, out JToken newToken);
                     newValueObject[subToken.Key] = newToken;
                 }
                 finalExpression = newValueObject;
@@ -165,7 +186,7 @@ namespace FabricUpgradeCmdlet.Utilities
                 bool valid = true;
                 for (int n = 0; n < valueArray.Count; n++)
                 {
-                    valid &= this.ValidateAdfToken(path + $"[{n}]", valueArray[n], out JToken newToken);
+                    valid &= this.ValidateAndResolveAdfToken(path + $"[{n}]", valueArray[n], out JToken newToken);
                     newValueArray.Add(newToken);
                 }
                 finalExpression = newValueArray;
@@ -176,6 +197,11 @@ namespace FabricUpgradeCmdlet.Utilities
             return false;
         }
 
+        /// <summary>
+        /// Check a token to see if it is an Expression.
+        /// </summary>
+        /// <param name="testToken">The token to check.</param>
+        /// <returns>True if and only if this token is an Expression.</returns>
         private bool IsExpression(JToken testToken)
         {
             if (testToken == null || testToken.Type != JTokenType.Object)
@@ -195,7 +221,7 @@ namespace FabricUpgradeCmdlet.Utilities
         /// A token is an "atom" if it is not an object and is not an array.
         /// </summary>
         /// <param name="testToken">The token to examine.</param>
-        /// <returns></returns>
+        /// <returns>True if and only if this is an "atom."</returns>
         private bool IsAtom(JToken testToken)
         {
             if (testToken == null)
@@ -206,7 +232,17 @@ namespace FabricUpgradeCmdlet.Utilities
             return testToken.Type != JTokenType.Object && testToken.Type != JTokenType.Array;
         }
 
-        private bool ValidateExpression(
+        /// <summary>
+        /// Use UpgradeExpression to validate and resolve the expression.
+        /// </summary>
+        /// <param name="path">The path to the expression, for alerting purposes.</param>
+        /// <param name="expressionToken">The expression to validate and resolve.</param>
+        /// <param name="finalExpression">
+        /// If the original token was an expression with Dataset or LinkedService parameter,
+        /// then this holds the expression that resolves those parameters.
+        /// </param>
+        /// <returns>True if and only if the expression is valid.</returns>
+        private bool ValidateAndResolveExpression(
             string path,
             JToken expressionToken,
             out JToken finalExpression)

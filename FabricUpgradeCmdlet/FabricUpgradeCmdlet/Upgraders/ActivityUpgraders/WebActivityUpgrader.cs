@@ -30,6 +30,7 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
         public override void Compile(AlertCollector alerts)
         {
             base.Compile(alerts);
+
             this.CheckRequiredAdfProperties(this.requiredAdfProperties, alerts);
 
             this.ValidateUrl(alerts);
@@ -62,71 +63,87 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
         {
             if (symbolName == Symbol.CommonNames.ExportResolves)
             {
-                List<FabricExportResolve> resolves = new List<FabricExportResolve>();
-
-                // The ADF WebActivity directly declares its URL, but the Fabric WebActivity uses a Connection instead.
-                // Therefore, the client must provide a UrlHostToConnectionId Resolution to help us out.
-
-                (string hostName, _) = this.ProcessUrl();
-
-                FabricUpgradeResolution.ResolutionType resolutionType = FabricUpgradeResolution.ResolutionType.UrlHostToConnectionId;
-                FabricExportResolve userCredentialConnectionResolve = new FabricExportResolve(
-                    resolutionType,
-                    hostName,
-                    "externalReferences.connection")
-                    .WithHint(new FabricUpgradeConnectionHint()
-                        {
-                            LinkedServiceName = null,
-                            ConnectionType = "Web v2",
-                            Datasource = hostName
-                        }
-                        .WithTemplate(new FabricUpgradeResolution()
-                            {
-                                Type = resolutionType,
-                                Key = hostName,
-                                Value = "<guid>"
-                            }
-                   ));
-
-                resolves.Add(userCredentialConnectionResolve);
-
-                return Symbol.ReadySymbol(JArray.Parse(UpgradeSerialization.Serialize(resolves)));
-
+                return this.BuildExportResolvesSymbol(parameters, alerts);
             }
             if (symbolName == Symbol.CommonNames.Activity)
             {
-                Symbol activitySymbol = base.ResolveExportedSymbol(Symbol.CommonNames.Activity, parameters, alerts);
-
-                if (activitySymbol.State != Symbol.SymbolState.Ready)
-                {
-                    // TODO!
-                }
-
-                JObject fabricActivityObject = (JObject)activitySymbol.Value;
-
-                (_, string relativeUrl) = this.ProcessUrl();
-
-                PropertyCopier copier = new PropertyCopier(this.Path, this.AdfResourceToken, fabricActivityObject, alerts);
-                copier.Copy("description");
-                copier.Copy("policy");
-
-                copier.Copy("typeProperties.method", allowNull: false);
-                copier.Copy("typeProperties.headers");
-                copier.Set("typeProperties.relativeUrl", relativeUrl);
-                copier.Copy("typeProperties.body");
-                copier.Copy("typeProperties.disableCertValidation");
-                copier.Copy("typeProperties.httpRequestTimeout");
-                copier.Copy("typeProperties.turnOffAsync");
-
-                // This property cannot be set until the Export operation phase.
-                // We include this property in the "exportResolve" symbol.
-                copier.Set("externalReferences.connection", Guid.Empty.ToString());
-
-                return Symbol.ReadySymbol(fabricActivityObject);
+                return this.BuildActivitySymbol(parameters, alerts);
             }
 
             return base.ResolveExportedSymbol(symbolName, parameters, alerts);
         }
+
+        /// <inheritdoc/>
+        protected override Symbol BuildExportResolvesSymbol(
+            Dictionary<string, JToken> parameters,
+            AlertCollector alerts)
+        {
+            List<FabricExportResolve> resolves = new List<FabricExportResolve>();
+
+            // The ADF WebActivity directly declares its URL, but the Fabric WebActivity uses a Connection instead.
+            // Therefore, the client must provide a UrlHostToConnectionId Resolution to help us out.
+
+            (string hostName, _) = this.ProcessUrl();
+
+            FabricUpgradeResolution.ResolutionType resolutionType = FabricUpgradeResolution.ResolutionType.UrlHostToConnectionId;
+            FabricExportResolve userCredentialConnectionResolve = new FabricExportResolve(
+                resolutionType,
+                hostName,
+                "externalReferences.connection")
+                .WithHint(new FabricUpgradeConnectionHint()
+                {
+                    LinkedServiceName = null,
+                    ConnectionType = "Web v2",
+                    Datasource = hostName
+                }
+                    .WithTemplate(new FabricUpgradeResolution()
+                    {
+                        Type = resolutionType,
+                        Key = hostName,
+                        Value = "<guid>"
+                    }
+               ));
+
+            resolves.Add(userCredentialConnectionResolve);
+
+            return Symbol.ReadySymbol(JArray.Parse(UpgradeSerialization.Serialize(resolves)));
+        }
+
+        /// <inheritdoc/>
+        protected override Symbol BuildActivitySymbol(
+            Dictionary<string, JToken> parameters,
+            AlertCollector alerts)
+        {
+            Symbol activitySymbol = base.ResolveExportedSymbol(Symbol.CommonNames.Activity, parameters, alerts);
+
+            if (activitySymbol.State != Symbol.SymbolState.Ready)
+            {
+                // TODO!
+            }
+
+            JObject fabricActivityObject = (JObject)activitySymbol.Value;
+
+            (_, string relativeUrl) = this.ProcessUrl();
+
+            PropertyCopier copier = new PropertyCopier(this.Path, this.AdfResourceToken, fabricActivityObject, alerts);
+            copier.Copy("description");
+            copier.Copy("policy");
+
+            copier.Copy("typeProperties.method", allowNull: false);
+            copier.Copy("typeProperties.headers");
+            copier.Set("typeProperties.relativeUrl", relativeUrl);
+            copier.Copy("typeProperties.body");
+            copier.Copy("typeProperties.disableCertValidation");
+            copier.Copy("typeProperties.httpRequestTimeout");
+            copier.Copy("typeProperties.turnOffAsync");
+
+            // This property cannot be set until the Export operation phase.
+            // We include this property in the "exportResolve" symbol.
+            copier.Set("externalReferences.connection", Guid.Empty.ToString());
+
+            return Symbol.ReadySymbol(fabricActivityObject);
+        }
+
 
         private int CountArrayElements(
             string path)

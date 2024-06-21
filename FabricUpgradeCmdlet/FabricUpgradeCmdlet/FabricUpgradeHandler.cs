@@ -10,12 +10,29 @@ using Newtonsoft.Json;
 
 namespace FabricUpgradeCmdlet
 {
+    /// <summary>
+    /// This class does all of the actual "work" exposed by the PowerShell Module.
+    /// By separating the exposed commands from the implementation, we can test.
+    /// </summary>
     public class FabricUpgradeHandler
     {
+        /// <summary>
+        /// This AlertCollector accumulates the Alerts generated during an Import/Upgrade/Export process.
+        /// </summary>
         private AlertCollector alerts = new AlertCollector();
 
         public FabricUpgradeHandler() { }
 
+        /// <summary>
+        /// Import an ADF Support File.
+        /// </summary>
+        /// <remarks>
+        /// ADF Studio can export a "Support File" that contains a Pipeline and all of the other 
+        /// ADF resources upon which that Pipeline depends (including other Pipelines!).
+        /// </remarks>
+        /// <param name="progressString">The progress sent by the client.</param>
+        /// <param name="fileName">The name of the ADF support file to import.</param>
+        /// <returns>A FabricUpgradeProgress that contains the unzipped contents of the ADF Support File.</returns>
         public FabricUpgradeProgress ImportAdfSupportFile(
             string progressString,
             string fileName)
@@ -33,6 +50,7 @@ namespace FabricUpgradeCmdlet
             FabricUpgradeProgress progress = FabricUpgradeProgress.FromString(progressString);
 
             AdfSupportFileUpgradePackageCollector collector = new AdfSupportFileUpgradePackageCollector();
+
             byte[] supportFileData;
             try
             {
@@ -80,9 +98,15 @@ namespace FabricUpgradeCmdlet
 
         }
 
+        /// <summary>
+        /// Accept a Progress that includes the result of Import-AdfSupportFile and
+        /// upgrade it to a set of Fabric Resource descriptions that can be exported
+        /// by Export-FabricPipeline.
+        /// </summary>
+        /// <param name="progressString">The progress sent by the client.</param>
+        /// <returns>A FabricUpgradeProgress that contains 'instructions' to Export-FabricPipeline.</returns>
         public FabricUpgradeProgress ConvertToFabricPipeline(
-            string progressString,
-            string resolutionsFilename)
+            string progressString)
         {
             FabricUpgradeProgress.FabricUpgradeState previousState = this.CheckProgress(progressString);
             if (previousState != FabricUpgradeProgress.FabricUpgradeState.Succeeded)
@@ -98,7 +122,7 @@ namespace FabricUpgradeCmdlet
 
             UpgradePackage upgradePackage = UpgradePackage.FromJToken(progress.Result);
 
-            if (upgradePackage.Type == AdfUpgradePackage.UpgradePackageType.AdfSupportFile)
+            if (upgradePackage.Type == UpgradePackage.UpgradePackageType.AdfSupportFile)
             {
                 AdfSupportFileUpgradeMachine machine = new AdfSupportFileUpgradeMachine(
                     progress.Result,
@@ -125,9 +149,9 @@ namespace FabricUpgradeCmdlet
         /// <remarks>
         /// Newer resolutions will take precendence over older resolutions.
         /// </remarks>
-        /// <param name="progressString">The progress so far.</param>
+        /// <param name="progressString">The progress sent by the client.</param>
         /// <param name="resolutionsFilename">The filename to load.</param>
-        /// <returns></returns>
+        /// <returns>A FabricUpgradeProgress that includes the new resolutions.</returns>
         public FabricUpgradeProgress ImportFabricResolutions(
             string progressString,
             string resolutionsFilename)
@@ -179,6 +203,15 @@ namespace FabricUpgradeCmdlet
             }
         }
 
+        /// <summary>
+        /// Prepend one resolutions to the resolutions we already have.
+        /// </summary>
+        /// <remarks>
+        /// Newer resolutions will take precendence over older resolutions.
+        /// </remarks>
+        /// <param name="progressString">The progress sent by the client.</param>
+        /// <param name="resolution">The resolution to add.</param>
+        /// <returns>A FabricUpgradeProgress that includes the new resolution.</returns>
         public FabricUpgradeProgress AddFabricResolution(
             string progressString,
             string resolution)
@@ -203,7 +236,15 @@ namespace FabricUpgradeCmdlet
             return progress;
         }
 
-
+        /// <summary>
+        /// Export the Fabric Resources by following the instructions in the progress.
+        /// </summary>
+        /// <param name="progressString">The progress sent by the client.</param>
+        /// <param name="cluster">The cluster (aka region) of the user's workspace.</param>
+        /// <param name="workspaceId">The ID of the user's workspace.</param>
+        /// <param name="fabricToken">The PowerBI AAD token to authenticate/authorize access to the workspace.</param>
+        /// <param name="cancellationToken"/>
+        /// <returns>A FabricUpgradeProgress that describes the created/updated resources.</returns>
         public async Task<FabricUpgradeProgress> ExportFabricPipelineAsync(
             string progressString,
             string cluster,

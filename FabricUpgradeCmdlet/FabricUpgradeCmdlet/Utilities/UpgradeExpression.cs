@@ -14,14 +14,16 @@ namespace FabricUpgradeCmdlet.Utilities
     public class UpgradeExpression
     {
         // Where is this expression?
-        // Used for logging and alerting.
+        // Used alerting.
         private string path;
 
+        // The string to examine.
         private readonly string expression;
 
+        // We tokenize the expression in order to inspect and manipulate it.
         private List<JToken> tokens = null;
 
-        public List<JToken> Tokens()
+        protected List<JToken> Tokens()
         {
             return new List<JToken>(this.tokens);
         }
@@ -34,6 +36,12 @@ namespace FabricUpgradeCmdlet.Utilities
             this.expression = expression;
         }
 
+        /// <summary>
+        /// If the expression contains a token like "dataset().xyz",
+        /// and parameter has a symbol that matches,
+        /// then replace the token with the parameter value.
+        /// </summary>
+        /// <param name="parameters">Values that can be used to resolve the parameters.</param>
         public void ApplyParameters(
             ResourceParameters parameters)
         {
@@ -52,29 +60,52 @@ namespace FabricUpgradeCmdlet.Utilities
 
                 if (TokenIsExpressionObject(standaloneValue))
                 {
-                    var newUE = new UpgradeExpression("", standaloneValue.SelectToken("value")?.ToString());
-                    newUE.TokenizeExpression();
-                    updatedTokens = newUE.Tokens();
+                    // We start with an expression like "@dataset().p1"
+                    // p1 is { "type": "Expression", "value": "@pipeline().parameters.x" }
+                    // Therefore, parse "@pipeline().parameters.x" and make that my new tokens.
+                    // When we Rebuild(), these tokens will turn back into
+                    // { "type": "Expression", "value": "@pipeline().parameters.x" }
+                    // which is exactly what we want.
+                    var newExpression = new UpgradeExpression("", standaloneValue.SelectToken("value")?.ToString());
+                    newExpression.TokenizeExpression();
+                    updatedTokens = newExpression.Tokens();
                 }
                 else
                 {
+                    // We start with an expression like "@dataset().p1"
+                    // pq is 'abc'
+                    // Therefore, just set our tokens to 'abc'.
+                    // When we Rebuild(), this token will turn into 'abc'
+                    // which is exactly what we want.
                     updatedTokens.Add(standaloneValue);
                 }
             }
             else
             {
-                // "@concat(dataset().fileName, '.json')" => "@concat('otter', '.json')".
+                // This is not a "singleton" expression.
+                // Instead, it's something like "@concat(dataset().fileName, '.json')"
                 foreach (string token in this.tokens)
                 {
+                    // Go through the tokens one at a time to find the ones that match a parameter.
+                    // TODO: Handle a parameter of type Object and a token that starts with the parameter name.
+                    // For example, p1 is an Object, and the token is "@dataset().p1.first".
                     if (parameters.ContainsParameterName(token))
                     {
                         JToken standaloneValue = parameters.StandaloneValue(token);
 
                         if (TokenIsExpressionObject(standaloneValue))
                         {
-                            var newUE = new UpgradeExpression("", standaloneValue.SelectToken("value")?.ToString());
-                            newUE.TokenizeExpression();
-                            List<JToken> insertTokens = newUE.Tokens();
+                            // We start with an expression like "@concat(dataset().p1, '.json')"
+                            // p1 is { "type": "Expression", "value": "@concat(pipeline().parameters.x, 'X')" }
+                            // Therefore, parse "@concat(pipeline().parameters.x, 'X')" => [ "@", "concat", "(", ...].
+                            // We skip the "@" and insert these new tokens into our updated tokens.
+                            // When we Rebuild(), these tokens will turn back into
+                            // { "type": "Expression", "value": "@concat(concat(pipeline().parameters.x, 'X'), '.json')" }
+                            // which is not the most compact form, but still does what we want.
+
+                            var newExpression = new UpgradeExpression("", standaloneValue.SelectToken("value")?.ToString());
+                            newExpression.TokenizeExpression();
+                            List<JToken> insertTokens = newExpression.Tokens();
                             foreach (string insertToken in insertTokens[1..])
                             {
                                 updatedTokens.Add(insertToken);
@@ -82,11 +113,17 @@ namespace FabricUpgradeCmdlet.Utilities
                         }
                         else
                         {
+                            // Not an expression, so just stick in the matching token.
+                            // We start with an expression like "@concat(dataset().p1, '.json')"
+                            // p1 is "abc", so its IntegratedValue is "'abc'".
+                            // When we Rebuild(), the updated tokens will produce "@concat('abc', '.json')"
+                            // which is exactly what we want.
                             updatedTokens.Add(parameters.IntegratedValue(token));
                         }
                     }
                     else
                     {
+                        // Not a parameter, so just append this token to the updated tokens.
                         updatedTokens.Add(token);
                     }
                 }
@@ -95,6 +132,11 @@ namespace FabricUpgradeCmdlet.Utilities
             this.tokens = updatedTokens;
         }
 
+        /// <summary>
+        /// See if there any invalid components in this expression.
+        /// </summary>
+        /// <param name="alerts">Add any generated alerts to this collector.</param>
+        /// <returns>True if and only if the expression is valid.</returns>
         public bool Validate(
             AlertCollector alerts)
         {
@@ -102,11 +144,14 @@ namespace FabricUpgradeCmdlet.Utilities
 
             bool isValid = true;
 
-            isValid &= this.CheckForInvalidParameterReferences(alerts);
+            isValid &= this.CheckForInvalidTokens(alerts);
             return isValid;
         }
 
-
+        /// <summary>
+        /// Put our tokens back together to create a new value/expression.
+        /// </summary>
+        /// <returns>The rebuilt expression.</returns>
         public JToken RebuildExpression()
         {
             if (this.tokens.All(t => t == null))
@@ -121,9 +166,12 @@ namespace FabricUpgradeCmdlet.Utilities
 
             if (this.tokens[0].ToString() != "@")
             {
+                // This is not an Expression, so just stick the token(s) back together.
+                // TODO: Can we wind up here? If tokens.Count > 1, will this not start with "@"?
                 return string.Join(string.Empty, this.tokens);
             }
 
+            // Our first token is "@", so we build an Expression object.
             JObject newExpression = new JObject();
             newExpression["value"] = string.Join(string.Empty, this.tokens);
             newExpression["type"] = "Expression";
@@ -136,7 +184,7 @@ namespace FabricUpgradeCmdlet.Utilities
         /// <param name="expression">The string to examine.</param>
         /// <param name="propertyPath">The 'path' to the property, for any new alerts.</param>
         /// <param name="alerts">Add any generated alerts to this list.</param>
-        private bool CheckForInvalidParameterReferences(
+        private bool CheckForInvalidTokens(
             AlertCollector alerts)
         {
             bool isValid = true;
@@ -189,6 +237,8 @@ namespace FabricUpgradeCmdlet.Utilities
             string token,
             AlertCollector alerts)
         {
+            // TODO: Allow pipeline().pipeline by converting it to pipeline().pipelineName
+
             // There are no expressions that contain this string as a substring.
             if (token.ToLower() == "pipeline().pipeline" ||
                 token.ToLower() == "pipeline()?.pipeline")
@@ -237,6 +287,11 @@ namespace FabricUpgradeCmdlet.Utilities
             return true;
         }
 
+        /// <summary>
+        /// Facilitate parsing by removing extraneous whitespace.
+        /// </summary>
+        /// <param name="toStrip">The original string to trim.</param>
+        /// <returns></returns>
         private string StripSpacesExceptInStrings(string toStrip)
         {
             string parsing = toStrip ?? string.Empty;
@@ -244,7 +299,7 @@ namespace FabricUpgradeCmdlet.Utilities
 
             while(!string.IsNullOrEmpty(parsing))
             {
-                if (this.ConsumeString(parsing, out string stringConstant, out parsing))
+                if (this.ConsumeStringConstant(parsing, out string stringConstant, out parsing))
                 {
                     stripped += stringConstant;
                 }
@@ -262,6 +317,14 @@ namespace FabricUpgradeCmdlet.Utilities
             return stripped;
         }
 
+        /// <summary>
+        /// Convert our expression into a list of tokens.
+        /// </summary>
+        /// <remarks>
+        /// There is no reason for this tokenization to match the "real" tokenization.
+        /// We only need to tokenize enough for our own operations.
+        /// That's why "pipeline().a.b.c" is considered one token.
+        /// </remarks>
         private void TokenizeExpression()
         {
             if (this.tokens != null)
@@ -297,6 +360,10 @@ namespace FabricUpgradeCmdlet.Utilities
             }
         }
 
+        /// <summary>
+        /// Convert one line into tokens.
+        /// </summary>
+        /// <param name="line">The line to tokenize.</param>
         private void TokenizeOneLine(string line)
         {
             string parsing = line[..];
@@ -308,11 +375,17 @@ namespace FabricUpgradeCmdlet.Utilities
             }
         }
 
+        /// <summary>
+        /// Advance by one token, return the token and tail.
+        /// </summary>
+        /// <param name="parsing">The string we are parsing.</param>
+        /// <param name="token">The token.</param>
+        /// <returns>The rest of the string.</returns>
         private string ConsumeOneToken(string parsing, out string token)
         {
             token = string.Empty;
 
-            if (this.ConsumeString(parsing, out token, out parsing))
+            if (this.ConsumeStringConstant(parsing, out token, out parsing))
             {
                 return parsing;
             }
@@ -338,7 +411,14 @@ namespace FabricUpgradeCmdlet.Utilities
             return parsing;
         }
 
-        private bool ConsumeString(string parsing, out string token, out string tail)
+        /// <summary>
+        /// If this is a string, then consume up to the first un-escaped single quote.
+        /// </summary>
+        /// <param name="parsing">The string we are parsing.</param>
+        /// <param name="token">The string (if parsing starts with a single quote)</param>
+        /// <param name="tail">The unparsed remainder of the string.</param>
+        /// <returns>True if and only if this method consumed a string constant.</returns>
+        private bool ConsumeStringConstant(string parsing, out string token, out string tail)
         {
             token = string.Empty;
             tail = parsing;
@@ -381,6 +461,14 @@ namespace FabricUpgradeCmdlet.Utilities
             return true;
         }
 
+        /// <summary>
+        /// Consume a single-character token.
+        /// </summary>
+        /// <param name="parsing">The string we are parsing.</param>
+        /// <param name="oneOfThese">The single-character tokens that may be consumed.</param>
+        /// <param name="token">The token, if it is oneOfThese.</param>
+        /// <param name="tail">The unparsed remainder of the string.</param>
+        /// <returns>True if and only if this method consumed one of these characters.</returns>
         private bool ConsumeOneOf(string parsing, string oneOfThese, out string token, out string tail)
         {
             token = string.Empty;
@@ -400,6 +488,13 @@ namespace FabricUpgradeCmdlet.Utilities
             return true;
         }
 
+        /// <summary>
+        /// Consume one parameter; to wit, a string that starts with "pipeline()", "dataset()", or "linkedService()".
+        /// </summary>
+        /// <param name="parsing">The string we are parsing.</param>
+        /// <param name="token">The parameter, if the next token is a parameter.</param>
+        /// <param name="tail">The unparsed remainder of the string.</param>
+        /// <returns>True if and only if this method consumes a parameter.</returns>
         private bool ConsumeParameter(string parsing, out string token, out string tail)
         {
             token = string.Empty;
@@ -417,6 +512,14 @@ namespace FabricUpgradeCmdlet.Utilities
             return false;
         }
 
+        /// <summary>
+        /// Consume a parameter with the specified prefix.
+        /// </summary>
+        /// <param name="parsing">The string we are parsing.</param>
+        /// <param name="prefix">The start of the parameter.</param>
+        /// <param name="token">The parameter, if the next token is a parameter.</param>
+        /// <param name="tail">The unparsed remainder of the string.</param>
+        /// <returns></returns>
         private bool ConsumeSpecificParameter(string parsing, string prefix, out string token, out string tail)
         {
             token = string.Empty;
@@ -431,32 +534,41 @@ namespace FabricUpgradeCmdlet.Utilities
             var matches = parser.Matches(parsing);
             if (matches.Count == 0)
             {
+                // The string did not start with <prefix>().
                 return false;
             }
 
             tail = matches[0].Groups["tail"].Value;
 
-            // We'll allow stripping the whitespace from, e.g., 'dataset ()'
             token += prefix + "().";
 
+            // Consume until we hit whitespace, a comma, or a closed parenthesis.
             (string restOfToken, tail) = BreakAtFirst(tail, " \\r\\n,)");
 
+            // Stick all that together.
             token += restOfToken;
             return true;
         }
 
+        /// <summary>
+        /// Split the string at any of the specified characters.
+        /// </summary>
+        /// <param name="parsing">The string we are parsing.</param>
+        /// <param name="breakers">Split at the first instance of any of these characters.</param>
+        /// <returns>The string before the breaker; the string including and after the breaker.</returns>
+
         private static Tuple<string, string> BreakAtFirst(
-            string expression,
+            string parsing,
             string breakers)
         {
             // Find the token up to the breakers. The rest of the string is the tail.
             var parser = new Regex($"^\\s*(?'token'[^{breakers}]*)(?'tail'.*$)");
-            var matches = parser.Matches(expression);
+            var matches = parser.Matches(parsing);
 
             if (matches.Count == 0)
             {
                 // If no breakers appear in the expression, then we are returning the final token.
-                return Tuple.Create(expression, string.Empty);
+                return Tuple.Create(parsing, string.Empty);
             }
 
             string token = matches[0].Groups["token"].Value;
@@ -465,6 +577,11 @@ namespace FabricUpgradeCmdlet.Utilities
             return Tuple.Create(token, tail);
         }
 
+        /// <summary>
+        /// Check for the magic Expression object.
+        /// </summary>
+        /// <param name="token">The token to check.</param>
+        /// <returns>True if and only if this is an Expression.</returns>
         private static bool TokenIsExpressionObject(JToken token)
         {
             if ((token == null) || (token.Type != JTokenType.Object))
@@ -481,6 +598,5 @@ namespace FabricUpgradeCmdlet.Utilities
 
             return false;
         }
-
     }
 }

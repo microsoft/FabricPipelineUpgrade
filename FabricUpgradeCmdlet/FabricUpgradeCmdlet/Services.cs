@@ -6,6 +6,9 @@ using FabricUpgradeCmdlet.Utilities;
 
 namespace FabricUpgradeCmdlet
 {
+    /// <summary>
+    /// A class to hold some global parameters as singletons.
+    /// </summary>
     public class Services
     {
         /// <summary>

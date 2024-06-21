@@ -15,6 +15,9 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
     /// <remarks>
     /// If, Switch, ForEach, Until, etc., include subactivities.
     /// The IfConditionActivityUpgrader shows how to use the methods in this class.
+    ///
+    /// The methods in this class describe a "group" of subactivities.
+    /// For example, all of the Activities under "ifFalseActivities" is a "group" of subactivities.
     /// </remarks>
     public class ActivityWithSubActivitiesUpgrader : ActivityUpgrader
     {
@@ -45,6 +48,13 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
             }
         }
 
+        /// <summary>
+        /// Ask each of the subactivities in a group for its exportLinks symbol.
+        /// </summary>
+        /// <param name="upgraders">The Upgraders to query.</param>
+        /// <param name="activityGroup">The JSON path to this group of subactivities.</param>
+        /// <param name="links">Put the gathered exportLinks here.</param>
+        /// <param name="alerts">Add any generated alerts to this collector.</param>
         protected void CollectSubActivityExportLinks(
             List<Upgrader> upgraders,
             string activityGroup,
@@ -74,6 +84,13 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
             }
         }
 
+        /// <summary>
+        /// Ask each of the subactivities in a group for its exportResolves symbol.
+        /// </summary>
+        /// <param name="upgraders">The Upgraders to query.</param>
+        /// <param name="activityGroup">The JSON path to this group of subactivities.</param>
+        /// <param name="resolves">Put the gathered exportResolves here.</param>
+        /// <param name="alerts">Add any generated alerts to this collector.</param>
         protected void CollectSubActivityExportResolves(
             List<Upgrader> upgraders,
             string activityGroup,
@@ -103,6 +120,12 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
             }
         }
 
+        /// <summary>
+        /// Query all of these Upgraders for their "activity" Symbol.
+        /// </summary>
+        /// <param name="upgraders">The Upgraders to query.</param>
+        /// <param name="alerts">Add any generated alerts to this collector.</param>
+        /// <returns></returns>
         protected JArray CollectSubActivities(
             List<Upgrader> upgraders,
             AlertCollector alerts)

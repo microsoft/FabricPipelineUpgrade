@@ -9,10 +9,11 @@ using Newtonsoft.Json.Linq;
 namespace FabricUpgradeCmdlet.Models
 {
     /// <summary>
-    /// Part of the communication between an Upgrader and an Exporter.
+    /// This class is part of the communication between an Upgrader and an Exporter.
     /// This class tells the Exporter how to "finish" the item that it is exporting.
     /// Each of these typically tell the Exporter to copy the Fabric resource ID of another item.
-    /// We cannot know the Fabric resource ID of another item until the Export operation.
+    /// We cannot know the Fabric resource ID of another item until we have exported that other item,
+    /// so this finishing touch must wait until then.
     /// </summary>
     public class FabricExportLink
     {

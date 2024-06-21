@@ -18,11 +18,13 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
         {
         }
 
+        /// <inheritdoc/>
         public override void Compile(AlertCollector alerts)
         {
             base.Compile(alerts);
         }
 
+        /// <inheritdoc/>
         public override Symbol ResolveExportedSymbol(
             string symbolName,
             Dictionary<string, JToken> parameters,
@@ -30,24 +32,32 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
         {
             if (symbolName == Symbol.CommonNames.Activity)
             {
-                Symbol activitySymbol = base.ResolveExportedSymbol(Symbol.CommonNames.Activity, parameters, alerts);
-
-                if (activitySymbol.State != Symbol.SymbolState.Ready)
-                {
-                    // TODO!
-                }
-
-                JObject fabricActivityObject = (JObject)activitySymbol.Value;
-
-                PropertyCopier copier = new PropertyCopier(this.Path, this.AdfResourceToken, fabricActivityObject, alerts);
-
-                copier.Copy("description");
-                copier.Copy("typeProperties.waitTimeInSeconds", allowNull: false);
-
-                return Symbol.ReadySymbol(fabricActivityObject);
+                return this.BuildActivitySymbol(parameters, alerts);
             }
 
             return base.ResolveExportedSymbol(symbolName, parameters, alerts);
+        }
+
+        /// <inheritdoc/>
+        protected override Symbol BuildActivitySymbol(
+            Dictionary<string, JToken> parameters,
+            AlertCollector alerts)
+        {
+            Symbol activitySymbol = base.ResolveExportedSymbol(Symbol.CommonNames.Activity, parameters, alerts);
+
+            if (activitySymbol.State != Symbol.SymbolState.Ready)
+            {
+                // TODO!
+            }
+
+            JObject fabricActivityObject = (JObject)activitySymbol.Value;
+
+            PropertyCopier copier = new PropertyCopier(this.Path, this.AdfResourceToken, fabricActivityObject, alerts);
+
+            copier.Copy("description");
+            copier.Copy("typeProperties.waitTimeInSeconds", allowNull: false);
+
+            return Symbol.ReadySymbol(fabricActivityObject);
         }
     }
 }

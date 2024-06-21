@@ -3,7 +3,6 @@
 // </copyright>
 
 using FabricUpgradeCmdlet.UpgradeMachines;
-using FabricUpgradeCmdlet.Upgraders.DatasetUpgraders;
 using FabricUpgradeCmdlet.Utilities;
 using Newtonsoft.Json.Linq;
 
@@ -32,11 +31,6 @@ namespace FabricUpgradeCmdlet.Upgraders
         // it allows other Upgraders to resolve their SymbolReferences.
         public string Name { get; set; } = null;
 
-        // When an Upgrader finishes its Generate phase, it will set this ID to one returned by Fabric backend.
-        // This ID will be used by other Upgraders to resolve SymbolLinks.
-        // (Which is one of the reasons we must Generate Upgraders in a particular order).
-        public Guid? FabricResourceId { get; protected set; } = null;
-
         /// <summary>
         /// Gets or sets a description of the "path" to an artifact or activity.
         /// </summary>
@@ -45,31 +39,6 @@ namespace FabricUpgradeCmdlet.Upgraders
         /// This path will be used in error messages, and within the resolutions of (for example) WebActivity Connections.
         /// </remarks>
         public virtual string Path { get; protected set; } = string.Empty;
-
-        /// <summary>
-        /// Gets the list of symbols referenced by a resource.
-        /// </summary>
-        /// <remarks>
-        /// Each upgrader will include a list of symbols that "reference" other upgraders.
-        ///
-        /// For examples:
-        /// A Pipeline with an ExecutePipeline Activity will reference the Pipeline it invokes.
-        /// A Pipeline with a Copy Activity will reference a Dataset (which will reference a LinkedService).
-        ///
-        /// During the Compile phase, each Upgrader will identify its SymbolReferences.
-        /// During the Link phase, each Upgrader will "resolve" each SymbolReference to another Upgrader.
-        /// During the Generate phase, each Upgrader will extract the ID of its SymbolReferences.
-        /// </remarks>
-        //public List<SymbolReference> SymbolReferences { get; } = new List<SymbolReference>();
-
-        // An Upgrade process generates a directed acyclic graph (DAG) that describes
-        // the order in which resources must be upgraded: from leaf to root.
-        // If no other Upgrader references this Upgrader, then this is a "root" Upgrader.
-        public bool IsRoot { get; set; } = true;
-
-        // A resource may be "accessible" from more than one root of the DAG.
-        // This flag prevents the Upgrader from generating the same Fabric resource twice.
-        public bool IsAlreadyGenerated { get; set; } = false;
 
         // The FabricUpgradeMachine that this Upgrader uses to resolve symbols, access the PublicApi, etc.
         public IFabricUpgradeMachine Machine { get; private set; }
@@ -87,11 +56,15 @@ namespace FabricUpgradeCmdlet.Upgraders
 
         // Used in Sort()
         public UpgraderSortingState SortingState { get; set; } = UpgraderSortingState.Unsorted;
-        
 
+        /// <summary>
+        /// Verify that there are no impediments to Upgrading.
+        /// For example, missing properties, malformed properties, unsupported properties, etc.
+        /// This step may also prepare parameters.
+        /// </summary>
+        /// <param name="alerts">Add any generated alerts to this collector.</param>
         public virtual void Compile(AlertCollector alerts)
         {
-            // Note: In subclasses, this is where you will ensure that properties have valid values.
         }
 
         /// <summary>
@@ -99,7 +72,8 @@ namespace FabricUpgradeCmdlet.Upgraders
         /// </summary>
         /// <remarks>
         /// This method populates this Upgrader's DependsOn list,
-        /// which is used later to sort the Upgraders.
+        /// which is used later to sort the Upgraders,
+        /// which is vitally important when we export the Fabric Resources.
         /// </remarks>
         /// <param name="allUpgraders">A list of all the upgraders</param>
         /// <param name="alerts">Add any generated alerts to this collector.</param>
@@ -109,6 +83,12 @@ namespace FabricUpgradeCmdlet.Upgraders
         {
         }
 
+        /// <summary>
+        /// A shortcut method for backwards compatibility when the caller does not have any invocationParameters.
+        /// </summary>
+        /// <param name="symbolName">The 'name' of the Symbol to export (see Symbol.CommonNames).</param>
+        /// <param name="alerts">Add any generated alerts to this collector.</param>
+        /// <returns>A Symbol containing the requested JToken.</returns>
         public Symbol ResolveExportedSymbol(
             string symbolName,
             AlertCollector alerts)
@@ -116,16 +96,26 @@ namespace FabricUpgradeCmdlet.Upgraders
             return this.ResolveExportedSymbol(symbolName, null, alerts);
         }
 
+        /// <summary>
+        /// Build a value that can be used by another Upgrader/Exporter/Machine.
+        /// This method handles checking parameters and expressions.
+        /// </summary>
+        /// <param name="symbolName">The 'name' of the Symbol to export (see Symbol.CommonNames).</param>
+        /// <param name="parametersFromCaller">
+        /// If a property has an expression, and that expression includes a parameter like 'dataset().xyz',
+        /// then override the default parameter values with the ones in this dictionary.
+        /// </param>
+        /// <param name="alerts">Add any generated alerts to this collector.</param>
+        /// <returns>A Symbol containing the requested JToken.</returns>
         public virtual Symbol ResolveExportedSymbol(
             string symbolName,
-            Dictionary<string, JToken> parameters,
+            Dictionary<string, JToken> parametersFromCaller,
             AlertCollector alerts)
         {
-            if (symbolName == Symbol.CommonNames.FabricResource)
+            if (symbolName == Symbol.CommonNames.ExportInstructions)
             {
-                // If a subclass does not generate a fabric resource, then return a null symbol value.
-                // For example, Activities and Datasets to do not generate a fabric resource.
-                // For example, LinkedServices to not (yet!) generate a fabric resource.
+                // If a subclass does not generate a Fabric resource, then return a null symbol value.
+                // For example, Activities and Datasets to do not generate a Fabric resource.
                 return Symbol.ReadySymbol(null);
             }
 
@@ -148,6 +138,11 @@ namespace FabricUpgradeCmdlet.Upgraders
             return Symbol.MissingSymbol();
         }
 
+        /// <summary>
+        /// Ensure that all of the required properties are not null.
+        /// </summary>
+        /// <param name="requiredAdfProperties">The path to the properties that must not be null.</param>
+        /// <param name="alerts">Add any generated alerts to this collector.</param>
         protected void CheckRequiredAdfProperties(
             List<string> requiredAdfProperties,
             AlertCollector alerts)
@@ -162,6 +157,15 @@ namespace FabricUpgradeCmdlet.Upgraders
             }
         }
 
+        /// <summary>
+        /// There is a property in the ADF JSON that is the name of another ADF Resource.
+        /// This method finds the Upgrader for that Resource.
+        /// </summary>
+        /// <param name="allUpgraders">The Upgraders to search.</param>
+        /// <param name="upgraderType">The Upgrader type to find (like DataPipeline or Dataset).</param>
+        /// <param name="pathToName">The JSON path in this AdfResoureToken to the property that is the name.</param>
+        /// <param name="alerts">Add any generated alerts to this collector.</param>
+        /// <returns></returns>
         protected Upgrader FindOtherUpgrader(
             List<Upgrader> allUpgraders,
             FabricUpgradeResourceTypes upgraderType,
@@ -230,76 +234,6 @@ namespace FabricUpgradeCmdlet.Upgraders
             sortedUpgraders.Add(this);
 
             return true;
-
-        }
-
-
-
-
-
-
-
-
-        /// <summary>
-        /// An opportunity to check whether this Upgrader is certain to fail.
-        /// </summary>
-        /// <remarks>
-        /// Here is where we might check FeatureFlights and TenantSwitches to ensure that the caller
-        /// is allowed to create the Fabric Artifact.
-        ///
-        /// This method should append to 'alerts' a description of any deviation from complete success.
-        /// This way, we can list _all_ the problems, not just the first one.
-        /// </remarks>
-        /// <param name="alerts">Add any generated alerts to this collector.</param>
-        /// <returns>Nothing.</returns>
-        public virtual Task PreCheckUpgradeAsync(
-            AlertCollector alerts,
-            CancellationToken cancellationToken)
-        {
-            return Task.CompletedTask;
-        }
-
-        /// <summary>
-        /// Resolve each SymbolReference into an Upgrader.
-        /// </summary>
-        /// <remarks>
-        /// This method should append to 'alerts' a description of any deviation from complete success.
-        /// This way, we can list _all_ the problems, not just the first one.
-        /// </remarks>
-        /// <param name="otherUpgraders">The list of other Upgraders.</param>
-        /// <param name="alerts">Add any generated alerts to this collector.</param>
-        public virtual void Link(List<Upgrader> otherUpgraders, AlertCollector alerts)
-        {
-        }
-
-        /// <summary>
-        /// Construct the JObject payload sent to CreateOrUpdateArtifact.
-        /// </summary>
-        /// <remarks>
-        /// For some Upgraders, like Pipeline, this JObject will be the one sent to CreateOrUpdateArtifact.
-        /// For some Upgraders, this JObject will be included in another Upgrader's payload.
-        /// For examples:
-        /// An Activity will return its Activity JObject for inclusion in its parent Pipeline.
-        /// A Dataset will return a JObject that can be used by the Activity that references it.
-        /// </remarks>
-        /// <returns>The payload sent to CreateOrUpdateArtifact or incorporated in another Upgrader's payload.</returns>
-        public virtual JObject ConstructPayloadForGenerate()
-        {
-            return null;
-        }
-
-        /// <summary>
-        /// Produce the resource specified by this Upgrader.
-        /// </summary>
-        /// <remarks>
-        /// If an Upgrader does not Generate, then it can use this default implementation.
-        /// For example, Activities do not Generate; Datasets do not Generate; LinkedServices do not Generate.
-        /// </remarks>
-        /// <param name="cancellationToken">The cancellation token.</param>
-        /// <returns>Nothing.</returns>
-        public virtual Task GenerateAsync(CancellationToken cancellationToken)
-        {
-            return Task.CompletedTask;
         }
     }
 }

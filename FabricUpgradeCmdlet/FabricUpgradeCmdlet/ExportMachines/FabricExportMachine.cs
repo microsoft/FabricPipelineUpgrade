@@ -29,8 +29,10 @@ namespace FabricUpgradeCmdlet.ExportMachines
             this.FabricToken = fabricToken;
         }
 
+        // The cluster (aka region) of the user's workspace.
         protected string Cluster { get; private set; }
 
+        // The user's PowerBI AAD token.
         protected string FabricToken { get; private set; }
 
         /// <inheritdoc/>
@@ -72,6 +74,10 @@ namespace FabricUpgradeCmdlet.ExportMachines
             return null;
         }
 
+        /// <summary>
+        /// Build all of the Exporters described by the ExportObject.
+        /// </summary>
+        /// <exception cref="UpgradeFailureException"></exception>
         private void BuildAllExporters()
         {
             JArray toExport = (JArray)this.ExportObject.SelectToken("fabricResources");
@@ -88,6 +94,10 @@ namespace FabricUpgradeCmdlet.ExportMachines
             }
         }
 
+        /// <summary>
+        /// Invoke CheckBeforeExports on all of the Exporters.
+        /// </summary>
+        /// <exception cref="UpgradeFailureException"></exception>
         private void CheckAllExportersBeforeExport()
         {
             foreach (ResourceExporter exporter in this.exporters)
@@ -101,6 +111,12 @@ namespace FabricUpgradeCmdlet.ExportMachines
             }
         }
 
+        /// <summary>
+        /// Invoke ExportAsync() on all of the Exporters.
+        /// </summary>
+        /// <param name="cancellationToken"/>
+        /// <returns>A FabricUpgradeProgress that is returned to the client.</returns>
+        /// <exception cref="UpgradeFailureException"></exception>
         private async Task<FabricUpgradeProgress> ExportAllExportersAsync(CancellationToken cancellationToken)
         {
             foreach (ResourceExporter exporter in this.exporters)
@@ -130,6 +146,10 @@ namespace FabricUpgradeCmdlet.ExportMachines
             };
         }
 
+        /// <summary>
+        /// Check the Alerts; if any are worse than a Warning, then the Export has failed.
+        /// </summary>
+        /// <returns>True if the Export has failed; False otherwise.</returns>
         private bool AlertsIndicateFailure()
         {
             return this.Alerts.Any(f => f.Severity != FabricUpgradeAlert.FailureSeverity.Warning);

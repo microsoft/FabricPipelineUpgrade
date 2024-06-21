@@ -2,25 +2,51 @@
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace FabricUpgradeCmdlet
 {
     /// <summary>
     /// This class represents a generic symbol within the Fabric Upgrader.
+    /// Upgraders query other Upgraders for symbol values.
+    /// Exporters query other Exporters for symbol values.
+    /// The UpgradeMachine queries some Upgraders for their exportInstructions.
     /// </summary>
     public class Symbol
     {
         public class CommonNames
         {
-            public const string FabricResource = "fabricResource";
-            public const string ExportLinks = "exportLinks";
+            // The ConvertTo-FabricPipeline command generates a set of
+            // exportResolves, exportLinks, and exportInstructions
+            // that are passed to Export-FabricPipeline.
+
+            // The exportResolves tell the Exporter which properties to extract from the Resolutions
+            // and insert into the FabricResource.
             public const string ExportResolves = "exportResolves";
+
+            // The exportLinks tell the Exporter to find the FabricResource ID from another exported
+            // Fabric Resource, and insert that ID into the Resource we are currently exporting.
+            // (Note: this is why we need to sort the FabricResources before we start Exporting them).
+            public const string ExportLinks = "exportLinks";
+
+            // The "exportFabricResource" tells the Exporter what to send to Create/Update Item.
+            public const string ExportInstructions = "exportInstructions";
+
+            // This symbol's value will describe the JSON definition of one Activity inside a Pipeline
+            // or inside another Activity.
+            // (For example, the IfCondition Activity needs to query its sub-activities).
             public const string Activity = "activity";
+
+            // A Copy Activity (and a few other Activities) need to fetch the datasetSettings
+            // from each of its Datasets.
+            // (ADF treats Datasets as separate resources, but Fabric moves these settings into the Activity itself).
             public const string DatasetSettings = "datasetSettings";
+
+            // A Dataset may need to query its LinkedService for a databaseName.
+            // The Dataset will include that databaseName in the datasetSettings that it builds for (e.g.) its Copy Activity.
             public const string LinkedServiceDatabaseName = "databaseName";
         }
+
         public Symbol()
         {
         }
@@ -53,6 +79,11 @@ namespace FabricUpgradeCmdlet
 
         protected JToken ActualValue { get; set; }
 
+        /// <summary>
+        /// Build a Symbol with state Ready with the specified value.
+        /// </summary>
+        /// <param name="value">The value to insert into the Symbol.</param>
+        /// <returns>A Symbol whose state is Ready.</returns>
         public static Symbol ReadySymbol(JToken value)
         {
             return new Symbol()
@@ -62,6 +93,10 @@ namespace FabricUpgradeCmdlet
             };
         }
 
+        /// <summary>
+        /// Build a Symbol with state Missing.
+        /// </summary>
+        /// <returns>A Symbol whose state is Missing.</returns>
         public static Symbol MissingSymbol()
         {
             return new Symbol()
@@ -69,51 +104,6 @@ namespace FabricUpgradeCmdlet
                 State = SymbolState.Missing,
                 Value = null,
             };
-        }
-
-        public Symbol AddProperty(
-            string destinationPath,
-            JToken value)
-        {
-            if (this.ActualValue == null)
-            {
-                this.ActualValue = new JObject();
-            }
-
-            (JObject targetObject, string targetKey) = this.TargetFromDestinationPath(destinationPath);
-            targetObject[targetKey] = value;
-
-            return this;
-        }
-
-        public override string ToString()
-        {
-            return $"{this.State}: {this.ActualValue?.ToString(Formatting.None)}";
-        }
-
-        /// <summary>
-        /// Ensure that the destination path exists in this symbol's Value, and tell the caller where it is.
-        /// </summary>
-        /// <param name="destinationPath">The new path to create in Value.</param>
-        /// <returns>The object that will hold the new property, and the key of the new property.</returns>
-        private Tuple<JObject, string> TargetFromDestinationPath(string destinationPath)
-        {
-            /* TODO: Handle arrays! */
-
-            JObject target = (JObject)this.ActualValue;
-            string[] destinationParts = destinationPath.Split(new char[] { '.' });
-            for (int n = 0; n < destinationParts.Length - 1; n++)
-            {
-                string dp = destinationParts[n];
-                if (!target.ContainsKey(dp))
-                {
-                    target[dp] = new JObject();
-                }
-
-                target = (JObject)target[dp];
-            }
-
-            return Tuple.Create(target, destinationParts[destinationParts.Length - 1]);
         }
     }
 }

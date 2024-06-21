@@ -6,7 +6,6 @@ using System.Net;
 using System.Text;
 using FabricUpgradeCmdlet.Exceptions;
 using FabricUpgradeCmdlet.Utilities;
-using Microsoft.Rest.Serialization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -15,9 +14,6 @@ namespace FabricUpgradeCmdlet
     /// <summary>
     /// This client interacts with the Public API endpoints.
     /// </summary>
-    /// <remarks>
-    /// This class can be used by a system that wants to send HTTP requests to an Public API endpoint.
-    /// </remarks>
     public class PublicApiClient
     {
         // This "Path" component is sent as part of a Create or Update call.
@@ -28,16 +24,13 @@ namespace FabricUpgradeCmdlet
             { FabricUpgradeResourceTypes.DataPipeline, "pipeline-content.json" },
         };
 
-        // To prevent port exhaustion, we need to reuse the HttpMessageHandler that we use in our HttpClients.
-        // This static object will be used to create the HttpClient that we use to make HTTP calls,
-        // so that we use the same HttpMessageHandler each time.
-        private static readonly HttpClientHandler ReusableClientHandler = new HttpClientHandler()
-        {
-            CheckCertificateRevocationList = true,
-        };
-
+        // The cluster (aka region) of the user's workspace.
         private readonly string cluster;
+
+        // The ID of the user's workspace.
         private readonly string workspaceId;
+
+        // A PowerBI AAD token that authenticates/authorizes access to the user's workspace.
         private readonly string pbiAadToken;
 
         public PublicApiClient(
@@ -50,7 +43,16 @@ namespace FabricUpgradeCmdlet
             this.pbiAadToken = pbiAadToken;
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Use the PublicAPI endpoint to Create or Update a Fabric Artifact.
+        /// </summary>
+        /// <param name="artifactType">The type, like "DataPipeline".</param>
+        /// <param name="displayName">The display name of the Artifact.</param>
+        /// <param name="description">The description of the Artifact.</param>
+        /// <param name="payload">The payload to send.</param>
+        /// <param name="cancellationToken"/>
+        /// <returns>The response from the PublicAPI endpoint.</returns>
+        /// <exception cref="Exception"></exception>
         public async Task<string> CreateOrUpdateArtifactAsync(
             FabricUpgradeResourceTypes artifactType,
             string displayName,
@@ -62,9 +64,10 @@ namespace FabricUpgradeCmdlet
             {
                 if (!ArtifactAlmPaths.ContainsKey(artifactType))
                 {
-                    throw new Exception("Cannot upgrade artifact of this type");
+                    throw new Exception("Cannot Create nor Update a Fabric Resource of this type");
                 }
 
+                // Does the artifact already exist?
                 Guid? existingArtifactId = await this.GetExistingArtifactIdAsync(
                     artifactType,
                     displayName,
@@ -72,6 +75,7 @@ namespace FabricUpgradeCmdlet
 
                 if (existingArtifactId == null)
                 {
+                    // The artifact does not already exist, so Create it.
                     return await this.CreateArtifactAsync(
                         artifactType,
                         displayName,
@@ -81,6 +85,7 @@ namespace FabricUpgradeCmdlet
                 }
                 else
                 {
+                    // The artifact does already exist, so Update it.
                     return await this.UpdateArtifactAsync(
                         existingArtifactId.Value,
                         artifactType,
@@ -99,7 +104,7 @@ namespace FabricUpgradeCmdlet
         /// List all the Artifacts of the specified type.
         /// </summary>
         /// <param name="artifactType">The type of Artifact to list.</param>
-        /// <param name="cancellationToken">The cancellationToken.</param>
+        /// <param name="cancellationToken"/>
         /// <returns>A JArray of the Artifacts.</returns>
         private async Task<JArray> ListArtifactsAsync(
             FabricUpgradeResourceTypes artifactType,
@@ -152,7 +157,7 @@ namespace FabricUpgradeCmdlet
         /// </remarks>
         /// <param name="artifactType">The type of the Artifact.</param>
         /// <param name="displayName">The displayName of the Artifact.</param>
-        /// <param name="cancellationToken">The CancellationToken.</param>
+        /// <param name="cancellationToken"/>
         /// <returns>The GUID of the existing Artifact; null if no such Artifact exists.</returns>
         private async Task<Guid?> GetExistingArtifactIdAsync(
             FabricUpgradeResourceTypes artifactType,
@@ -462,20 +467,6 @@ namespace FabricUpgradeCmdlet
             return request;
         }
 
-        private PublicApiItemModel ParseItemModelPayload(
-            string responsePayload,
-            string operationName)
-        {
-            try
-            {
-                return SafeJsonConvert.DeserializeObject<PublicApiItemModel>(responsePayload);
-            }
-            catch (JsonException)
-            {
-                throw new Exception($"Received unparseable response payload\n{responsePayload}\nfrom PublicApi.{operationName}");
-            }
-        }
-
         /// <summary>
         /// Build an HTTP client that talks to the Public API.
         /// </summary>
@@ -484,9 +475,6 @@ namespace FabricUpgradeCmdlet
         {
             IHttpClientFactory httpClientFactory = Services.HttpClientFactory;
 
-            // Protect our HttpClientHandler by wrapping it in a SkipDisposeDelegatingHandler.
-            // This will prevent the HttpClient from disposing our HttpClientHandler when we dispose the HttpClient.
-            // Also, add a retry handler that retries SocketExceptions.
             HttpClient httpClient = httpClientFactory.CreateHttpClient();
 
             string publicApiBaseUrl = this.ComputePublicApiBaseUrl();
@@ -497,9 +485,8 @@ namespace FabricUpgradeCmdlet
         }
 
         /// <summary>
-        /// Find the PublicApiBaseUrl from the WorkloadParameters.
+        /// Compute the PublicApiBaseUrl from the cluster name.
         /// </summary>
-        /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>the PublicApiBaseUrl for this region.</returns>
         private string ComputePublicApiBaseUrl()
         {
@@ -528,8 +515,8 @@ namespace FabricUpgradeCmdlet
         /// <param name="displayName">The displayName of the artifact, if there is one.</param>
         /// <param name="statusCode">The status code from PublicApi.</param>
         /// <param name="responsePayload">The response payload from PublicApi, if there is one.</param>
-        /// <returns>The error code, a log message, and an exception message.</returns>
-        private (string ErrorCode, string LogMessage, string ExceptionMessage) BuildErrorMessages(
+        /// <returns>The error code and an exception message.</returns>
+        private (string ErrorCode, string ExceptionMessage) BuildErrorMessages(
             string operation,
             FabricUpgradeResourceTypes artifactType,
             string displayName,
@@ -539,19 +526,13 @@ namespace FabricUpgradeCmdlet
             PublicApiErrorModel errorModel = PublicApiErrorModel.FromString(responsePayload);
             string errorCode = errorModel?.ErrorCode;
 
-            // Build the log message
-            string logMessage = $"{operation}({artifactType}" +
-                (displayName == null ? string.Empty : $", {displayName}") +
-                $") returned status code {statusCode}" +
-                (errorCode == null ? string.Empty : $" and error code {errorCode}");
-
             // Build the exception message.
             string exceptionMessage = $"{operation} for {artifactType}" +
                 (displayName == null ? string.Empty : $" '{displayName}'") +
                 $" returned unexpected status code {statusCode}" +
                 (errorCode == null ? string.Empty : $" with error code {errorCode}");
 
-            return (errorCode, logMessage, exceptionMessage);
+            return (errorCode, exceptionMessage);
         }
 
         /// <summary>
@@ -584,7 +565,7 @@ namespace FabricUpgradeCmdlet
 
                 try
                 {
-                    return SafeJsonConvert.DeserializeObject<PublicApiErrorModel>(errorString);
+                    return JsonConvert.DeserializeObject<PublicApiErrorModel>(errorString);
                 }
                 catch (JsonException)
                 {
@@ -618,7 +599,7 @@ namespace FabricUpgradeCmdlet
 
             public override string ToString()
             {
-                return SafeJsonConvert.SerializeObject(this);
+                return JsonConvert.SerializeObject(this);
             }
         }
 
@@ -639,7 +620,7 @@ namespace FabricUpgradeCmdlet
 
             public override string ToString()
             {
-                return SafeJsonConvert.SerializeObject(this);
+                return JsonConvert.SerializeObject(this);
             }
         }
 

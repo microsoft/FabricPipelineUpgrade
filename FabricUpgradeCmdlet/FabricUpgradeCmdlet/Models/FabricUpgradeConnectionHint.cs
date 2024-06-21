@@ -8,7 +8,7 @@ using System.Runtime.Serialization;
 namespace FabricUpgradeCmdlet.Models
 {
     /// <summary>
-    /// This class describes a hint returned when the user needs to
+    /// This class describes a "hint" returned when the user needs to
     /// create/find a Fabric Connection which should replace an ADF LinkedService.
     /// </summary>
     public class FabricUpgradeConnectionHint
@@ -36,7 +36,8 @@ namespace FabricUpgradeCmdlet.Models
         [JsonProperty("datasource")]
         public string Datasource { get; set; }
 
-        // If we don't find this resolution during Export,
+        // If we don't find this Resolution during Export, then tell the user
+        // what the Resolution should "look like."
         [JsonProperty(PropertyName = "template")]
         public FabricUpgradeResolution Template { get; set; }
 
@@ -73,6 +74,11 @@ namespace FabricUpgradeCmdlet.Models
             return this;
         }
 
+        /// <summary>
+        /// Set the Tempate of the hint.
+        /// </summary>
+        /// <param name="template">The template.</param>
+        /// <returns>this, for chaining.</returns>
         public FabricUpgradeConnectionHint WithTemplate(FabricUpgradeResolution template)
         {
             this.Template = template;

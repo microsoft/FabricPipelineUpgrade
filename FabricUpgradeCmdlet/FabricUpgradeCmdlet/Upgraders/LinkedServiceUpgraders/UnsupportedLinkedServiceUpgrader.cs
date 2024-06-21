@@ -8,6 +8,10 @@ using Newtonsoft.Json.Linq;
 
 namespace FabricUpgradeCmdlet.Upgraders.LinkedServiceUpgraders
 {
+
+    /// <summary>
+    /// This class handles an unsupported LinkedService type by failing in the Compile step.
+    /// </summary>
     public class UnsupportedLinkedServiceUpgrader : LinkedServiceUpgrader
     {
         public UnsupportedLinkedServiceUpgrader(
@@ -17,6 +21,7 @@ namespace FabricUpgradeCmdlet.Upgraders.LinkedServiceUpgraders
         {
         }
 
+        /// <inheritdoc/>
         public override void Compile(AlertCollector alerts)
         {
             base.Compile(alerts);

@@ -7,6 +7,9 @@ using Newtonsoft.Json.Converters;
 
 namespace FabricUpgradeCmdlet.Utilities
 {
+    /// <summary>
+    /// The different kinds of ADF and Fabric resources handled by this module.
+    /// </summary>
     [JsonConverter(typeof(StringEnumConverter))]
     public enum FabricUpgradeResourceTypes
     {
@@ -15,19 +18,19 @@ namespace FabricUpgradeCmdlet.Utilities
         // An ADF or Fabric Pipeline
         DataPipeline = 1,
 
+        // An ADF or Fabric PipelineActivity
+        PipelineActivity = 2,
+
         // An ADF Dataset
-        Dataset = 2,
+        Dataset = 3,
 
         // An ADF LinkedService
-        LinkedService = 3,
-
-        // An ADF Trigger (not currently supported)
-        Trigger = 4,
-
-        // An ADF or Fabric PipelineActivity
-        PipelineActivity = 5,
+        LinkedService = 4,
 
         // A Fabric Connection
-        Connection = 6,
+        Connection = 5,
+
+        // An ADF Trigger (not currently supported)
+        Trigger = 6,
     }
 }
