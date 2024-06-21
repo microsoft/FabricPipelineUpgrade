@@ -9,6 +9,12 @@ using Newtonsoft.Json.Linq;
 
 namespace FabricUpgradeCmdlet.Exporters
 {
+    /// <summary>
+    /// If, somehow, the ExportMachine tries to export an unrecognized Resource,
+    /// the ResourceExporter factory will make one of these.
+    /// This object will throw an Error in CheckBeforeExports(), thereby terminating the
+    /// export before it begins.
+    /// </summary>
     public class UnsupportedResourceExporter : ResourceExporter
     {
         private readonly FabricExportInstruction exportInstruction;
@@ -22,6 +28,7 @@ namespace FabricUpgradeCmdlet.Exporters
             this.Name = this.exportInstruction.ResourceName;
         }
 
+        /// <inheritdoc/>
         public override void CheckBeforeExports(AlertCollector alerts)
         {
             base.CheckBeforeExports(alerts);

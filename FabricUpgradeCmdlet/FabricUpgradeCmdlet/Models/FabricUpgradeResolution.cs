@@ -16,7 +16,7 @@ namespace FabricUpgradeCmdlet.Models
     /// <remarks>
     /// For example, an Upgrade may need to "convert" an ADF LinkedService into a Fabric Connection.
     /// A Resolution like
-    /// { type = "LinkedServiceToConnection", name = [LinkedService's name], value = [Connection's GUID] }
+    /// { type = "LinkedServiceToConnectionId", name = [LinkedService's name], value = [Connection's GUID] }
     /// will allow the Upgrader to perform this translation.
     ///
     /// These resolutions must come from the client; this Workload has no way of computing them.
@@ -48,15 +48,15 @@ namespace FabricUpgradeCmdlet.Models
         public ResolutionType Type { get; set; }
 
         // The content of this key depends on the ResolutionType.
-        // In a LinkedServiceToConnection, this is the name of the ADF LinkedService.
-        // In a UrlHostToConnection, this is the hostname of a Url.
+        // In a LinkedServiceToConnectionId Resolution, this is the name of the ADF LinkedService.
+        // In a UrlHostToConnectionId Resolution, this is the hostname of a Url.
+        // In a CredentialConnectionId Resolution, this should be "user."
         [DataMember(Name = "key")]
         [JsonProperty("key")]
         public string Key { get; set; }
 
-        // The content of this value depends on the ResolutionType.
-        // In a LinkedServiceToConnection, this is a Fabric ConnectionId.
-        // For a UrlHostToConnection, this is a FabricConnectionId.
+        // The content of this value could depend on the ResolutionType.
+        // For all the current Resolutions, this is a Fabric ConnectionId.
         [DataMember(Name = "value")]
         [JsonProperty("value")]
         public string Value { get; set; }

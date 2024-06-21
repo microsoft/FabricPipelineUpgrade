@@ -9,6 +9,9 @@ using Newtonsoft.Json.Linq;
 
 namespace FabricUpgradeCmdlet.Upgraders.LinkedServiceUpgraders
 {
+    /// <summary>
+    /// This class handles the Upgrade for an AzureSqlDatabase LinkedService.
+    /// </summary>
     public class AzureSqlDatabaseLinkedServiceUpgrader : LinkedServiceUpgrader
     {
         public const string DatabaseKey = "initial catalog";
@@ -22,7 +25,6 @@ namespace FabricUpgradeCmdlet.Upgraders.LinkedServiceUpgraders
             DatabaseNamePath,
         };
 
-        protected ResourceParameters LinkedServiceParameters { get; set; }
 
         public AzureSqlDatabaseLinkedServiceUpgrader(
             JToken adfLinkedServiceToken,
@@ -40,11 +42,7 @@ namespace FabricUpgradeCmdlet.Upgraders.LinkedServiceUpgraders
 
             this.CheckRequiredAdfProperties(this.requiredAdfProperties, alerts);
 
-            Dictionary<string, JToken> parameters = this.AdfResourceToken.SelectToken(AdfParametersPath)?.ToObject<Dictionary<string, JToken>>();
-            this.LinkedServiceParameters = ResourceParameters.FromResourceDeclaration(
-                parameters,
-                "linkedService()");
-
+            // TODO: Verify that Server is not an expression.
         }
 
         /// <inheritdoc/>
@@ -55,48 +53,35 @@ namespace FabricUpgradeCmdlet.Upgraders.LinkedServiceUpgraders
             base.PreLink(allUpgraders, alerts);
         }
 
+        /// <inheritdoc/>
         public override Symbol ResolveExportedSymbol(
             string symbolName,
             Dictionary<string, JToken> parametersFromCaller,
             AlertCollector alerts)
         {
-            if (symbolName == Symbol.CommonNames.ExportLinks)
-            {
-                return base.ResolveExportedSymbol(Symbol.CommonNames.ExportLinks, parametersFromCaller, alerts);
-            }
-
             if (symbolName == Symbol.CommonNames.LinkedServiceDatabaseName)
             {
-                // We need to do a bit of manipulation here.
-
-                // In a LinkedService, the expressions look like "@{...}", so we need to convert that to 
-                // a form like "{ 'type': 'Expression', 'value': '@...' }.
-                string databaseNameSource = this.AdfResourceToken.SelectToken(DatabaseNamePath).ToString();
-                this.FixupLinkedServiceExpression(databaseNameSource, out JToken databaseNameSourceToken);
-
-                // Next, we need to stick this into an object from which the PropertyCopier can copy this value.
-                JObject source = new JObject();
-                source["database"] = databaseNameSourceToken;
-
-
-                // And here's an object into which we can copy the value.
-                JObject target = new JObject();
-
-                JObject databaseNameTarget = new JObject();
-                PropertyCopier copier = new PropertyCopier(
-                    this.Name,
-                    source,
-                    target,
-                    this.BuildActiveParameters(parametersFromCaller),
-                    alerts);
-
-                copier.Copy("database");
-
-                // Finally, pull that "database" property from the target object, and return it!
-                return Symbol.ReadySymbol(target["database"]);
+                return this.BuildLinkedServiceDatabaseNameSymbol(parametersFromCaller, alerts);
             }
 
             return base.ResolveExportedSymbol(symbolName, parametersFromCaller, alerts);
+        }
+
+        /// <summary>
+        /// Build and return a Symbol that contains the name of the database.
+        /// This handles the possibility that the database is a LinkedService Expression.
+        /// </summary>
+        /// <param name="parametersFromCaller">The parameters from the caller.</param>
+        /// <param name="alerts">Add any generated alerts to this collector.</param>
+        /// <returns>A Symbol whose value is the database name.</returns>
+        private Symbol BuildLinkedServiceDatabaseNameSymbol(
+            Dictionary<string, JToken> parametersFromCaller,
+            AlertCollector alerts)
+        {
+            return this.BuildLinkedServiceExportableSymbol(
+                DatabaseNamePath,
+                this.BuildActiveParameters(parametersFromCaller),
+                alerts);
         }
 
         /// <summary>
@@ -104,9 +89,9 @@ namespace FabricUpgradeCmdlet.Upgraders.LinkedServiceUpgraders
         /// then convert it to the "Recommended" format.
         /// </summary>
         /// <remarks>
-        /// Sometime around June 2024, this LinkedService acquired a new, "Recommended" format.
+        /// Sometime around June 2024, this LinkedService acquired a new "Recommended" format.
         /// The "Recommended" format uses individual typeProperties instead of the connectionString.
-        /// This LinkedService may have been built _before_ then, or intentionally built in the "Legacy" format.
+        /// This LinkedService may have been built before then, or intentionally built in the "Legacy" format.
         /// To simplify downstream operations, convert this to the "Recommended" format.
         /// </remarks>
         /// <param name="alerts">Add any generated alerts to this collector.</param>
@@ -143,7 +128,7 @@ namespace FabricUpgradeCmdlet.Upgraders.LinkedServiceUpgraders
 
             string connectionString = connectionStringToken.ToString();
 
-            this.BuildConnectionSettings(connectionString);
+            var connectionSettings = this.BuildConnectionSettings(connectionString);
 
             /* This:
             "typeProperties": {
@@ -171,23 +156,18 @@ namespace FabricUpgradeCmdlet.Upgraders.LinkedServiceUpgraders
 
             JObject typeProperties = (JObject)this.AdfResourceToken.SelectToken("properties.typeProperties");
 
-            if (this.ConnectionSettings.TryGetValue(DatasourceKey, out JToken serverName))
+            if (connectionSettings.TryGetValue(DatasourceKey, out JToken serverName))
             {
                 typeProperties["server"] = serverName;
             }
 
-            if (this.ConnectionSettings.TryGetValue(DatabaseKey, out JToken databaseName))
+            if (connectionSettings.TryGetValue(DatabaseKey, out JToken databaseName))
             {
                 typeProperties["database"] = databaseName;
             }
         }
 
-        protected ResourceParameters BuildActiveParameters(
-                    Dictionary<string, JToken> callerValues)
-        {
-            return this.LinkedServiceParameters.BuildResolutionContext(callerValues);
-        }
-
+        /// <inheritdoc/>
         protected override FabricUpgradeConnectionHint BuildFabricConnectionHint()
         {
             string serverName = this.AdfResourceToken.SelectToken(ServerNamePath)?.ToString();

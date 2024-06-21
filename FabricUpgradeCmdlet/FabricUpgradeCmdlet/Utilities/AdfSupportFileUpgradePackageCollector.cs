@@ -2,17 +2,19 @@
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
+using FabricUpgradeCmdlet.Models;
 using Newtonsoft.Json.Linq;
 
 namespace FabricUpgradeCmdlet.Utilities
 {
+    /// <summary>
+    /// A class to accept the callbacks from Unzip and collect the contents of the ZIP file.
+    /// </summary>
     internal class AdfSupportFileUpgradePackageCollector : IUpgradePackageCollector
     {
-        private AdfSupportFileUpgradePackage upgradePackage = new AdfSupportFileUpgradePackage()
-        {
-            Type = AdfUpgradePackage.UpgradePackageType.AdfSupportFile,
-        };
+        private AdfSupportFileUpgradePackage upgradePackage = new AdfSupportFileUpgradePackage();
 
+        /// <inheritdoc/>
         public void Collect(string entryName, string entryData)
         {
             if (entryName == "diagnostic.json")
@@ -45,11 +47,19 @@ namespace FabricUpgradeCmdlet.Utilities
             }
         }
 
+        /// <summary>
+        /// Construct the JObject that can be inserted into the FabricUpgradeProgress' Result field.
+        /// </summary>
+        /// <returns>The Result that will be returned to the client in the FabricUpgradeProgress.</returns>
         public JObject Build()
         {
             return JObject.Parse(UpgradeSerialization.Serialize(upgradePackage));
         }
 
+        /// <summary>
+        /// Extract some data from the diagnostic.json file and add it to the UpgradePackage.
+        /// </summary>
+        /// <param name="entryData">The contents of the diagnostic.json file.</param>
         private void ProcessDiagnosticFile(string entryData)
         {
             JObject diagnostic = JObject.Parse(entryData);

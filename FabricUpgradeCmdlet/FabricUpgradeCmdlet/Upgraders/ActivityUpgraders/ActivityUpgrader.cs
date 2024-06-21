@@ -9,6 +9,9 @@ using Newtonsoft.Json.Linq;
 
 namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
 {
+    /// <summary>
+    /// The base class for all Activity Upgraders.
+    /// </summary>
     public class ActivityUpgrader : Upgrader
     {
         public class ActivityTypes
@@ -18,6 +21,9 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
             public const string If = "IfCondition";
             public const string Wait = "Wait";
             public const string Web = "WebActivity";
+
+            // The ADF ExecutePipeline becomes a Fabric InvokePipeline.
+            public const string InvokePipeline = "InvokePipeline";
         }
 
         protected ActivityUpgrader(
@@ -28,14 +34,16 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
             : base(adfActivityToken, machine)
         {
             this.ActivityType = activityType;
-            this.AdfModel = AdfPipelineActivityModel.Build(adfActivityToken);
-            this.Name = AdfModel.Name;
+            this.AdfBaseModel = AdfBaseActivityModel.Build(adfActivityToken);
+            this.Name = AdfBaseModel.Name;
             this.UpgraderType = FabricUpgradeResourceTypes.PipelineActivity;
             this.Path = parentPath + "/" + this.Name;
         }
 
-        protected AdfPipelineActivityModel AdfModel { get; set; }
+        // The model of the common properties of all ADF Activities.
+        protected AdfBaseActivityModel AdfBaseModel { get; set; }
 
+        // The Type of the activity, like 'Copy'.
         protected string ActivityType { get; set; }
 
         /// <summary>
@@ -50,7 +58,7 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
             JToken adfActivityToken,
             IFabricUpgradeMachine machine)
         {
-            string activityType = AdfPipelineActivityModel.Build(adfActivityToken).ActivityType;
+            string activityType = AdfBaseActivityModel.Build(adfActivityToken).ActivityType;
             return activityType switch
             {
                 ActivityTypes.Copy => new CopyActivityUpgrader(parentPath, adfActivityToken, machine),
@@ -62,11 +70,13 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
             };
         }
 
+        // <inheritdoc/>
         public override void Compile(AlertCollector alerts)
         {
             base.Compile(alerts);
         }
 
+        // <inheritdoc/>
         public override void PreLink(
             List<Upgrader> allUpgraders,
             AlertCollector alerts)
@@ -74,6 +84,7 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
             base.PreLink(allUpgraders, alerts);
         }
 
+        // <inheritdoc/>
         public override Symbol ResolveExportedSymbol(
             string symbolName,
             Dictionary<string, JToken> parameters,
@@ -81,30 +92,97 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
         {
             if (symbolName == Symbol.CommonNames.Activity)
             {
-                // Create a Symbol whose Value is a JObject that contains all of the 
-                // common activity properties.
+                // Each individual Activity Upgrader requests this Symbol
+                // in order to start building its particular "activity" Symbol.
 
-                FabricPipelineActivityModel fabricModel = new FabricPipelineActivityModel()
-                {
-                    Name = this.Name,
-                    ActivityType = this.ActivityType,
-                    Description = this.AdfModel.Description,
-                    DependsOn = this.AdfModel.DependsOn,
-                    State = this.AdfModel.State,
-                    OnInactiveMarkAs = this.AdfModel.OnInactiveMarkAs,
-                    UserProperties = this.AdfModel.UserProperties,
-                };
-
-                return Symbol.ReadySymbol(fabricModel.ToJToken());
-
+                return this.BuildCommonActivitySymbol(alerts);
             }
+
             return base.ResolveExportedSymbol(symbolName, parameters, alerts);
         }
 
         /// <summary>
-        /// The ADF Model for a Pipeline Activity.
+        /// Create a Symbol whose Value is a JObject that contains all of the 
+        /// common activity properties.
         /// </summary>
-        protected class AdfPipelineActivityModel
+        /// <param name="alerts">Add any generated alerts to this collector.</param>
+        /// <returns></returns>
+        private Symbol BuildCommonActivitySymbol(
+            AlertCollector alerts)
+        {
+            // Create a Symbol whose Value is a JObject that contains all of the 
+            // common activity properties.
+
+            FabricBaseActivityModel fabricModel = new FabricBaseActivityModel()
+            {
+                Name = this.Name,
+                ActivityType = this.ActivityType,
+                Description = this.AdfBaseModel.Description,
+                DependsOn = this.AdfBaseModel.DependsOn,
+                State = this.AdfBaseModel.State,
+                OnInactiveMarkAs = this.AdfBaseModel.OnInactiveMarkAs,
+                UserProperties = this.AdfBaseModel.UserProperties,
+            };
+
+            return Symbol.ReadySymbol(fabricModel.ToJToken());
+        }
+
+        /// <summary>
+        /// Build the ExportLinks Symbol whose value will be included in this Activity's Pipeline's ExportLinks.
+        /// </summary>
+        /// <remarks>
+        /// Before this Activity's Pipeline can be exported, we need to populate the IDs of 
+        /// the other Fabric Resources referenced by this Activity (see ExportPipeline).
+        /// Collect those rquirements now so that the Pipeline can fill out its exportResolves field.
+        /// </remarks>
+        /// <param name="parameters">The parameters from the caller.</param>
+        /// <param name="alerts">Add any generated alerts to this collector.</param>
+        /// <returns>The ExportLinks Symbol whose value is added to the Pipeline's ExportLinks.</returns>
+        protected virtual Symbol BuildExportLinksSymbol(
+            Dictionary<string, JToken> parameters,
+            AlertCollector alerts)
+        {
+            // For Activities with no ExportLinks, return null.
+            return Symbol.ReadySymbol(null);
+        }
+
+        /// <summary>
+        /// Build the ExportResolves Symbol whose value will be included in this Activity's Pipeline's ExportResolves.
+        /// </summary>
+        /// <remarks>
+        /// Before this Activity's Pipeline can be exported, we need to populate the IDs of 
+        /// the Fabric Connections used by this Activity's Datasets. Collect them now so that
+        /// the Pipeline can fill out its exportLinks field.
+        /// </remarks>
+        /// <param name="parameters">The parameters from the caller.</param>
+        /// <param name="alerts">Add any generated alerts to this collector.</param>
+        /// <returns>The ExportLinks Symbol whose value is added to the Pipeline's ExportResolves.</returns>
+        protected virtual Symbol BuildExportResolvesSymbol(
+            Dictionary<string, JToken> parameters,
+            AlertCollector alerts)
+        {
+            // For Activities with no ExportResolves, return null.
+            return Symbol.ReadySymbol(null);
+        }
+
+        /// <summary>
+        /// Build the Activity Symbol whose value will be included in this Activity's Pipeline.
+        /// </summary>
+        /// <param name="parameters">The parameters from the caller.</param>
+        /// <param name="alerts">Add any generated alerts to this collector.</param>
+        /// <returns>The Activity Symbol whose value is added to the Pipeline's Activities.</returns>
+        protected virtual Symbol BuildActivitySymbol(
+            Dictionary<string, JToken> parameters,
+            AlertCollector alerts)
+        {
+            // Each Activity should override this.
+            return Symbol.ReadySymbol(null);
+        }
+
+        /// <summary>
+        /// The ADF Model for the common properties of all ADF Activities.
+        /// </summary>
+        protected class AdfBaseActivityModel
         {
             [JsonProperty(PropertyName = "name")]
             public string Name { get; set; }
@@ -128,16 +206,16 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
             [JsonProperty(PropertyName = "userProperties")]
             public List<UserProperty> UserProperties { get; set; } = new List<UserProperty>();
 
-            public static AdfPipelineActivityModel Build(JToken activityToken)
+            public static AdfBaseActivityModel Build(JToken activityToken)
             {
-                return UpgradeSerialization.FromJToken<AdfPipelineActivityModel>(activityToken);
+                return UpgradeSerialization.FromJToken<AdfBaseActivityModel>(activityToken);
             }
         }
 
         /// <summary>
-        /// The Fabric Model for a Pipeline Activity.
+        /// The Fabric Model for the common properties of all Fabric Activities.
         /// </summary>
-        protected class FabricPipelineActivityModel
+        protected class FabricBaseActivityModel
         {
             [JsonProperty(PropertyName = "name")]
             public string Name { get; set; }

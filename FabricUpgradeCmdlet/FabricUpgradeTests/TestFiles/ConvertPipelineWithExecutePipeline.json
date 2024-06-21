@@ -85,7 +85,7 @@
                   },
                   {
                     "name": "Execute Other Pipeline",
-                    "type": "Wait",
+                    "type": "InvokePipeline",
                     "description": "This activity executes another pipeline",
                     "dependsOn": [
                       {

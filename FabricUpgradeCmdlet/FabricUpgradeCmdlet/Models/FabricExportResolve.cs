@@ -9,10 +9,13 @@ using Newtonsoft.Json.Linq;
 namespace FabricUpgradeCmdlet.Models
 {
     /// <summary>
-    /// Part of the communication between an Upgrader and an Exporter.
+    /// This class is part of the communication between an Upgrader and an Exporter.
     /// This class tells the Exporter how to "finish" the item that it is exporting.
-    /// Each of these typically tell the Exporter to copy the Fabric resource ID of another item.
-    /// We cannot know the Fabric resource ID of another item until the Export operation.
+    /// Each of these typically tell the Exporter which Connection ID needs to be found
+    /// in the Resolutions from the client, and where in the Resource to insert that ID.
+    /// We don't need Resolutions until Export, so we allow the user to postpone setting
+    /// the Resolutions until then.
+    /// Therefore, we need to finish this in the Export phase.
     /// </summary>
     public class FabricExportResolve
     {

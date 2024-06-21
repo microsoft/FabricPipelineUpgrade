@@ -9,6 +9,9 @@ using System.Management.Automation;
 // into the FabricUpgradeHandler.
 namespace FabricUpgradeCmdlet
 {
+    /// <summary>
+    /// Import an ADF Support File.
+    /// </summary>
     [Cmdlet(VerbsData.Import, "AdfSupportFile")]
     public class ImportAdfSupportFile : Cmdlet
     {
@@ -61,20 +64,9 @@ namespace FabricUpgradeCmdlet
         }
         private string progress;
 
-        [Alias("rf")]
-        [Parameter(Mandatory = false)]
-        public string ResolutionsFilename
-        {
-            get { return resolutionsFilename; }
-            set { resolutionsFilename = value; }
-        }
-        private string resolutionsFilename;
-
         protected override void ProcessRecord()
         {
-            WriteObject(new FabricUpgradeHandler().ConvertToFabricPipeline(
-                this.progress,
-                this.resolutionsFilename).ToString());
+            WriteObject(new FabricUpgradeHandler().ConvertToFabricPipeline(this.progress).ToString());
         }
     }
 

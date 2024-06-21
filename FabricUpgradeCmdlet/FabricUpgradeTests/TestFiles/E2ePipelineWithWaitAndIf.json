@@ -30,7 +30,7 @@
           "activities": [
             {
               "name": "If Condition1",
-              "type": "Wait",
+              "type": "IfCondition",
               "dependsOn": [
                 {
                   "activity": "Wait11Seconds",

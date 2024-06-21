@@ -9,11 +9,17 @@ using Newtonsoft.Json.Linq;
 
 namespace FabricUpgradeCmdlet.Upgraders.LinkedServiceUpgraders
 {
+    /// <summary>
+    /// This class handles the Upgrade for an AzureBlob LinkedService.
+    /// </summary>
     public class AzureBlobStorageLinkedServiceUpgrader : LinkedServiceUpgrader
     {
         private readonly List<string> requiredAdfProperties = new List<string>
         {
         };
+
+        // A dictionary parsed from the connectionSettings property.
+        private Dictionary<string, JToken> connectionSettings;
 
         public AzureBlobStorageLinkedServiceUpgrader(
             JToken adfLinkedServiceToken,
@@ -41,8 +47,10 @@ namespace FabricUpgradeCmdlet.Upgraders.LinkedServiceUpgraders
             }
             else
             {
-                this.BuildConnectionSettings(connectionStringToken.ToString());
+                this.connectionSettings = this.BuildConnectionSettings(connectionStringToken.ToString());
             }
+
+            // TODO: Verify that AccountName and EndpointSuffix are not expressions.
         }
 
         /// <inheritdoc/>
@@ -53,22 +61,19 @@ namespace FabricUpgradeCmdlet.Upgraders.LinkedServiceUpgraders
             base.PreLink(allUpgraders, alerts);
         }
 
+        /// <inheritdoc/>
         public override Symbol ResolveExportedSymbol(
             string symbolName,
             Dictionary<string, JToken> parameters,
             AlertCollector alerts)
         {
-            if (symbolName == Symbol.CommonNames.ExportLinks)
-            {
-                return base.ResolveExportedSymbol(Symbol.CommonNames.ExportLinks, parameters, alerts);
-            }
-
             return base.ResolveExportedSymbol(symbolName, parameters, alerts);
         }
 
+        /// <inheritdoc/>
         protected override FabricUpgradeConnectionHint BuildFabricConnectionHint()
         {
-            this.ConnectionSettings.TryGetValue("AccountName", out JToken accountName);
+            this.connectionSettings.TryGetValue("AccountName", out JToken accountName);
 
             return base.BuildFabricConnectionHint()
                 .WithConnectionType(this.LinkedServiceType)

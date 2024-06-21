@@ -10,6 +10,9 @@ using FabricUpgradeCmdlet.Utilities;
 
 namespace FabricUpgradeCmdlet.Models
 {
+    /// <summary>
+    /// An "alert" is a Warning, an Error, or some other information we need to send to the client.
+    /// </summary>
     public class FabricUpgradeAlert
     {
         /// <summary>
@@ -35,7 +38,7 @@ namespace FabricUpgradeCmdlet.Models
             Warning = 1,
 
             /// <summary>
-            /// FabricUpgrade requires additional information about the resource in Details.
+            /// FabricUpgrade requires additional information about the resource described in Details.
             /// Typically, the caller should retry with this resource included in the next request's Resolutions.
             /// </summary>
             [EnumMember(Value = "RequiresUserAction")]

@@ -43,13 +43,14 @@ namespace FabricUpgradeCmdlet.Models
             InProgress = 3,
 
             /// <summary>
-            /// The FabricUpgrade failed. See the Failures field for more information.
+            /// The FabricUpgrade failed. See the Alerts field for more information.
             /// </summary>
             [EnumMember(Value = "Failed")]
             Failed = 4,
 
             /// <summary>
             /// The FabricUpgrade has completed successfully.
+            /// There may be Warnings in the Alerts field.
             /// </summary>
             [EnumMember(Value = "Succeeded")]
             Succeeded = 5,
@@ -67,12 +68,27 @@ namespace FabricUpgradeCmdlet.Models
         [JsonProperty(PropertyName = "alerts", Order = 20)]
         public List<FabricUpgradeAlert> Alerts { get; set; } = new List<FabricUpgradeAlert>();
 
-        [JsonProperty(PropertyName = "resolutions", Order = 30)]
-        public List<FabricUpgradeResolution> Resolutions { get; set; } = new List<FabricUpgradeResolution>();
-
-        [JsonProperty(PropertyName = "result", Order = 40)]
+        /// <summary>
+        /// A "result" object, whose contents vary by which method returns it.
+        /// </summary>
+        [JsonProperty(PropertyName = "result", Order = 30)]
         public JObject Result { get; set; } = new JObject();
 
+        /// <summary>
+        /// The Resolutions of LinkedServices to Connection IDs.
+        /// </summary>
+        /// <remarks>
+        /// The Resolutions may be set at any time during the Import/Upgrade/Export process,
+        /// so they are carried along in the Progress.
+        /// </remarks>
+        [JsonProperty(PropertyName = "resolutions", Order = 40)]
+        public List<FabricUpgradeResolution> Resolutions { get; set; } = new List<FabricUpgradeResolution>();
+
+        /// <summary>
+        /// Add an Alert to the Progress.
+        /// </summary>
+        /// <param name="alert">The Alert to add.</param>
+        /// <returns>this, for chaining.</returns>
         public FabricUpgradeProgress WithAlert(FabricUpgradeAlert alert)
         {
             this.Alerts.Add(alert);

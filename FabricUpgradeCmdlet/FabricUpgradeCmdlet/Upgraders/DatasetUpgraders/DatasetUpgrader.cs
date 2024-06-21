@@ -75,11 +75,10 @@ namespace FabricUpgradeCmdlet.Upgraders.DatasetUpgraders
             };
         }
 
+        /// <inheritdoc/>
         public override void Compile(AlertCollector alerts)
         {
             base.Compile(alerts);
-
-            string q = this.AdfResourceToken.ToString(Newtonsoft.Json.Formatting.Indented);
 
             this.CheckRequiredAdfProperties(this.requiredAdfProperties, alerts);
 
@@ -88,6 +87,7 @@ namespace FabricUpgradeCmdlet.Upgraders.DatasetUpgraders
                 "dataset()");
         }
 
+        /// <inheritdoc/>
         public override void PreLink(
             List<Upgrader> allUpgraders,
             AlertCollector alerts)
@@ -117,43 +117,88 @@ namespace FabricUpgradeCmdlet.Upgraders.DatasetUpgraders
         {
             if (symbolName == Symbol.CommonNames.ExportLinks)
             {
-                // A Dataset links to a LinkedService.
-                // In the Export phase, we will acquire the Fabric Resource ID for the Connection
-                // that corresponds to the LinkedService, and _then_ we will insert it into this JSON.
-
-                List<FabricExportLink> links = new List<FabricExportLink>();
-
-                string linkedServiceName = this.AdfResourceToken.SelectToken(AdfLinkedServiceNamePath)?.ToString();
-
-                FabricExportLink linkedServiceLink = new FabricExportLink(
-                    $"{FabricUpgradeResourceTypes.Connection}:{linkedServiceName}",
-                    FabricConnectionIdPath);
-
-                links.Add(linkedServiceLink);
-
-                return Symbol.ReadySymbol(JArray.Parse(UpgradeSerialization.Serialize(links)));
+                return this.BuildExportLinks(parametersFromCaller, alerts);
             }
 
             if (symbolName == Symbol.CommonNames.DatasetSettings)
             {
-                // Populate the common dataset settings.
-
-                JObject datasetSettings = new JObject();
-                PropertyCopier copier = new PropertyCopier(
-                    this.Path,
-                    this.AdfResourceToken,
-                    datasetSettings,
-                    this.BuildActiveParameters(parametersFromCaller),
-                    alerts);
-
-                copier.Copy("properties.annotations", "annotations");
-                copier.Copy(AdfDatasetTypePath, FabricDatasetTypePath);
-                copier.Set(FabricConnectionIdPath, Guid.Empty.ToString());
-
-                return Symbol.ReadySymbol(datasetSettings);
+                return this.BuildCommonDatasetSettings(parametersFromCaller, alerts);
             }
 
             return base.ResolveExportedSymbol(symbolName, parametersFromCaller, alerts);
+        }
+
+        /// <summary>
+        /// Build the ExportLinks Symbol that will be included in
+        /// the Pipeline of the Activity that references this Dataset.
+        /// </summary>
+        /// <remarks>
+        /// A Dataset links to a LinkedService.
+        /// In the Export phase, we will acquire the Fabric Resource ID for the Connection
+        /// that corresponds to the LinkedService, and _then_ we will insert it into this JSON.
+        /// </remarks>
+        /// <param name="parametersFromCaller">The parameters from the caller.</param>
+        /// <param name="alerts">Add any generated alerts to this collector.</param>
+        /// <returns>A Symbol whose value describes the other Fabric Resources upon which this Dataset depends.</returns>
+        protected virtual Symbol BuildExportLinks(
+            Dictionary<string, JToken> parametersFromCaller,
+            AlertCollector alerts)
+        {
+            // Datasets may override this method.
+
+            List<FabricExportLink> links = new List<FabricExportLink>();
+
+            string linkedServiceName = this.AdfResourceToken.SelectToken(AdfLinkedServiceNamePath)?.ToString();
+
+            FabricExportLink linkedServiceLink = new FabricExportLink(
+                $"{FabricUpgradeResourceTypes.Connection}:{linkedServiceName}",
+                FabricConnectionIdPath);
+
+            links.Add(linkedServiceLink);
+
+            return Symbol.ReadySymbol(JArray.Parse(UpgradeSerialization.Serialize(links)));
+        }
+
+        /// <summary>
+        /// Create a Symbol whose Value is a JObject that contains all of the 
+        /// common datasetSetting properties.
+        /// </summary>
+        /// <param name="parametersFromCaller">The parameters from the caller.</param>
+        /// <param name="alerts">Add any generated alerts to this collector.</param>
+        /// <returns>A Symbol whose value describes the common Fabric datasetSettings.</returns>
+        private Symbol BuildCommonDatasetSettings(
+            Dictionary<string, JToken> parametersFromCaller,
+            AlertCollector alerts)
+        {
+            // Populate the common dataset settings.
+
+            JObject datasetSettings = new JObject();
+            PropertyCopier copier = new PropertyCopier(
+                this.Path,
+                this.AdfResourceToken,
+                datasetSettings,
+                this.BuildActiveParameters(parametersFromCaller),
+                alerts);
+
+            copier.Copy("properties.annotations", "annotations");
+            copier.Copy(AdfDatasetTypePath, FabricDatasetTypePath);
+            copier.Set(FabricConnectionIdPath, Guid.Empty.ToString());
+
+            return Symbol.ReadySymbol(datasetSettings);
+        }
+
+        /// <summary>
+        /// Build the datasetSettings Symbol whose value will be included in an Activity.
+        /// </summary>
+        /// <param name="parameters">The parameters from the caller.</param>
+        /// <param name="alerts">Add any generated alerts to this collector.</param>
+        /// <returns>The datasetSettings Symbol whose value will be included in an Activity.</returns>
+        protected virtual Symbol BuildDatasetSettings(
+            Dictionary<string, JToken> parametersFromCaller,
+            AlertCollector alerts)
+        {
+            // Datasets should override this method!
+            return Symbol.ReadySymbol(null);
         }
 
         protected ResourceParameters BuildActiveParameters(

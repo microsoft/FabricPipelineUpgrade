@@ -71,7 +71,7 @@
               "activities": [
                 {
                   "name": "WaitOrExecute",
-                  "type": "Wait",
+                  "type": "IfCondition",
                   "description": "This activity checks a condition and either waits or invokes another pipeline",
                   "dependsOn": [],
                   "userProperties": [],
@@ -83,7 +83,7 @@
                     "ifFalseActivities": [
                       {
                         "name": "ExecuteOtherPipeline",
-                        "type": "Wait",
+                        "type": "InvokePipeline",
                         "description": "This activity invokes another pipeline",
                         "dependsOn": [],
                         "userProperties": [],

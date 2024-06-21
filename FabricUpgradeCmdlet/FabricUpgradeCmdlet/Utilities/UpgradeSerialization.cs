@@ -39,7 +39,7 @@ namespace FabricUpgradeCmdlet.Utilities
         }
 
         /// <summary>
-        /// Serialize any (serializable) object to a JToken.
+        /// Serialize any (serializable) object and parse that into a JToken.
         /// </summary>
         /// <remarks>
         /// This method uses the TransformationJsonConverter to allow us to

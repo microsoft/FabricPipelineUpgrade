@@ -12,7 +12,7 @@ namespace FabricUpgradeCmdlet.Utilities
     /// It is initialized with the default values.
     /// When a resource (Dataset or LinkedService) is asked to resolve a Symbol, this class
     /// produces a "context" for the resolution of the Symbol.
-    /// This context is a merge of the default values and the override from the resolve requester.
+    /// This context is a merge of the default values and the overrides from the resolve requester.
     /// </summary>
     public class ResourceParameters
     {
@@ -32,6 +32,12 @@ namespace FabricUpgradeCmdlet.Utilities
             this.parameters = parameters ?? new Dictionary<string, Parameter>();
         }
 
+        /// <summary>
+        /// Initialize a ResourceParameters object from the contents of the ADF Resource.
+        /// </summary>
+        /// <param name="parameterDeclaration">The Dictionary from the ADF Resource.</param>
+        /// <param name="prefix">Prepend this to each symbol name, to facilitate lookups.</param>
+        /// <returns>A ResourceParameters object.</returns>
         public static ResourceParameters FromResourceDeclaration(
             Dictionary<string, JToken> parameterDeclaration,
             string prefix)
@@ -45,8 +51,35 @@ namespace FabricUpgradeCmdlet.Utilities
             return new ResourceParameters(prefix, declaredParameters);
         }
 
+
+        /// <summary>
+        /// Initialize a ResourceParameters object from the contents of the ADF Resource.
+        /// </summary>
+        /// <remarks>
+        /// This method performs the transformation from JToken to Dictionary and calls the "other" FromResourceDeclaration().
+        /// </remarks>
+        /// <param name="parameterDeclaration">The JObject from the ADF Resource.</param>
+        /// <param name="prefix">Prepend this to each symbol name, to facilitate lookups.</param>
+        /// <returns>A ResourceParameters object.</returns>
+        public static ResourceParameters FromResourceDeclaration(
+            JToken parameterDeclaration,
+            string prefix)
+        {
+            return FromResourceDeclaration(((JObject)parameterDeclaration)?.ToDictionary<string, JToken>(), prefix);
+        }
+
+
+        /// <summary>
+        /// Combine this ResourceParameters object with the override values to produce a new ResourceParameters object.
+        /// </summary>
+        /// <remarks>
+        /// When a Copy Activity asks a Dataset to build its datasetSettings Symbol, the Copy Activity passes
+        /// the 'override' values that overwrite the Dataset's default values.
+        /// </remarks>
+        /// <param name="overrideValues">Override the current values with the contents of this dictionary.</param>
+        /// <returns>A new ResourceParameters with the updated values.</returns>
         public ResourceParameters BuildResolutionContext(
-            Dictionary<string, JToken> callerValues)
+            Dictionary<string, JToken> overrideValues)
         {
             Dictionary<string, Parameter> activeParameters = new Dictionary<string, Parameter>();
 
@@ -55,27 +88,20 @@ namespace FabricUpgradeCmdlet.Utilities
                 activeParameters[myParam.Key] = myParam.Value?.Clone();
             }
 
-            foreach (var incomingParam in callerValues ?? new Dictionary<string, JToken>())
+            foreach (var incomingParam in overrideValues ?? new Dictionary<string, JToken>())
             {
                 string key = this.prefix + incomingParam.Key;
-                // TODO: if the incomingParam is null, should we override the default value?
                 activeParameters[key] = activeParameters[key].WithValue(incomingParam.Value);
             }
 
             return new ResourceParameters(this.prefix, activeParameters);
         }
 
-        public Dictionary<string, JToken> ParametersToCallee()
-        {
-            Dictionary<string, JToken> parametersToCallee = new Dictionary<string, JToken>();
-            foreach (var parameter in this.parameters)
-            {
-                parametersToCallee[parameter.Key] = this.parameters[parameter.Key].StandaloneValue;
-            }
-
-            return parametersToCallee;
-        }
-
+        /// <summary>
+        /// Does this object have a parameter with this name?
+        /// </summary>
+        /// <param name="parameterName">The name to check.</param>
+        /// <returns>True if and only if this object has a parameter with this name.</returns>
         public bool ContainsParameterName(string parameterName)
         {
             return this.parameters.ContainsKey(parameterName);
@@ -94,7 +120,7 @@ namespace FabricUpgradeCmdlet.Utilities
         // If the parameter is part of an expression,
         // like "@concat(dataset().fileName, '.json')",
         // then use this value.
-        // This way, the result will be "@concat('otter', '.json')
+        // This way, the result will be something like "@concat('otter', '.json')
         public JToken IntegratedValue(
             string parameterName)
         {
@@ -102,7 +128,7 @@ namespace FabricUpgradeCmdlet.Utilities
         }
 
         /// <summary>
-        /// An UpgradeParameter describes a parameter from an ADF Resource.
+        /// An UpgradeParameter describes a parameter declared in an ADF Resource.
         /// UpgradeParameters are built from (e.g.) a Dataset's 'parameters' property.
         /// </summary>
         private class Parameter
@@ -148,7 +174,7 @@ namespace FabricUpgradeCmdlet.Utilities
             // If the parameter is part of an expression,
             // like "@concat(dataset().fileName, '.json')",
             // then use this value.
-            // This way, the result will be "@concat('otter', '.json')
+            // This way, the result will be something like "@concat('otter', '.json')
             public JToken IntegratedValue
             {
                 get
@@ -181,7 +207,6 @@ namespace FabricUpgradeCmdlet.Utilities
                     };
                 }
             }
-
         }
     }
 }

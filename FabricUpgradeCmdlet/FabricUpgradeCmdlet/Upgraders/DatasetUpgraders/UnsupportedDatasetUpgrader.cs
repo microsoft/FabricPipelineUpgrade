@@ -8,6 +8,9 @@ using Newtonsoft.Json.Linq;
 
 namespace FabricUpgradeCmdlet.Upgraders.DatasetUpgraders
 {
+    /// <summary>
+    /// This class handles an unsupported Dataset type by failing in the Compile step.
+    /// </summary>
     public class UnsupportedDatasetUpgrader : DatasetUpgrader
     {
         public UnsupportedDatasetUpgrader(
@@ -17,6 +20,7 @@ namespace FabricUpgradeCmdlet.Upgraders.DatasetUpgraders
         {
         }
 
+        /// <inheritdoc/>
         public override void Compile(AlertCollector alerts)
         {
             base.Compile(alerts);

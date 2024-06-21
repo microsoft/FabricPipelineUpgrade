@@ -31,30 +31,13 @@ namespace FabricUpgradeCmdlet.UpgradeMachines
         /// <inheritdoc/>
         public override FabricUpgradeProgress Upgrade()
         {
-            foreach (var entry in this.upgradePackage.Pipelines)
-            {
-                JToken pipelineToken = entry.Value;
-                Upgrader pipelineUpgrader = new PipelineUpgrader(pipelineToken, this);
-                this.Upgraders.Add(pipelineUpgrader);
-            }
-
-            foreach (var entry in this.upgradePackage.Datasets)
-            {
-                JToken datasetToken = entry.Value;
-                Upgrader datasetUpgrader = DatasetUpgrader.CreateDatasetUpgrader(datasetToken, this);
-                this.Upgraders.Add(datasetUpgrader);
-            }
-
-            foreach (var entry in this.upgradePackage.LinkedServices)
-            {
-                JToken linkedServiceToken = entry.Value;
-                Upgrader pipelineUpgrader = LinkedServiceUpgrader.CreateLinkedServiceUpgrader(linkedServiceToken, this);
-                this.Upgraders.Add(pipelineUpgrader);
-            }
-
             try
             {
-                JObject result = this.PerformUpgrade();
+                this.BuildUpgraders();
+                this.CompileUpgraders();
+                this.PreLinkUpgraders();
+                this.SortUpgraders();
+                JObject result = this.GenerateExportInstructions();
 
                 return new FabricUpgradeProgress()
                 {
@@ -75,14 +58,37 @@ namespace FabricUpgradeCmdlet.UpgradeMachines
 
         }
 
-        private JObject PerformUpgrade()
+        /// <summary>
+        /// Construct all of the Upgraders and add them to the Upgraders list.
+        /// </summary>
+        private void BuildUpgraders()
         {
-            this.CompileUpgraders();
-            this.PreLinkUpgraders();
-            this.SortUpgraders();
-            return this.GenerateFabricResources();
+            foreach (var entry in this.upgradePackage.Pipelines)
+            {
+                JToken pipelineToken = entry.Value;
+                Upgrader pipelineUpgrader = new PipelineUpgrader(pipelineToken, this);
+                this.Upgraders.Add(pipelineUpgrader);
+            }
+
+            foreach (var entry in this.upgradePackage.Datasets)
+            {
+                JToken datasetToken = entry.Value;
+                Upgrader datasetUpgrader = DatasetUpgrader.CreateDatasetUpgrader(datasetToken, this);
+                this.Upgraders.Add(datasetUpgrader);
+            }
+
+            foreach (var entry in this.upgradePackage.LinkedServices)
+            {
+                JToken linkedServiceToken = entry.Value;
+                Upgrader pipelineUpgrader = LinkedServiceUpgrader.CreateLinkedServiceUpgrader(linkedServiceToken, this);
+                this.Upgraders.Add(pipelineUpgrader);
+            }
         }
 
+        /// <summary>
+        /// Invoke the Compile method on all of the Upgraders.
+        /// </summary>
+        /// <exception cref="UpgradeFailureException"></exception>
         private void CompileUpgraders()
         {
             foreach (Upgrader upgrader in this.Upgraders)
@@ -96,6 +102,10 @@ namespace FabricUpgradeCmdlet.UpgradeMachines
             }
         }
 
+        /// <summary>
+        /// Invoke the PreLink method on all of the Upgraders.
+        /// </summary>
+        /// <exception cref="UpgradeFailureException"></exception>
         private void PreLinkUpgraders()
         {
             foreach (Upgrader upgrader in this.Upgraders)
@@ -109,12 +119,19 @@ namespace FabricUpgradeCmdlet.UpgradeMachines
             }
         }
 
+        /// <summary>
+        /// Perform a topological sort on the Upgraders, to ensure that we Generate them in the correct order.
+        /// </summary>
+        /// <exception cref="UpgradeFailureException"></exception>
         private void SortUpgraders()
         {
             List<Upgrader> sortedUpgraders = new List<Upgrader>();
             while (true)
             {
-                Upgrader unsortedUpgrader = this.Upgraders.Where(u => u.SortingState == Upgrader.UpgraderSortingState.Unsorted).FirstOrDefault();
+                Upgrader unsortedUpgrader = this.Upgraders
+                    .Where(u => u.SortingState == Upgrader.UpgraderSortingState.Unsorted)
+                    .FirstOrDefault();
+
                 if (unsortedUpgrader == null)
                 {
                     this.Upgraders = sortedUpgraders;
@@ -129,12 +146,12 @@ namespace FabricUpgradeCmdlet.UpgradeMachines
             }
         }
 
-        private JObject GenerateFabricResources()
+        private JObject GenerateExportInstructions()
         {
             JArray fabricResources = new JArray();
             foreach (Upgrader upgrader in this.Upgraders)
             {
-                Symbol resourceSymbol = upgrader.ResolveExportedSymbol(Symbol.CommonNames.FabricResource, this.Alerts);
+                Symbol resourceSymbol = upgrader.ResolveExportedSymbol(Symbol.CommonNames.ExportInstructions, this.Alerts);
                 if (resourceSymbol.State == Symbol.SymbolState.Ready)
                 {
                     if (resourceSymbol.Value != null)
@@ -160,64 +177,13 @@ namespace FabricUpgradeCmdlet.UpgradeMachines
             return result;
         }
 
+        /// <summary>
+        /// Check the Alerts; if any are worse than a Warning, then the Upgrade has failed.
+        /// </summary>
+        /// <returns>True if the Upgrade has failed; False otherwise.</returns>
         private bool AlertsIndicateFailure()
         {
             return this.Alerts.Any(f => f.Severity != FabricUpgradeAlert.FailureSeverity.Warning);
         }
-
-        /*
-        /// <summary>
-        /// From the unzipped file, build the appropriate Upgrader, extract some metadata, etc..
-        /// </summary>
-        /// <param name="fileName">The name of the file (lets us interpret the type of the contents).</param>
-        /// <param name="fileContents">The contents of the file.</param>
-        private void ProcessFile(
-            string fileName,
-            string fileContents)
-        {
-            if (fileName == "diagnostic.json")
-            {
-                JObject diagnosticInfo = JObject.Parse(fileContents);
-                this.ProcessDiagnosticInfo(diagnosticInfo);
-            }
-            else if (fileName.StartsWith("pipeline/") && !fileName.EndsWith("/"))
-            {
-                JObject pipelineToken = JObject.Parse(fileContents);
-                this.Upgraders.Add(new PipelineUpgrader(pipelineToken, this));
-            }
-            else if (fileName.StartsWith("dataset/") && !fileName.EndsWith("/"))
-            {
-                JObject datasetToken = JObject.Parse(fileContents);
-                this.Upgraders.Add(DatasetUpgrader.CreateDatasetUpgrader(datasetToken, this));
-            }
-            else if (fileName.StartsWith("linkedService/") && !fileName.EndsWith("/"))
-            {
-                JObject linkedServiceToken = JObject.Parse(fileContents);
-                this.Upgraders.Add(LinkedServiceUpgrader.CreateLinkedServiceUpgrader(linkedServiceToken, this));
-            }
-            else if (fileName.StartsWith("trigger/") && !fileName.EndsWith("/"))
-            {
-                JObject triggerToken = JObject.Parse(fileContents);
-                this.Upgraders.Add(TriggerUpgrader.CreateTriggerUpgrader(triggerToken, this));
-            }
-        }
-        */
-
-        /*
-        /// <summary>
-        /// Process the contents of the diagnostic.json file.
-        /// </summary>
-        /// <param name="diagnosticInfo">The contents of the diagnostic.json file.</param>
-        private void ProcessDiagnosticInfo(
-            JToken diagnosticInfo)
-        {
-            DiagnosticModel diagnosticModel = DiagnosticModel.Build(diagnosticInfo);
-            string originalDataFactory = diagnosticModel.DataFactoryName;
-            if (!string.IsNullOrEmpty(originalDataFactory))
-            {
-                this.Metadata.OriginalDataFactory = originalDataFactory;
-            }
-        }
-        */
     }
 }

@@ -8,6 +8,9 @@ using Newtonsoft.Json.Linq;
 
 namespace FabricUpgradeCmdlet.Upgraders.DatasetUpgraders
 {
+    /// <summary>
+    /// This class handles the Upgrade for an Binary Dataset.
+    /// </summary>
     public class BinaryDatasetUpgrader : DatasetUpgrader
     {
         private const string adfLocationPath = "properties.typeProperties.location";
@@ -41,39 +44,43 @@ namespace FabricUpgradeCmdlet.Upgraders.DatasetUpgraders
             base.PreLink(allUpgraders, alerts);
         }
 
+        /// <inheritdoc/>
         public override Symbol ResolveExportedSymbol(
             string symbolName,
             Dictionary<string, JToken> parametersFromCaller,
             AlertCollector alerts)
         {
-            if (symbolName == Symbol.CommonNames.ExportLinks)
-            {
-                return base.ResolveExportedSymbol(Symbol.CommonNames.ExportLinks, parametersFromCaller, alerts);
-            }
-
             if (symbolName == Symbol.CommonNames.DatasetSettings)
             {
-                Symbol datasetSettingsSymbol = base.ResolveExportedSymbol(Symbol.CommonNames.DatasetSettings, parametersFromCaller, alerts);
-
-                if (datasetSettingsSymbol.State != Symbol.SymbolState.Ready)
-                {
-                    // TODO!
-                }
-
-                JObject fabricActivityObject = (JObject)datasetSettingsSymbol.Value;
-                PropertyCopier copier = new PropertyCopier(
-                    this.Path,
-                    this.AdfResourceToken,
-                    fabricActivityObject,
-                    this.BuildActiveParameters(parametersFromCaller),
-                    alerts);
-
-                copier.Copy(adfLocationPath, fabricLocationPath);
-
-                return Symbol.ReadySymbol(fabricActivityObject);
+                return this.BuildDatasetSettings(parametersFromCaller, alerts);
             }
 
             return base.ResolveExportedSymbol(symbolName, parametersFromCaller, alerts);
+        }
+
+        /// <inheritdoc/>
+        protected override Symbol BuildDatasetSettings(
+            Dictionary<string, JToken> parametersFromCaller,
+            AlertCollector alerts)
+        {
+            Symbol datasetSettingsSymbol = base.ResolveExportedSymbol(Symbol.CommonNames.DatasetSettings, parametersFromCaller, alerts);
+
+            if (datasetSettingsSymbol.State != Symbol.SymbolState.Ready)
+            {
+                // TODO!
+            }
+
+            JObject fabricActivityObject = (JObject)datasetSettingsSymbol.Value;
+            PropertyCopier copier = new PropertyCopier(
+                this.Path,
+                this.AdfResourceToken,
+                fabricActivityObject,
+                this.BuildActiveParameters(parametersFromCaller),
+                alerts);
+
+            copier.Copy(adfLocationPath, fabricLocationPath);
+
+            return Symbol.ReadySymbol(fabricActivityObject);
         }
     }
 }

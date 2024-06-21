@@ -72,7 +72,7 @@ namespace FabricUpgradeTests
                 testConfig.Progress?.ToString(),
                 "./TestFiles/AdfSupportFiles/" + testConfig.AdfSupportFile);
 
-            FabricUpgradeProgress actualConvertResponse = new FabricUpgradeHandler().ConvertToFabricPipeline(importResponse.ToString(), null);
+            FabricUpgradeProgress actualConvertResponse = new FabricUpgradeHandler().ConvertToFabricPipeline(importResponse.ToString());
 
             JObject actualResponseObject = actualConvertResponse.ToJObject();
 
@@ -92,7 +92,7 @@ namespace FabricUpgradeTests
             string expectedResponse)
         {
             JObject expectedResponseObject = JObject.Parse(expectedResponse);
-            FabricUpgradeProgress actualResponse = new FabricUpgradeHandler().ConvertToFabricPipeline(progress, null);
+            FabricUpgradeProgress actualResponse = new FabricUpgradeHandler().ConvertToFabricPipeline(progress);
 
             Assert.AreEqual(FabricUpgradeProgress.FabricUpgradeState.Failed, actualResponse.State);
             Assert.AreEqual(0, actualResponse.Alerts.Count);
@@ -128,7 +128,7 @@ namespace FabricUpgradeTests
                 _ => null,
             };
 
-            FabricUpgradeProgress actualResponse = new FabricUpgradeHandler().ConvertToFabricPipeline(progress, null);
+            FabricUpgradeProgress actualResponse = new FabricUpgradeHandler().ConvertToFabricPipeline(progress);
 
             var mismatches = JsonUtils.DeepCompare(expectedResponse.ToJObject(), actualResponse.ToJObject());
             Assert.IsNull(

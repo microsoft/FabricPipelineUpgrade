@@ -16,8 +16,7 @@ namespace FabricUpgradeCmdlet.Utilities
         /// Unzip the UpgradePackage and send each archive entry to a callback lambda.
         /// </summary>
         /// <param name="package">The zipped UpgradePackage.</param>
-        /// <param name="onArchiveEntry">Callback to handle name and contents of each unzipped entry.</param>
-        /// <returns>Nothing.</returns>
+        /// <param name="packageCollector">Send each unzipped entry to this object's Collect() method.</param>
         public static void Unzip(
             byte[] package,
             IUpgradePackageCollector packageCollector)

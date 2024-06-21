@@ -11,9 +11,19 @@ using Newtonsoft.Json.Linq;
 
 namespace FabricUpgradeCmdlet.Upgraders
 {
+    /// <summary>
+    /// This class upgrades an ADF Pipeline to a Fabric Pipeline.
+    /// </summary>
+
     public class PipelineUpgrader : Upgrader
     {
+        protected const string AdfActivityPath = "properties.activities";
+        protected const string FabricActivityPath = "properties.activities";
+
         protected AdfPipelineModel adfModel;
+
+        // These are the Upgraders for all the Activities in the Pipeline.
+        // Each of them needs to be upgraded.
         protected List<Upgrader> activityUpgraders = new List<Upgrader>();
 
         public PipelineUpgrader(
@@ -27,12 +37,13 @@ namespace FabricUpgradeCmdlet.Upgraders
             this.Path = this.Name;
         }
 
+        /// <inheritdoc/>
         public override void Compile(
             AlertCollector alerts)
         {
             base.Compile(alerts);
 
-            JToken activitiesToken = this.AdfResourceToken.SelectToken("$.properties.activities");
+            JToken activitiesToken = this.AdfResourceToken.SelectToken(AdfActivityPath);
 
             if (activitiesToken != null && activitiesToken.Type == JTokenType.Array)
             {
@@ -46,6 +57,7 @@ namespace FabricUpgradeCmdlet.Upgraders
             }
         }
 
+        /// <inheritdoc/>
         public override void PreLink(
             List<Upgrader> allUpgraders,
             AlertCollector alerts)
@@ -53,6 +65,8 @@ namespace FabricUpgradeCmdlet.Upgraders
             foreach (Upgrader activityUpgrader in this.activityUpgraders)
             {
                 activityUpgrader.PreLink(allUpgraders, alerts);
+
+                // Used in Sort().
                 this.DependsOn.AddRange(activityUpgrader.DependsOn);
             }
         }
@@ -63,13 +77,13 @@ namespace FabricUpgradeCmdlet.Upgraders
             Dictionary<string, JToken> parameters,
             AlertCollector alerts)
         {
-            if (symbolName == Symbol.CommonNames.FabricResource)
+            if (symbolName == Symbol.CommonNames.ExportInstructions)
             {
                 PipelineExportInstruction exportInstruction = new PipelineExportInstruction(this.Name, this.adfModel.Description);
 
-                this.AddExportLinks(exportInstruction, alerts);
+                this.CollectActivityExportLinks(exportInstruction, alerts);
 
-                this.AddExportResolves(exportInstruction, alerts);
+                this.CollectActivityExportResolves(exportInstruction, alerts);
 
                 FabricPipelineModel pipeline = new FabricPipelineModel()
                 {
@@ -93,7 +107,12 @@ namespace FabricUpgradeCmdlet.Upgraders
             return base.ResolveExportedSymbol(symbolName, parameters, alerts);
         }
 
-        private void AddExportLinks(
+        /// <summary>
+        /// Collect the ExportLinks from all of the Activities and add them to this Pipeline's ExportLinks.
+        /// </summary>
+        /// <param name="exportInstruction">Where to put the ExportLinks.</param>
+        /// <param name="alerts">Add any generated alerts to this collector.</param>
+        private void CollectActivityExportLinks(
             PipelineExportInstruction exportInstruction,
             AlertCollector alerts)
         {
@@ -120,7 +139,12 @@ namespace FabricUpgradeCmdlet.Upgraders
             }
         }
 
-        private void AddExportResolves(
+        /// <summary>
+        /// Collect the ExportResolves from all of the Activities and add them to this Pipeline's ExportResolves.
+        /// </summary>
+        /// <param name="exportInstruction">Where to put the ExportResolves.</param>
+        /// <param name="alerts">Add any generated alerts to this collector.</param>
+        private void CollectActivityExportResolves(
             PipelineExportInstruction exportInstruction,
             AlertCollector alerts)
         {
@@ -147,6 +171,11 @@ namespace FabricUpgradeCmdlet.Upgraders
             }
         }
 
+        /// <summary>
+        /// Collect all of the upgrade from all of the Activities and add them to the exported Fabric Pipeline.
+        /// </summary>
+        /// <param name="pipeline">The Fabric Pipeline into which to insert the Activity.</param>
+        /// <param name="alerts">Add any generated alerts to this collector.</param>
         private void AddActivities(
             FabricPipelineModel pipeline,
             AlertCollector alerts)
@@ -162,6 +191,9 @@ namespace FabricUpgradeCmdlet.Upgraders
             }
         }
 
+        /// <summary>
+        /// A model of an ADF Pipeline.
+        /// </summary>
         protected class AdfPipelineModel
         {
             [JsonProperty(PropertyName = "name")]
@@ -180,7 +212,7 @@ namespace FabricUpgradeCmdlet.Upgraders
         }
 
         /// <summary>
-        /// The Fabric model of a Pipeline.
+        /// A model of a Fabric Pipeline.
         /// </summary>
         public class FabricPipelineModel
         {

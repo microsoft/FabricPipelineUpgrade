@@ -8,6 +8,14 @@ using Newtonsoft.Json;
 
 namespace FabricUpgradeCmdlet.Models
 {
+    /// <summary>
+    /// This class contains the instructions required to finish and then create/update a DataPipeline Item.
+    /// </summary>
+    /// <remarks>
+    /// Before a DataPipeline can be created/updated, we need to populate
+    /// the IDs of other Fabric Resources and Connections.
+    /// These are the "link" and "resolve" steps.
+    /// </remarks>
     public class PipelineExportInstruction : FabricExportInstruction
     {
         // These Links describe which properties in the generated code should be set to the
@@ -20,6 +28,7 @@ namespace FabricUpgradeCmdlet.Models
         [JsonProperty(PropertyName = "resolve", Order = 101)]
         public List<FabricExportResolve> Resolves { get; set; } = new List<FabricExportResolve>();
 
+        // This object describes the DataPipeline Resource that the PipelineExporter will create/update.
         [JsonProperty(PropertyName = "export", Order = 102)]
         public JObject Export { get; set; } = new JObject();
 

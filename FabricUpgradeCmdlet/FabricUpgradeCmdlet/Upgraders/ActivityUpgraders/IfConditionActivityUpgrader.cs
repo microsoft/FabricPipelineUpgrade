@@ -9,6 +9,9 @@ using Newtonsoft.Json.Linq;
 
 namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
 {
+    /// <summary>
+    /// This class Upgrades an ADF IfCondition Activity to a Fabric IfCondition Activity.
+    /// </summary>
     public class IfConditionActivityUpgrader : ActivityWithSubActivitiesUpgrader
     {
         private const string adfExpressionPath = "typeProperties.expression";
@@ -18,13 +21,14 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
             adfExpressionPath
         };
 
+        // TODO: This might move up to ActivityWithSubActivitiesUpgrader.
         private readonly Dictionary<string, List<Upgrader>> subActivityUpgraders = new Dictionary<string, List<Upgrader>>();
 
         public IfConditionActivityUpgrader(
             string parentPath,
             JToken activityToken,
             IFabricUpgradeMachine machine)
-            : base(ActivityUpgrader.ActivityTypes.Wait, parentPath, activityToken, machine)
+            : base(ActivityUpgrader.ActivityTypes.If, parentPath, activityToken, machine)
         {
         }
 
@@ -32,6 +36,7 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
         public override void Compile(AlertCollector alerts)
         {
             base.Compile(alerts);
+
             this.CheckRequiredAdfProperties(this.requiredAdfProperties, alerts);
 
             this.subActivityUpgraders["false"] = this.CompileSubActivities("typeProperties.ifFalseActivities", alerts);
@@ -55,44 +60,17 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
         {
             if (symbolName == Symbol.CommonNames.ExportLinks)
             {
-                List<FabricExportLink> links = new List<FabricExportLink>();
-
-                this.CollectSubActivityExportLinks(this.subActivityUpgraders["false"], "ifFalseActivities", links, alerts);
-                this.CollectSubActivityExportLinks(this.subActivityUpgraders["true"], "ifTrueActivities", links, alerts);
-
-                return Symbol.ReadySymbol(JArray.Parse(UpgradeSerialization.Serialize(links)));
+                return this.BuildExportLinksSymbol(parameters, alerts);
             }
 
             if (symbolName == Symbol.CommonNames.ExportResolves)
             {
-                List<FabricExportResolve> resolves = new List<FabricExportResolve>();
-
-                this.CollectSubActivityExportResolves(this.subActivityUpgraders["false"], "ifFalseActivities", resolves, alerts);
-                this.CollectSubActivityExportResolves(this.subActivityUpgraders["true"], "ifTrueActivities", resolves, alerts);
-
-                return Symbol.ReadySymbol(JArray.Parse(UpgradeSerialization.Serialize(resolves)));
+                return this.BuildExportResolvesSymbol(parameters, alerts);
             }
 
             if (symbolName == Symbol.CommonNames.Activity)
             {
-                Symbol activitySymbol = base.ResolveExportedSymbol(Symbol.CommonNames.Activity, parameters, alerts);
-
-                if (activitySymbol.State != Symbol.SymbolState.Ready)
-                {
-                    // TODO!
-                }
-
-                JObject fabricActivityObject = (JObject)activitySymbol.Value;
-
-                PropertyCopier copier = new PropertyCopier(this.Path, this.AdfResourceToken, fabricActivityObject, alerts);
-                copier.Copy("description");
-
-                copier.Copy(adfExpressionPath);
-
-                copier.Set("typeProperties.ifFalseActivities", CollectSubActivities(this.subActivityUpgraders["false"], alerts));
-                copier.Set("typeProperties.ifTrueActivities", CollectSubActivities(this.subActivityUpgraders["true"], alerts));
-
-                return Symbol.ReadySymbol(fabricActivityObject);
+                return this.BuildActivitySymbol(parameters, alerts);
             }
 
             return base.ResolveExportedSymbol(symbolName, parameters, alerts);
@@ -119,5 +97,59 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
 
             return upgraders;
         }
+
+        /// <inheritdoc/>
+        protected override Symbol BuildExportLinksSymbol(
+            Dictionary<string, JToken> parameters,
+            AlertCollector alerts)
+        {
+            List<FabricExportLink> links = new List<FabricExportLink>();
+
+            this.CollectSubActivityExportLinks(this.subActivityUpgraders["false"], "ifFalseActivities", links, alerts);
+            this.CollectSubActivityExportLinks(this.subActivityUpgraders["true"], "ifTrueActivities", links, alerts);
+
+            return Symbol.ReadySymbol(JArray.Parse(UpgradeSerialization.Serialize(links)));
+        }
+
+        /// <inheritdoc/>
+        protected override Symbol BuildExportResolvesSymbol(
+            Dictionary<string, JToken> parameters,
+            AlertCollector alerts)
+        {
+            List<FabricExportResolve> resolves = new List<FabricExportResolve>();
+
+            this.CollectSubActivityExportResolves(this.subActivityUpgraders["false"], "ifFalseActivities", resolves, alerts);
+            this.CollectSubActivityExportResolves(this.subActivityUpgraders["true"], "ifTrueActivities", resolves, alerts);
+
+            return Symbol.ReadySymbol(JArray.Parse(UpgradeSerialization.Serialize(resolves)));
+        }
+
+        /// <inheritdoc/>
+        protected override Symbol BuildActivitySymbol(
+            Dictionary<string, JToken> parameters,
+            AlertCollector alerts)
+        {
+            Symbol activitySymbol = base.ResolveExportedSymbol(Symbol.CommonNames.Activity, parameters, alerts);
+
+            if (activitySymbol.State != Symbol.SymbolState.Ready)
+            {
+                // TODO!
+            }
+
+            JObject fabricActivityObject = (JObject)activitySymbol.Value;
+
+            PropertyCopier copier = new PropertyCopier(this.Path, this.AdfResourceToken, fabricActivityObject, alerts);
+            copier.Copy("description");
+
+            copier.Copy(adfExpressionPath);
+
+            copier.Set("typeProperties.ifFalseActivities", CollectSubActivities(this.subActivityUpgraders["false"], alerts));
+            copier.Set("typeProperties.ifTrueActivities", CollectSubActivities(this.subActivityUpgraders["true"], alerts));
+
+            return Symbol.ReadySymbol(fabricActivityObject);
+        }
+
+
+
     }
 }

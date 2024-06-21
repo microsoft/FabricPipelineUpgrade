@@ -8,10 +8,17 @@ using Newtonsoft.Json.Linq;
 
 namespace FabricUpgradeCmdlet.Models
 {
+    /// <summary>
+    /// The base class for ExportInstructions.
+    /// </summary>
+    /// <remarks>
+    /// An ExportInstruction is an object that tells the ExportMachine and
+    /// individual Exporters how to finish and create/update a Fabric Resource.
+    /// </remarks>
     public class FabricExportInstruction
     {
         /// <summary>
-        /// This is the type of resource that this instruction exports.
+        /// This is the type of resource that this instruction exports (DataPipeline or Connection).
         /// </summary>
         [JsonProperty(PropertyName = "resourceType", Order = 1)]
         public FabricUpgradeResourceTypes ResourceType { get; set; }
@@ -26,7 +33,7 @@ namespace FabricUpgradeCmdlet.Models
 
         /// <summary>
         /// The export process requires the description of the resource.
-        /// Since this is easily available during ConvertTo-FabricResources, we set this now.
+        /// Since this is easily available during ConvertTo-FabricPipeline, we set it then.
         /// </summary>
         [JsonProperty(PropertyName = "resourceDescription", Order = 3)]
         public string ResourceDescription { get; set; }

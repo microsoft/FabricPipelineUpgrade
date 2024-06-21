@@ -9,6 +9,9 @@ using Newtonsoft.Json.Linq;
 
 namespace FabricUpgradeCmdlet.Upgraders.LinkedServiceUpgraders
 {
+    /// <summary>
+    /// Base class for all LinkedService Upgraders.
+    /// </summary>
     public class LinkedServiceUpgrader : Upgrader
     {
         public class LinkedServiceTypes
@@ -38,10 +41,8 @@ namespace FabricUpgradeCmdlet.Upgraders.LinkedServiceUpgraders
 
         protected string LinkedServiceType { get; set; }
 
-        // This dictionary is used by some DatasetUpgraders.
-        // For example, the AzureSqlTableDatasetUpgrader uses it to fill in the "database"
-        // field in the datasetSettings of a CopyActivity.
-        protected Dictionary<string, JToken> ConnectionSettings { get; set; } = new Dictionary<string, JToken>();
+        // The parameters declared by a LinkedService.
+        protected ResourceParameters LinkedServiceParameters { get; set; }
 
         /// <summary>
         /// Create the appropriate subclass of LinkedServiceUpgrader, based on the type of the ADF LinkedService.
@@ -71,60 +72,164 @@ namespace FabricUpgradeCmdlet.Upgraders.LinkedServiceUpgraders
             base.Compile(alerts);
 
             this.CheckRequiredAdfProperties(this.requiredAdfProperties, alerts);
+
+            // All LinkedServices have their parameter declarations in the same place.
+
+            this.LinkedServiceParameters = ResourceParameters.FromResourceDeclaration(
+                this.AdfResourceToken.SelectToken(AdfParametersPath),
+                "linkedService()");
+
         }
 
         /// <inheritdoc/>
         public override Symbol ResolveExportedSymbol(
             string symbolName,
-            Dictionary<string, JToken> parameters,
+            Dictionary<string, JToken> parametersFromCaller,
             AlertCollector alerts)
         {
             if (symbolName == Symbol.CommonNames.ExportResolves)
             {
-                List<FabricExportResolve> resolves = new List<FabricExportResolve>();
-
-                FabricUpgradeResolution.ResolutionType resolutionType = FabricUpgradeResolution.ResolutionType.LinkedServiceToConnectionId;
-                FabricExportResolve userCredentialConnectionResolve = new FabricExportResolve(
-                    resolutionType,
-                    this.Name,
-                    "id")
-                    .WithHint(this.BuildFabricConnectionHint()
-                        .WithTemplate(new FabricUpgradeResolution()
-                        {
-                            Type = resolutionType,
-                            Key = this.Name,
-                            Value = "<guid>"
-                        }
-                   ));
-
-                resolves.Add(userCredentialConnectionResolve);
-
-                return Symbol.ReadySymbol(JArray.Parse(UpgradeSerialization.Serialize(resolves)));
+                return this.BuildExportResolves(parametersFromCaller, alerts);
             }
-            if (symbolName == Symbol.CommonNames.FabricResource)
+            if (symbolName == Symbol.CommonNames.ExportInstructions)
             {
-                ConnectionExportInstruction exportInstruction = new ConnectionExportInstruction(this.Name);
-
-                Symbol resolvesSymbol = this.ResolveExportedSymbol(Symbol.CommonNames.ExportResolves, parameters, alerts);
-                if (resolvesSymbol.State != Symbol.SymbolState.Ready)
-                {
-                    // TODO!
-                }
-                if (resolvesSymbol.Value != null)
-                {
-                    foreach (JToken requiredResolution in (JArray)resolvesSymbol.Value)
-                    {
-                        FabricExportResolve resolve = FabricExportResolve.FromJToken(requiredResolution);
-                        exportInstruction.Resolves.Add(resolve);
-                    }
-                }
-                exportInstruction.Export["id"] = Guid.Empty.ToString();
-
-                return Symbol.ReadySymbol(exportInstruction.ToJObject());
+                return this.BuildExportInstructions(parametersFromCaller, alerts);
             }
 
-            return base.ResolveExportedSymbol(symbolName, parameters, alerts);
+            return base.ResolveExportedSymbol(symbolName, parametersFromCaller, alerts);
         }
+
+        /// <summary>
+        /// During the Export phase, a LinkedService needs to find the ID of the Fabric Connection that
+        /// will replace the LinkedService in the Fabric Pipeline. This method prepares the ExportLink 
+        /// that will do this job in the LinkedServiceExporter.
+        /// </summary>
+        /// <param name="parametersFromCaller">The parameters from the caller.</param>
+        /// <param name="alerts">Add any generated alerts to this collector.</param>
+        /// <returns>The Symbol whose value will instruct the LinkedServiceExporter how to find the Fabric Connection ID.</returns>
+        protected virtual Symbol BuildExportResolves(
+            Dictionary<string, JToken> parametersFromCaller,
+            AlertCollector alerts)
+        {
+            List<FabricExportResolve> resolves = new List<FabricExportResolve>();
+
+            FabricUpgradeResolution.ResolutionType resolutionType = FabricUpgradeResolution.ResolutionType.LinkedServiceToConnectionId;
+            FabricExportResolve userCredentialConnectionResolve = new FabricExportResolve(
+                resolutionType,
+                this.Name,
+                "id")
+                .WithHint(this.BuildFabricConnectionHint()
+                    .WithTemplate(new FabricUpgradeResolution()
+                    {
+                        Type = resolutionType,
+                        Key = this.Name,
+                        Value = "<guid>"
+                    }
+               ));
+
+            resolves.Add(userCredentialConnectionResolve);
+
+            return Symbol.ReadySymbol(JArray.Parse(UpgradeSerialization.Serialize(resolves)));
+        }
+
+        /// <summary>
+        /// This method prepares the exportInstruction that will be executed by
+        /// the LinkedServiceExporter in the Export phase.
+        /// </summary>
+        /// <remarks>
+        /// You will see in the LinkedServiceExporter that we do not _actually_ export a Fabric Connection.
+        /// The exportInstructions tell the LinkedServiceExporter how to "pretend" to export a Fabric Connection.
+        /// </remarks>
+        /// <param name="parametersFromCaller">The parameters from the caller.</param>
+        /// <param name="alerts">Add any generated alerts to this collector.</param>
+        /// <returns>The Symbol whose value will instruct the LinkedServiceExporter how to export the Connection.</returns>
+        protected virtual Symbol BuildExportInstructions(
+            Dictionary<string, JToken> parametersFromCaller,
+            AlertCollector alerts)
+        {
+            ConnectionExportInstruction exportInstruction = new ConnectionExportInstruction(this.Name);
+
+            Symbol resolvesSymbol = this.BuildExportResolves(parametersFromCaller, alerts);
+            if (resolvesSymbol.State != Symbol.SymbolState.Ready)
+            {
+                // TODO!
+            }
+            if (resolvesSymbol.Value != null)
+            {
+                foreach (JToken requiredResolution in (JArray)resolvesSymbol.Value)
+                {
+                    FabricExportResolve resolve = FabricExportResolve.FromJToken(requiredResolution);
+                    exportInstruction.Resolves.Add(resolve);
+                }
+            }
+
+            // This is set to an empty GUID here; during the Export phase,
+            // the LinkedServiceExporter will use the exportResolves to populate this value.
+            exportInstruction.Export["id"] = Guid.Empty.ToString();
+
+            return Symbol.ReadySymbol(exportInstruction.ToJObject());
+        }
+
+        /// <summary>
+        /// When the LinkedService needs to export a property, like its DatabaseName,
+        /// this method performs the slightly complicated steps to do so. 
+        /// </summary>
+        /// <param name="pathToProperty">Where in the ADF JSON to find the property.</param>
+        /// <param name="activeParameters">The parameters to apply to resolve symbol values.</param>
+        /// <param name="alerts">Add any generated alerts to this collector.</param>
+        /// <returns>A Symbol that the LinkedService can return from ResolveExportedSymbol.</returns>
+        protected Symbol BuildLinkedServiceExportableSymbol(
+            string pathToProperty,
+            ResourceParameters activeParameters,
+            AlertCollector alerts)
+        {
+            // We need to do a bit of fiddling here so that we can use the
+            // common symbol resolution code.
+
+            // In a LinkedService, expressions look like
+            // "@{...}".
+            // Therefore, we first need to convert that to a form like
+            // "{ 'type': 'Expression', 'value': '@...' }.
+            //
+            // If the property is NOT an expression, then fixedupSourceToken is just the same as sourceToken.
+            string sourceToken = this.AdfResourceToken.SelectToken(pathToProperty).ToString();
+            this.FixupLinkedServiceExpression(sourceToken, out JToken fixedupSourceToken);
+
+            // Then we need to stick this into an object from which the PropertyCopier can copy this value.
+            JObject source = new JObject();
+            source["value"] = fixedupSourceToken;
+
+            // Then we make an object into which we can copy the value.
+            JObject target = new JObject();
+
+            // Then we make a PropertyCopier to move the value.
+            // This is important, because PropertyCopier does all of the work to apply expressions and parameters.
+            PropertyCopier copier = new PropertyCopier(
+                this.Name,
+                source,
+                target,
+                activeParameters,
+                alerts);
+
+            // Then, copy from source["value"] to target["value"].
+            copier.Copy("value");
+
+            // Finally, pull that "value" property from the target object, and return it!
+            return Symbol.ReadySymbol(target["value"]);
+        }
+
+        /// <summary>
+        /// Combine the default parameter values with the overrides passed in from the caller
+        /// to create "active" parameters that can be used when resolving parameters in expressions.
+        /// </summary>
+        /// <param name="callerValues">Values passed in from the caller.</param>
+        /// <returns>A ResourceParameters object that can be used in the PropertyCopier.</returns>
+        protected ResourceParameters BuildActiveParameters(
+            Dictionary<string, JToken> callerValues)
+        {
+            return this.LinkedServiceParameters.BuildResolutionContext(callerValues);
+        }
+
 
         /// <summary>
         /// From the information in the LinkedService, construct a "hint" for the client/user
@@ -141,11 +246,11 @@ namespace FabricUpgradeCmdlet.Upgraders.LinkedServiceUpgraders
         /// Convert the ConnectionString into a dictionary.
         /// </summary>
         /// <remarks>
-        /// A LinkedService may store its "connection string" in different locations,
+        /// A LinkedService may store its "connection string" in different locations (or not even have one!),
         /// so we require the sub-class to extract that and call this method.
         /// </remarks>
         /// <param name="connectionString">The connection string to parse.</param>
-        protected void BuildConnectionSettings(
+        protected Dictionary<string, JToken> BuildConnectionSettings(
             string connectionString)
         {
             Dictionary<string, JToken> settings = new Dictionary<string, JToken>();
@@ -167,12 +272,25 @@ namespace FabricUpgradeCmdlet.Upgraders.LinkedServiceUpgraders
                 }
             }
 
-            this.ConnectionSettings = settings;
+            return settings;
         }
 
         /// <summary>
         /// In LinkedServices, expressions look like "@{...}" for some reason.
-        /// This method detects that form and converts it to a more form that can be transformed by UpgradeExpression.
+        /// This method detects that form.
+        /// </summary>
+        /// <param name="possibleExpression">A string that might be an expression.</param>
+        /// <returns>True if and only if the string is a LinkedService Expression.</returns>
+        protected bool IsLinkedServiceExpression(string possibleExpression)
+        {
+            return ((possibleExpression != null) &&
+                possibleExpression.Trim().StartsWith("@{") &&
+                possibleExpression.Trim().EndsWith("}"));
+        }
+
+        /// <summary>
+        /// In LinkedServices, expressions look like "@{...}" for some reason.
+        /// This method detects that form and converts it to a form that can be transformed by UpgradeExpression.
         /// </summary>
         /// <param name="possibleExpression">A string that might be an expression.</param>
         /// <param name="canonicalValue">
@@ -185,13 +303,17 @@ namespace FabricUpgradeCmdlet.Upgraders.LinkedServiceUpgraders
             out JToken canonicalValue)
         {
             canonicalValue = possibleExpression;
-            if (!possibleExpression.StartsWith("@{"))
+            if (!this.IsLinkedServiceExpression(possibleExpression))
             {
                 return false;
             }
 
-            string canonicalString = possibleExpression.Substring(2);
-            if (canonicalString.EndsWith("}")) canonicalString = canonicalString.Substring(0, canonicalString.Length - 1);
+            // Remove the "@{" from the beginning.
+            string canonicalString = possibleExpression.Trim().Substring(2);
+            // Remove the "}" from the end.
+            canonicalString = canonicalString.Trim().Substring(0, canonicalString.Length - 1);
+
+            // Insert a new "@" at the beginning.
             canonicalString = "@" + canonicalString;
 
             JObject expressionObject = new JObject();
@@ -201,7 +323,6 @@ namespace FabricUpgradeCmdlet.Upgraders.LinkedServiceUpgraders
             canonicalValue = expressionObject;
 
             return true;
-
         }
     }
 }

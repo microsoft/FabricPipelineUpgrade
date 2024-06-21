@@ -8,38 +8,70 @@ using static FabricUpgradeCmdlet.Models.FabricUpgradeAlert;
 
 namespace FabricUpgradeCmdlet.Utilities
 {
+    /// <summary>
+    /// This class wraps a list of FabricUpgradeAlerts
+    /// and provides useful methods to add and read those Alerts.
+    /// </summary>
     public class AlertCollector : IEnumerable<FabricUpgradeAlert>
     {
         private readonly List<FabricUpgradeAlert> alerts = new List<FabricUpgradeAlert>();
 
         public int Count { get => this.alerts.Count; }
 
+        /// <summary>
+        /// Exposes an enumerable interface method.
+        /// </summary>
+        /// <returns>An IEnumerator</returns>
         public IEnumerator<FabricUpgradeAlert> GetEnumerator()
         {
             return this.alerts.GetEnumerator();
         }
 
+        /// <summary>
+        /// Exposes an enumerable interface method.
+        /// </summary>
+        /// <returns></returns>
         IEnumerator IEnumerable.GetEnumerator()
         {
             return this.alerts.GetEnumerator();
         }
 
+        /// <summary>
+        /// Add an Alert to this collector.
+        /// </summary>
+        /// <param name="alert">The Alert to add.</param>
+        /// <returns>this, for chaining.</returns>
         public AlertCollector AddAlert(FabricUpgradeAlert alert)
         {
             this.alerts.Add(alert);
             return this;
         }
 
+        /// <summary>
+        /// Add an Alert with a Severity of Permanent.
+        /// </summary>
+        /// <param name="details">The details of the Alert.</param>
+        /// <returns>this, for chaining.</returns>
         public AlertCollector AddPermanentError(string details)
         {
             return this.AddAlert(FailureSeverity.Permanent, details);
         }
 
+        /// <summary>
+        /// Add an Alert with a Severity of Warning.
+        /// </summary>
+        /// <param name="details">The deails of the Alert.</param>
+        /// <returns>this, for chaining.</returns>
         public AlertCollector AddWarning(string details)
         {
             return this.AddAlert(FailureSeverity.Warning, details);
         }
 
+        /// <summary>
+        /// Add an Alert with a Severity of UnsupportedResource.
+        /// </summary>
+        /// <param name="details">The details of the Alert.</param>
+        /// <returns>this, for chaining.</returns>
         public AlertCollector AddUnsupportedResourceAlert(string details)
         {
             return this.AddAlert(FailureSeverity.UnsupportedResource, details);
