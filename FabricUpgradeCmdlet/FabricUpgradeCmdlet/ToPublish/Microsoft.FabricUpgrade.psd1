@@ -12,13 +12,13 @@
 RootModule = 'FabricUpgrade.dll'
 
 # Version number of this module.
-ModuleVersion = '0.0.4'
+ModuleVersion = '0.0.5'
 
 # Supported PSEditions
 # CompatiblePSEditions = @()
 
 # ID used to uniquely identify this module
-GUID = '80060208-7593-4a74-8fdd-9be5fc11c9a2'
+GUID = 'cd2915e9-82a1-46c9-89ce-5067e1172422'
 
 # Author of this module
 Author = 'rodenkew'
@@ -100,13 +100,13 @@ PrivateData = @{
     PSData = @{
 
         # Tags applied to this module. These help with module discovery in online galleries.
-        # Tags = @()
+        Tags = @('Microsoft', 'Fabric', 'ADF')
 
         # A URL to the license for this module.
         # LicenseUri = ''
 
         # A URL to the main website for this project.
-        # ProjectUri = ''
+        ProjectUri = 'https://github.com/microsoft/FabricUpgrade'
 
         # A URL to an icon representing this module.
         # IconUri = ''
