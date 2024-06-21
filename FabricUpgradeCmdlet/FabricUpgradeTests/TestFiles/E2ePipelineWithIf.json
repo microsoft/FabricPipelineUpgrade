@@ -37,19 +37,21 @@
       }
     ],
     "result": {
-      "pipelineToInvoke": {
-        "type": "DataPipeline",
-        "workspaceId": "",
-        "id": 0,
-        "displayName": "pipelineToInvoke",
-        "description": null
-      },
-      "pipelineWithIf": {
-        "type": "DataPipeline",
-        "workspaceId": "",
-        "id": 1,
-        "displayName": "pipelineWithIf",
-        "description": null
+      "exportedFabricResources": {
+        "pipelineToInvoke": {
+          "type": "DataPipeline",
+          "workspaceId": "",
+          "id": 0,
+          "displayName": "pipelineToInvoke",
+          "description": null
+        },
+        "pipelineWithIf": {
+          "type": "DataPipeline",
+          "workspaceId": "",
+          "id": 1,
+          "displayName": "pipelineWithIf",
+          "description": null
+        }
       }
     }
   },

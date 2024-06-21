@@ -27,7 +27,7 @@
     " source.datasetSettings.fileName = @concat('ccc', 'def')"
 
   ],
-  
+
   "adfSupportFile": "PipelineWithCopy_Binary_DatasetParams_support_live.zip",
 
   "resolutions": [
@@ -49,15 +49,18 @@
       }
     ],
     "result": {
-      "AzureBlobStorage1": {
-        "id": "99379220-ae1a-467f-b9f5-537cc3142b9f"
-      },
-      "PipelineWithCopy_Binary_DatasetParams": {
-        "type": "DataPipeline",
-        "displayName": "PipelineWithCopy_Binary_DatasetParams",
-        "description": null,
-        "workspaceId": "",
-        "id": 0
+      "exportedFabricResources": {
+
+        "AzureBlobStorage1": {
+          "id": "99379220-ae1a-467f-b9f5-537cc3142b9f"
+        },
+        "PipelineWithCopy_Binary_DatasetParams": {
+          "type": "DataPipeline",
+          "displayName": "PipelineWithCopy_Binary_DatasetParams",
+          "description": null,
+          "workspaceId": "",
+          "id": 0
+        }
       }
     }
   },

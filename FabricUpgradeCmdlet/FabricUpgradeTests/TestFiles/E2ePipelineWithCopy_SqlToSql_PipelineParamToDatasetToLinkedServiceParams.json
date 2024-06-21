@@ -65,15 +65,17 @@
       }
     ],
     "result": {
-      "rodenkewsql": {
-        "id": "0f1083d3-8b19-44a2-bd3b-26a7e82ebe51"
-      },
-      "PipelineWithCopy_SqlToSql_PipelineParamToDatasetToLinkedServiceParams": {
-        "type": "DataPipeline",
-        "displayName": "PipelineWithCopy_SqlToSql_PipelineParamToDatasetToLinkedServiceParams",
-        "description": null,
-        "workspaceId": "",
-        "id": 0
+      "exportedFabricResources": {
+        "rodenkewsql": {
+          "id": "0f1083d3-8b19-44a2-bd3b-26a7e82ebe51"
+        },
+        "PipelineWithCopy_SqlToSql_PipelineParamToDatasetToLinkedServiceParams": {
+          "type": "DataPipeline",
+          "displayName": "PipelineWithCopy_SqlToSql_PipelineParamToDatasetToLinkedServiceParams",
+          "description": null,
+          "workspaceId": "",
+          "id": 0
+        }
       }
     }
   },

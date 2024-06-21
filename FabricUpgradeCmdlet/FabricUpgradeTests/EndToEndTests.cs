@@ -78,7 +78,7 @@ namespace FabricUpgradeTests
         [DataRow("E2eEmptyPipeline_DisplayNameAlreadyInUse")]
         [DataRow("E2ePipelineWithExecutePipeline_ReserveFirst")]
         [DataRow("E2ePipelineWithExecutePipeline_ReserveSecond")]
-        public async Task ExportFabricPipeline_TestAsync(
+        public async Task EndToEndUpgradePipeline_TestAsync(
             string testConfigFilename)
         {
             Guid workspaceId = Guid.NewGuid();
@@ -237,7 +237,8 @@ namespace FabricUpgradeTests
 
             public EndToEndTestConfig UpdateItemGuids(Guid workspaceId, List<Guid> itemIds)
             {
-                foreach (var r in this.ExpectedResponse.Result)
+                JObject expectedResponseItems = (JObject)(this.ExpectedResponse.Result[FabricUpgradeProgress.ExportedFabricResourcesKey]) ?? new JObject();
+                foreach (var r in expectedResponseItems)
                 {
                     if (((JObject)r.Value)["workspaceId"]?.ToString() == "")
                     {

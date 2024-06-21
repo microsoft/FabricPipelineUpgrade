@@ -20,12 +20,14 @@
       }
     ],
     "result": {
-      "PipelineWithWebActivity_NoHeaders": {
-        "type": "DataPipeline",
-        "workspaceId": "",
-        "id": 0,
-        "displayName": "PipelineWithWebActivity_NoHeaders",
-        "description": null
+      "exportedFabricResources": {
+        "PipelineWithWebActivity_NoHeaders": {
+          "type": "DataPipeline",
+          "workspaceId": "",
+          "id": 0,
+          "displayName": "PipelineWithWebActivity_NoHeaders",
+          "description": null
+        }
       }
     }
   },

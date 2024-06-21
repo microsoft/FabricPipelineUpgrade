@@ -7,6 +7,7 @@ using FabricUpgradeCmdlet.Models;
 using FabricUpgradeCmdlet.UpgradeMachines;
 using FabricUpgradeCmdlet.Utilities;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace FabricUpgradeCmdlet
 {
@@ -37,17 +38,10 @@ namespace FabricUpgradeCmdlet
             string progressString,
             string fileName)
         {
-            FabricUpgradeProgress.FabricUpgradeState previousState = this.CheckProgress(progressString);
-            if (previousState != FabricUpgradeProgress.FabricUpgradeState.Succeeded)
+            if (!this.CheckProgress(progressString, out FabricUpgradeProgress progress))
             {
-                return new FabricUpgradeProgress()
-                {
-                    State = previousState,
-                    Alerts = this.alerts.ToList(),
-                };
+                return progress;
             }
-
-            FabricUpgradeProgress progress = FabricUpgradeProgress.FromString(progressString);
 
             AdfSupportFileUpgradePackageCollector collector = new AdfSupportFileUpgradePackageCollector();
 
@@ -92,10 +86,9 @@ namespace FabricUpgradeCmdlet
             {
                 State = FabricUpgradeProgress.FabricUpgradeState.Succeeded,
                 Alerts = progress.Alerts,
-                Resolutions = progress.Resolutions,
                 Result = collector.Build(),
+                Resolutions = progress.Resolutions,
             };
-
         }
 
         /// <summary>
@@ -108,24 +101,29 @@ namespace FabricUpgradeCmdlet
         public FabricUpgradeProgress ConvertToFabricResources(
             string progressString)
         {
-            FabricUpgradeProgress.FabricUpgradeState previousState = this.CheckProgress(progressString);
-            if (previousState != FabricUpgradeProgress.FabricUpgradeState.Succeeded)
+            if (!this.CheckProgress(progressString, out FabricUpgradeProgress progress))
             {
+                return progress;
+            }
+
+            if (!progress.Result.ContainsKey(FabricUpgradeProgress.ImportedResourcesKey))
+            {
+                this.alerts.AddPermanentError("ConvertTo-FabricResources expects imported ADF resources");
                 return new FabricUpgradeProgress()
                 {
-                    State = previousState,
+                    State = FabricUpgradeProgress.FabricUpgradeState.Failed,
                     Alerts = this.alerts.ToList(),
                 };
             }
 
-            FabricUpgradeProgress progress = FabricUpgradeProgress.FromString(progressString);
+            JToken adfResourcesToken = progress.Result[FabricUpgradeProgress.ImportedResourcesKey];
 
-            UpgradePackage upgradePackage = UpgradePackage.FromJToken(progress.Result);
+            UpgradePackage upgradePackage = UpgradePackage.FromJToken(adfResourcesToken);
 
             if (upgradePackage.Type == UpgradePackage.UpgradePackageType.AdfSupportFile)
             {
                 AdfSupportFileUpgradeMachine machine = new AdfSupportFileUpgradeMachine(
-                    progress.Result,
+                    (JObject)adfResourcesToken,
                     progress.Resolutions,
                     this.alerts);
 
@@ -156,17 +154,10 @@ namespace FabricUpgradeCmdlet
             string progressString,
             string resolutionsFilename)
         {
-            FabricUpgradeProgress.FabricUpgradeState progressState = this.CheckProgress(progressString);
-            if (progressState != FabricUpgradeProgress.FabricUpgradeState.Succeeded)
+            if (!this.CheckProgress(progressString, out FabricUpgradeProgress progress))
             {
-                return new FabricUpgradeProgress()
-                {
-                    State = progressState,
-                    Alerts = this.alerts.ToList(),
-                };
+                return progress;
             }
-
-            FabricUpgradeProgress progress = FabricUpgradeProgress.FromString(progressString);
 
             string detailsIfFail = null;
             try
@@ -184,8 +175,8 @@ namespace FabricUpgradeCmdlet
                 {
                     State = FabricUpgradeProgress.FabricUpgradeState.Succeeded,
                     Alerts = this.alerts.ToList(),
-                    Resolutions = resolutions,
                     Result = progress.Result,
+                    Resolutions = resolutions,
                 };
             }
             catch (Exception)
@@ -216,17 +207,10 @@ namespace FabricUpgradeCmdlet
             string progressString,
             string resolution)
         {
-            FabricUpgradeProgress.FabricUpgradeState progressState = this.CheckProgress(progressString);
-            if (progressState != FabricUpgradeProgress.FabricUpgradeState.Succeeded)
+            if (!this.CheckProgress(progressString, out FabricUpgradeProgress progress))
             {
-                return new FabricUpgradeProgress()
-                {
-                    State = progressState,
-                    Alerts = this.alerts.ToList(),
-                };
+                return progress;
             }
-
-            FabricUpgradeProgress progress = FabricUpgradeProgress.FromString(progressString);
 
             FabricUpgradeResolution newResolution = JsonConvert.DeserializeObject<FabricUpgradeResolution>(resolution);
             // TODO: Handle parsing error
@@ -252,17 +236,20 @@ namespace FabricUpgradeCmdlet
             string fabricToken,
             CancellationToken cancellationToken)
         {
-            FabricUpgradeProgress.FabricUpgradeState progressState = this.CheckProgress(progressString);
-            if (progressState != FabricUpgradeProgress.FabricUpgradeState.Succeeded)
+            if (!this.CheckProgress(progressString, out FabricUpgradeProgress progress))
             {
+                return progress;
+            }
+
+            if (!progress.Result.ContainsKey(FabricUpgradeProgress.ExportableFabricResourcesKey))
+            {
+                this.alerts.AddPermanentError("Export-FabricResources expects exportable Fabric resources");
                 return new FabricUpgradeProgress()
                 {
-                    State = progressState,
+                    State = FabricUpgradeProgress.FabricUpgradeState.Failed,
                     Alerts = this.alerts.ToList(),
                 };
             }
-
-            FabricUpgradeProgress progress = FabricUpgradeProgress.FromString(progressString);
 
             FabricExportMachine machine = new FabricExportMachine(
                     progress.Result,
@@ -275,24 +262,33 @@ namespace FabricUpgradeCmdlet
             return await machine.ExportAsync(cancellationToken).ConfigureAwait(false);
         }
 
-        private FabricUpgradeProgress.FabricUpgradeState CheckProgress(
-            string previousResponse)
+        private bool CheckProgress(
+            string previousResponse,
+            out FabricUpgradeProgress currentProgress)
         {
             try
             {
-                FabricUpgradeProgress previousResponseObject = FabricUpgradeProgress.FromString(previousResponse);
+                FabricUpgradeProgress previousProgress = FabricUpgradeProgress.FromString(previousResponse);
 
-                foreach (FabricUpgradeAlert alert in previousResponseObject.Alerts)
+                foreach (FabricUpgradeAlert alert in previousProgress.Alerts)
                 {
                     this.alerts.AddAlert(alert);
                 }
 
-                return previousResponseObject.State;
+                currentProgress = previousProgress;
+                return currentProgress.State == FabricUpgradeProgress.FabricUpgradeState.Succeeded;
             }
             catch (Newtonsoft.Json.JsonException)
             {
                 this.alerts.AddPermanentError("Input is not a valid JSON string.");
-                return FabricUpgradeProgress.FabricUpgradeState.Failed;
+
+                currentProgress = new FabricUpgradeProgress()
+                {
+                    State = FabricUpgradeProgress.FabricUpgradeState.Failed,
+                    Alerts = this.alerts.ToList(),
+                };
+
+                return false;
             }
         }
     }

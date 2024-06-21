@@ -86,24 +86,6 @@ namespace FabricUpgradeTests
         }
 
         [TestMethod]
-        [DataRow("{\"state\":\"Failed\", \"alerts\": []}", "{\"state\":\"Failed\", \"alerts\": [], \"resolutions\": [], \"result\": {} }")]
-        public void ConvertToFabricPipeline_WithPreviousFailure_Test(
-            string progress,
-            string expectedResponse)
-        {
-            JObject expectedResponseObject = JObject.Parse(expectedResponse);
-            FabricUpgradeProgress actualResponse = new FabricUpgradeHandler().ConvertToFabricResources(progress);
-
-            Assert.AreEqual(FabricUpgradeProgress.FabricUpgradeState.Failed, actualResponse.State);
-            Assert.AreEqual(0, actualResponse.Alerts.Count);
-
-            var mismatches = JsonUtils.DeepCompare(expectedResponseObject, actualResponse.ToJObject());
-            Assert.IsNull(
-                    mismatches,
-                    $"MISMATCHES:\n{mismatches?.ToString(Formatting.Indented)}\n\nEXPECTED:\n{expectedResponseObject}\n\nACTUAL:\n{actualResponse}");
-        }
-
-        [TestMethod]
         [DataRow("{\"state\":\"Failed\", \"alerts\": []}", "passthrough")]
         [DataRow("{\"state\":\"Failed\", \"alerts\": [{\"severity\": \"Permanent\"}]}", "passthrough")]
         [DataRow("abc", "invalid")]
@@ -123,7 +105,7 @@ namespace FabricUpgradeTests
                             Severity = FabricUpgradeAlert.FailureSeverity.Permanent,
                             Details = "Input is not a valid JSON string."
                         }
-                    }
+                    },
                 },
                 _ => null,
             };
@@ -313,7 +295,8 @@ namespace FabricUpgradeTests
 
             public ExportTestConfig UpdateItemGuids(Guid workspaceId, List<Guid> itemIds)
             {
-                foreach (var r in this.ExpectedResponse.Result)
+                JObject expectedResponseItems = (JObject)(this.ExpectedResponse.Result[FabricUpgradeProgress.ExportedFabricResourcesKey]);
+                foreach (var r in expectedResponseItems)
                 {
                     r.Value["workspaceId"] = workspaceId.ToString();
                     int idGuidIndex = r.Value["id"].ToObject<int>();

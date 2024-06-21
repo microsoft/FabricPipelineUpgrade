@@ -6,111 +6,113 @@
     "alerts": [],
     "resolutions": [],
     "result": {
-      "type": "AdfSupportFile",
-      "adfName": "datafactoryqaaogpkbmturm",
-      "pipelines": {
-        "PipelineWithCopy_JsonToJson": {
-          "name": "PipelineWithCopy_JsonToJson",
-          "properties": {
-            "activities": [
-              {
-                "name": "Copy data1",
-                "type": "Copy",
-                "dependsOn": [],
-                "policy": {
-                  "timeout": "0.12:00:00",
-                  "retry": 0,
-                  "retryIntervalInSeconds": 30,
-                  "secureOutput": false,
-                  "secureInput": false
-                },
-                "userProperties": [],
-                "typeProperties": {
-                  "source": {
-                    "type": "JsonSource",
-                    "storeSettings": {
-                      "type": "AzureBlobStorageReadSettings",
-                      "recursive": true,
-                      "enablePartitionDiscovery":  false
-                    },
-                    "formatSettings": {
-                      "type": "JsonReadSettings"
-                    }
+      "importedResources": {
+        "type": "AdfSupportFile",
+        "adfName": "datafactoryqaaogpkbmturm",
+        "pipelines": {
+          "PipelineWithCopy_JsonToJson": {
+            "name": "PipelineWithCopy_JsonToJson",
+            "properties": {
+              "activities": [
+                {
+                  "name": "Copy data1",
+                  "type": "Copy",
+                  "dependsOn": [],
+                  "policy": {
+                    "timeout": "0.12:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
                   },
-                  "sink": {
-                    "type": "JsonSink",
-                    "storeSettings": {
-                      "type": "AzureBlobStorageWriteSettings",
-                      "maxConcurrentConnections": 3,
-                      "copyBehavior": "PreserveHierarchy",
-                      "blockSizeInMB": 4
+                  "userProperties": [],
+                  "typeProperties": {
+                    "source": {
+                      "type": "JsonSource",
+                      "storeSettings": {
+                        "type": "AzureBlobStorageReadSettings",
+                        "recursive": true,
+                        "enablePartitionDiscovery": false
+                      },
+                      "formatSettings": {
+                        "type": "JsonReadSettings"
+                      }
                     },
-                    "formatSettings": {
-                      "type": "JsonWriteSettings",
-                      "filePattern": "arrayOfObjects"
-                    }
+                    "sink": {
+                      "type": "JsonSink",
+                      "storeSettings": {
+                        "type": "AzureBlobStorageWriteSettings",
+                        "maxConcurrentConnections": 3,
+                        "copyBehavior": "PreserveHierarchy",
+                        "blockSizeInMB": 4
+                      },
+                      "formatSettings": {
+                        "type": "JsonWriteSettings",
+                        "filePattern": "arrayOfObjects"
+                      }
+                    },
+                    "enableStaging": false
                   },
-                  "enableStaging": false
-                },
-                "inputs": [
-                  {
-                    "referenceName": "Json1",
-                    "type": "DatasetReference"
-                  }
-                ],
-                "outputs": [
-                  {
-                    "referenceName": "Json1",
-                    "type": "DatasetReference"
-                  }
-                ]
-              }
-            ],
-            "annotations": []
+                  "inputs": [
+                    {
+                      "referenceName": "Json1",
+                      "type": "DatasetReference"
+                    }
+                  ],
+                  "outputs": [
+                    {
+                      "referenceName": "Json1",
+                      "type": "DatasetReference"
+                    }
+                  ]
+                }
+              ],
+              "annotations": []
+            }
           }
-        }
-      },
-      "datasets": {
-        "Json1": {
-          "name": "Json1",
-          "properties": {
-            "linkedServiceName": {
-              "referenceName": "ArmtemplateStorageLinkedService",
-              "type": "LinkedServiceReference"
-            },
-            "annotations": [],
-            "type": "Json",
-            "typeProperties": {
-              "location": {
-                "type": "AzureBlobStorageLocation",
-                "fileName": "ccc",
-                "container": "aaa"
+        },
+        "datasets": {
+          "Json1": {
+            "name": "Json1",
+            "properties": {
+              "linkedServiceName": {
+                "referenceName": "ArmtemplateStorageLinkedService",
+                "type": "LinkedServiceReference"
               },
-              "compression": {
-                "type": "bzip2",
-                "level": "Fastest"
-              }
+              "annotations": [],
+              "type": "Json",
+              "typeProperties": {
+                "location": {
+                  "type": "AzureBlobStorageLocation",
+                  "fileName": "ccc",
+                  "container": "aaa"
+                },
+                "compression": {
+                  "type": "bzip2",
+                  "level": "Fastest"
+                }
+              },
+              "schema": {}
             },
-            "schema": {}
-          },
-          "type": "Microsoft.DataFactory/factories/datasets"
-        }
-      },
-      "linkedServices": {
-        "ArmtemplateStorageLinkedService": {
-          "name": "ArmtemplateStorageLinkedService",
-          "type": "Microsoft.DataFactory/factories/linkedservices",
-          "properties": {
-            "type": "AzureBlobStorage",
-            "typeProperties": {
-              "connectionString": "DefaultEndpointsProtocol=https;AccountName=storageqaaogpkbmturm;",
-              "encryptedCredential": "ew0KICAiVmVyc2lvbiI6ICIyMDE3LTExLTMwIiwNCiAgIlByb3RlY3Rpb25Nb2RlIjogIktleSIsDQogICJTZWNyZXRDb250ZW50VHlwZSI6ICJQbGFpbnRleHQiLA0KICAiQ3JlZGVudGlhbElkIjogIkRBVEFGQUNUT1JZQEE1OEE5OEQ5LUFFODAtNDAxMy1CMjZFLUI1MjcyNzI3ODIyRV9iZDAwZWUzZS1mNTkxLTQ3NDEtOTQwMC04OTMwNzMwZTA3M2UiDQp9"
-            },
-            "annotations": []
+            "type": "Microsoft.DataFactory/factories/datasets"
           }
-        }
-      },
-      "triggers": {}
+        },
+        "linkedServices": {
+          "ArmtemplateStorageLinkedService": {
+            "name": "ArmtemplateStorageLinkedService",
+            "type": "Microsoft.DataFactory/factories/linkedservices",
+            "properties": {
+              "type": "AzureBlobStorage",
+              "typeProperties": {
+                "connectionString": "DefaultEndpointsProtocol=https;AccountName=storageqaaogpkbmturm;",
+                "encryptedCredential": "ew0KICAiVmVyc2lvbiI6ICIyMDE3LTExLTMwIiwNCiAgIlByb3RlY3Rpb25Nb2RlIjogIktleSIsDQogICJTZWNyZXRDb250ZW50VHlwZSI6ICJQbGFpbnRleHQiLA0KICAiQ3JlZGVudGlhbElkIjogIkRBVEFGQUNUT1JZQEE1OEE5OEQ5LUFFODAtNDAxMy1CMjZFLUI1MjcyNzI3ODIyRV9iZDAwZWUzZS1mNTkxLTQ3NDEtOTQwMC04OTMwNzMwZTA3M2UiDQp9"
+              },
+              "annotations": []
+            }
+          }
+        },
+        "triggers": {}
+      }
     }
   }
 }

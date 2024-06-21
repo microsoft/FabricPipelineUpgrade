@@ -4,7 +4,6 @@
   "expectedResponse": {
     "state": "Failed",
     "alerts": [
-
       {
         "severity": "RequiresUserAction",
         "details": "Please use the hint and template to create/find a new connection and add its ID to your resolutions.",

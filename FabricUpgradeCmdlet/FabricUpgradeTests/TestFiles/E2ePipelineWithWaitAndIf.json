@@ -5,12 +5,14 @@
     "state": "Succeeded",
     "alerts": [],
     "result": {
-      "PipelineWithWaitAndIf": {
-        "type": "DataPipeline",
-        "workspaceId": "",
-        "id": 0,
-        "displayName": "PipelineWithWaitAndIf",
-        "description": null
+      "exportedFabricResources": {
+        "PipelineWithWaitAndIf": {
+          "type": "DataPipeline",
+          "workspaceId": "",
+          "id": 0,
+          "displayName": "PipelineWithWaitAndIf",
+          "description": null
+        }
       }
     }
   },

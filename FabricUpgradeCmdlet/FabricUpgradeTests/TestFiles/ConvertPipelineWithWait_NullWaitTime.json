@@ -13,8 +13,8 @@
         "details": "WaitPipeline/Wait10Seconds/typeProperties.waitTimeInSeconds must not be null."
       }
     ],
-    "resolutions": [],
-    "result": {}
+    "result": {},
+    "resolutions": []
   }
 
 }

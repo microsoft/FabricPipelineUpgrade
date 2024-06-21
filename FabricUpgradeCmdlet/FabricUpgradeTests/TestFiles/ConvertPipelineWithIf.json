@@ -5,8 +5,9 @@
     "state": "Succeeded",
     "alerts": [],
     "resolutions": [],
+
     "result": {
-      "fabricResources": [
+      "exportableFabricResources": [
         {
           "resourceName": "pipelineToInvoke",
           "resourceType": "DataPipeline",

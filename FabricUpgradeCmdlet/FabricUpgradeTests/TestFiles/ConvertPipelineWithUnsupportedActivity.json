@@ -10,8 +10,9 @@
       }
     ],
     "resolutions": [],
+
     "result": {
-      "fabricResources": [
+      "exportableFabricResources": [
         {
           "resourceName": "PipelineWithUnsupportedActivity",
           "resourceType": "DataPipeline",

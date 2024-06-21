@@ -43,8 +43,8 @@ namespace FabricUpgradeCmdlet.UpgradeMachines
                 {
                     State = FabricUpgradeProgress.FabricUpgradeState.Succeeded,
                     Alerts = this.Alerts.ToList(),
-                    Resolutions = this.Resolutions,
                     Result = result,
+                    Resolutions = this.Resolutions,
                 };
             }
             catch (UpgradeFailureException)
@@ -172,7 +172,7 @@ namespace FabricUpgradeCmdlet.UpgradeMachines
             }
 
             JObject result = new JObject();
-            result["fabricResources"] = fabricResources;
+            result[FabricUpgradeProgress.ExportableFabricResourcesKey] = fabricResources;
 
             return result;
         }

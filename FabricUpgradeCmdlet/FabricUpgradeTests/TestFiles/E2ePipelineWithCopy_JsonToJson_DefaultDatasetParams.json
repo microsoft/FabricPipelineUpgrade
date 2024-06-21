@@ -25,15 +25,17 @@
       }
     ],
     "result": {
-      "AzureBlobStorage2": {
-        "id": "aa090a13-26a9-47f5-91f6-a8edc0c3e452"
-      },
-      "PipelineWithCopy_JsonToJson_DefaultDatasetParams": {
-        "type": "DataPipeline",
-        "displayName": "PipelineWithCopy_JsonToJson_DefaultDatasetParams",
-        "description": null,
-        "workspaceId": "",
-        "id": 0
+      "exportedFabricResources": {
+        "AzureBlobStorage2": {
+          "id": "aa090a13-26a9-47f5-91f6-a8edc0c3e452"
+        },
+        "PipelineWithCopy_JsonToJson_DefaultDatasetParams": {
+          "type": "DataPipeline",
+          "displayName": "PipelineWithCopy_JsonToJson_DefaultDatasetParams",
+          "description": null,
+          "workspaceId": "",
+          "id": 0
+        }
       }
     }
   },

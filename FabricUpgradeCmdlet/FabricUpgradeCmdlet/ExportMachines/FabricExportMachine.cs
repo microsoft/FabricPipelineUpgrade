@@ -50,7 +50,7 @@ namespace FabricUpgradeCmdlet.ExportMachines
                 {
                     State = FabricUpgradeProgress.FabricUpgradeState.Failed,
                     Alerts = this.Alerts.ToList(),
-                    Result = this.exportResults,
+                    Result = this.BuildResult(),
                 };
             }
         }
@@ -80,7 +80,7 @@ namespace FabricUpgradeCmdlet.ExportMachines
         /// <exception cref="UpgradeFailureException"></exception>
         private void BuildAllExporters()
         {
-            JArray toExport = (JArray)this.ExportObject.SelectToken("fabricResources");
+            JArray toExport = (JArray)this.ExportObject.SelectToken(FabricUpgradeProgress.ExportableFabricResourcesKey);
             if (toExport == null)
             {
                 this.Alerts.AddPermanentError("Cannot find fabricResources to export");
@@ -141,8 +141,8 @@ namespace FabricUpgradeCmdlet.ExportMachines
             {
                 State = FabricUpgradeProgress.FabricUpgradeState.Succeeded,
                 Alerts = this.Alerts.ToList(),
+                Result = this.BuildResult(),
                 Resolutions = this.Resolutions,
-                Result = this.exportResults,
             };
         }
 
@@ -155,5 +155,14 @@ namespace FabricUpgradeCmdlet.ExportMachines
             return this.Alerts.Any(f => f.Severity != FabricUpgradeAlert.FailureSeverity.Warning);
         }
 
+        private JObject BuildResult()
+        {
+            JObject result = new JObject();
+            if (this.exportResults != null && this.exportResults.Count > 0)
+            {
+                result[FabricUpgradeProgress.ExportedFabricResourcesKey] = this.exportResults;
+            }
+            return result;
+        }
     }
 }
