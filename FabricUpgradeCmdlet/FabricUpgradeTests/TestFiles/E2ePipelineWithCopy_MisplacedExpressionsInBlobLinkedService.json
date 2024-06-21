@@ -1,0 +1,37 @@
+﻿{
+  "comments": [
+    "The LinkedService has expressions in AccountName and EndpointSuffix.",
+    "This is an error."
+  ],
+
+  "adfSupportFile": "PipelineWithCopy_MisplacedExpressionsInBlobLinkedService_support_live.zip",
+
+  "resolutions": [
+    {
+      "type": "LinkedServiceToConnectionId",
+      "key": "AzureBlobStorage1",
+      "value": "99379220-ae1a-467f-b9f5-537cc3142b9f"
+    }
+  ],
+
+  "expectedResponse": {
+    "state": "Failed",
+    "alerts": [
+      {
+        "severity": "Permanent",
+        "details": "Cannot upgrade LinkedService 'AzureBlobStorage3' because its connection setting 'AccountName' is an expression."
+      },
+      {
+        "severity": "Permanent",
+        "details": "Cannot upgrade LinkedService 'AzureBlobStorage3' because its connection setting 'EndpointSuffix' is an expression."
+      }
+    ],
+    "result": {},
+    "resolutions": []
+  },
+
+  "expectedItems": [],
+
+  "expectedEndpointEvents": []
+
+}

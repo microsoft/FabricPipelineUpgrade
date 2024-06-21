@@ -42,6 +42,9 @@ namespace FabricUpgradeTests
 
         [DataRow("E2ePipelineWithCopy_Binary_DatasetParams")]
 
+        [DataRow("E2ePipelineWithCopy_MisplacedExpressionsInBlobLinkedService")]
+        [DataRow("E2ePipelineWithCopy_MisplacedExpressionsInAzureSqlLinkedService")]
+
         [DataRow("E2ePipelineWithCopy_JsonToJson")]
         [DataRow("E2ePipelineWithCopy_JsonToJson_MissingResolution")]
         [DataRow("E2ePipelineWithCopy_StagingAndLogging")]

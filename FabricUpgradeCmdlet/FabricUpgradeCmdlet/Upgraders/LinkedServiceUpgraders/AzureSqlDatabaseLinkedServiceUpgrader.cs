@@ -16,8 +16,13 @@ namespace FabricUpgradeCmdlet.Upgraders.LinkedServiceUpgraders
     {
         public const string DatabaseKey = "initial catalog";
         private const string DatasourceKey = "data source";
+        private const string UserNameKey = "user id";
+        private const string PasswordKey = "password";
+
         private const string ServerNamePath = "properties.typeProperties.server";
         private const string DatabaseNamePath = "properties.typeProperties.database";
+        private const string UserNamePath = "properties.typeProperties.userName";
+        private const string PasswordPath = "properties.typeProperties.password";
 
         private readonly List<string> requiredAdfProperties = new List<string>
         {
@@ -42,7 +47,9 @@ namespace FabricUpgradeCmdlet.Upgraders.LinkedServiceUpgraders
 
             this.CheckRequiredAdfProperties(this.requiredAdfProperties, alerts);
 
-            // TODO: Verify that Server is not an expression.
+            this.CheckForExpressionInProperty(ServerNamePath, alerts);
+            this.CheckForExpressionInProperty(UserNamePath, alerts);
+            this.CheckForExpressionInProperty(PasswordPath, alerts);
         }
 
         /// <inheritdoc/>
@@ -164,6 +171,16 @@ namespace FabricUpgradeCmdlet.Upgraders.LinkedServiceUpgraders
             if (connectionSettings.TryGetValue(DatabaseKey, out JToken databaseName))
             {
                 typeProperties["database"] = databaseName;
+            }
+
+            if (connectionSettings.TryGetValue(UserNameKey, out JToken userName))
+            {
+                typeProperties["userName"] = userName;
+            }
+
+            if (connectionSettings.TryGetValue(PasswordKey, out JToken password))
+            {
+                typeProperties["password"] = password;
             }
         }
 

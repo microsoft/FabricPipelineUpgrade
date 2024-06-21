@@ -78,7 +78,6 @@ namespace FabricUpgradeCmdlet.Upgraders.LinkedServiceUpgraders
             this.LinkedServiceParameters = ResourceParameters.FromResourceDeclaration(
                 this.AdfResourceToken.SelectToken(AdfParametersPath),
                 "linkedService()");
-
         }
 
         /// <inheritdoc/>
@@ -97,6 +96,53 @@ namespace FabricUpgradeCmdlet.Upgraders.LinkedServiceUpgraders
             }
 
             return base.ResolveExportedSymbol(symbolName, parametersFromCaller, alerts);
+        }
+
+        protected virtual void CheckForExpressionsInConnectionString(
+            string connectionString,
+            List<string> keysToCheck,
+            AlertCollector alerts)
+        {
+            var connectionSettings = this.BuildConnectionSettings(connectionString);
+
+            foreach (var keyToCheck in keysToCheck)
+            {
+                this.CheckForExpressionInConnectionSettings(connectionSettings, keyToCheck, alerts);
+            }
+        }
+
+        protected virtual void CheckForExpressionInConnectionString(
+            string connectionString,
+            string keyToCheck,
+            AlertCollector alerts)
+        {
+            var connectionSettings = this.BuildConnectionSettings(connectionString);
+
+            this.CheckForExpressionInConnectionSettings(connectionSettings, keyToCheck, alerts);
+        }
+
+        protected virtual void CheckForExpressionInConnectionSettings(
+            Dictionary<string, JToken> connectionSettings,
+            string keyToCheck,
+            AlertCollector alerts)
+        {
+            if (connectionSettings.TryGetValue(keyToCheck, out JToken value) &&
+                (value.Type == JTokenType.String) &&
+                this.IsLinkedServiceExpression(value.ToString()))
+            {
+                alerts.AddPermanentError($"Cannot upgrade LinkedService '{this.Name}' because its connection setting '{keyToCheck}' is an expression.");
+            }
+        }
+
+        protected virtual void CheckForExpressionInProperty(
+            string pathToCheck,
+            AlertCollector alerts)
+        {
+            string valueToCheck = this.AdfResourceToken.SelectToken(pathToCheck)?.ToString();
+            if (this.IsLinkedServiceExpression(valueToCheck))
+            {
+                alerts.AddPermanentError($"Cannot upgrade LinkedService '{this.Name}' because its property '{pathToCheck}' is an expression.");
+            }
         }
 
         /// <summary>
@@ -253,7 +299,7 @@ namespace FabricUpgradeCmdlet.Upgraders.LinkedServiceUpgraders
         protected Dictionary<string, JToken> BuildConnectionSettings(
             string connectionString)
         {
-            Dictionary<string, JToken> settings = new Dictionary<string, JToken>();
+            Dictionary<string, JToken> settings = new Dictionary<string, JToken>(StringComparer.OrdinalIgnoreCase);
 
             // A connection string looks like "a=b;c=d;e=f'..."
             if (!string.IsNullOrEmpty(connectionString))
