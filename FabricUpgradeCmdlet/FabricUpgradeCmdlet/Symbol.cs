@@ -16,9 +16,9 @@ namespace FabricUpgradeCmdlet
     {
         public class CommonNames
         {
-            // The ConvertTo-FabricPipeline command generates a set of
+            // The ConvertTo-FabricResources command generates a set of
             // exportResolves, exportLinks, and exportInstructions
-            // that are passed to Export-FabricPipeline.
+            // that are passed to Export-FabricResources.
 
             // The exportResolves tell the Exporter which properties to extract from the Resolutions
             // and insert into the FabricResource.

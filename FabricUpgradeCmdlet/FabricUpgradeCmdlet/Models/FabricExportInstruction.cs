@@ -33,7 +33,7 @@ namespace FabricUpgradeCmdlet.Models
 
         /// <summary>
         /// The export process requires the description of the resource.
-        /// Since this is easily available during ConvertTo-FabricPipeline, we set it then.
+        /// Since this is easily available during ConvertTo-FabricResources, we set it then.
         /// </summary>
         [JsonProperty(PropertyName = "resourceDescription", Order = 3)]
         public string ResourceDescription { get; set; }

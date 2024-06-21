@@ -47,9 +47,9 @@ namespace FabricUpgradeCmdlet
     /// Import-AdfSupportFile or Import-Resolutions or Add-Resolution.
     /// It returns a new "progress" string that contains one or more
     /// Fabric Pipeline descriptions.
-    /// The output from this cmdlet can be sent to Export-FabricPipeline.
+    /// The output from this cmdlet can be sent to Export-FabricResources.
     /// </summary>
-    [Cmdlet(VerbsData.ConvertTo, "FabricPipeline")]
+    [Cmdlet(VerbsData.ConvertTo, "FabricResources")]
     public class ConvertToPipeline : Cmdlet
     {
         [Parameter(
@@ -66,7 +66,7 @@ namespace FabricUpgradeCmdlet
 
         protected override void ProcessRecord()
         {
-            WriteObject(new FabricUpgradeHandler().ConvertToFabricPipeline(this.progress).ToString());
+            WriteObject(new FabricUpgradeHandler().ConvertToFabricResources(this.progress).ToString());
         }
     }
 
@@ -143,11 +143,11 @@ namespace FabricUpgradeCmdlet
         }
     }
 
-    // This cmdlet takes the progress payload produced by ConvertTo-FabricPipeline,
+    // This cmdlet takes the progress payload produced by ConvertTo-FabricResources,
     // and takes the workspace and AAD token from named parameters:
-    // Import-AdfSupportFile '...' | ConvertTo-FabricPipeline | Export-FabricPipeline -Workspace ABC -Token 123
+    // Import-AdfSupportFile '...' | ConvertTo-FabricResources | Export-FabricResources -Workspace ABC -Token 123
     // This cmdlet uploads the pipelines to the PublicApi endpoint to create/update the items.
-    [Cmdlet(VerbsData.Export, "FabricPipeline")]
+    [Cmdlet(VerbsData.Export, "FabricResources")]
     public class ExportFabricPipeline : Cmdlet
     {
         [Parameter(
@@ -191,7 +191,7 @@ namespace FabricUpgradeCmdlet
         protected override void ProcessRecord()
         {
             CancellationTokenSource cts = new CancellationTokenSource(TimeSpan.FromSeconds(120));
-            string result = new FabricUpgradeHandler().ExportFabricPipelineAsync(
+            string result = new FabricUpgradeHandler().ExportFabricResourcesAsync(
                 this.progress,
                 this.cluster,
                 this.workspaceId,

@@ -113,7 +113,7 @@ namespace FabricUpgradeTests
                 runningProgress?.ToString(),
                 "./TestFiles/AdfSupportFiles/" + testConfig.AdfSupportFile);
 
-            runningProgress = new FabricUpgradeHandler().ConvertToFabricPipeline(runningProgress?.ToString());
+            runningProgress = new FabricUpgradeHandler().ConvertToFabricResources(runningProgress?.ToString());
 
             foreach (FabricUpgradeResolution resolution in testConfig.Resolutions)
             {
@@ -122,7 +122,7 @@ namespace FabricUpgradeTests
                     resolution?.ToString());
             }
 
-            runningProgress = await new FabricUpgradeHandler().ExportFabricPipelineAsync(
+            runningProgress = await new FabricUpgradeHandler().ExportFabricResourcesAsync(
                 runningProgress?.ToString(),
                 "daily",
                 workspaceId.ToString(),

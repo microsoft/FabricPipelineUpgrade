@@ -41,6 +41,10 @@ namespace FabricUpgradeCmdlet
             this.cluster = cluster;
             this.workspaceId = workspaceId;
             this.pbiAadToken = pbiAadToken;
+            if (!this.pbiAadToken.StartsWith("Bearer "))
+            {
+                this.pbiAadToken = "Bearer " + this.pbiAadToken;
+            }
         }
 
         /// <summary>
@@ -115,7 +119,7 @@ namespace FabricUpgradeCmdlet
                 HttpClient httpClient = this.BuildPublicApiHttpClient();
 
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, $"workspaces/{this.workspaceId}/items?type={artifactType}");
-                request.Headers.Add("Authorization", $"Bearer {this.pbiAadToken}");
+                request.Headers.Add("Authorization", $"{this.pbiAadToken}");
 
                 HttpResponseMessage response = await httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
                 string responsePayload = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
@@ -408,7 +412,7 @@ namespace FabricUpgradeCmdlet
                 Content = new StringContent(createItemPayload.ToString(), encoding: Encoding.UTF8, mediaType: "application/json"),
             };
 
-            request.Headers.Add("Authorization", $"Bearer {this.pbiAadToken}");
+            request.Headers.Add("Authorization", $"{this.pbiAadToken}");
 
             return request;
         }
@@ -433,7 +437,7 @@ namespace FabricUpgradeCmdlet
                 Content = new StringContent(updateItemPayload.ToString(), encoding: Encoding.UTF8, mediaType: "application/json"),
             };
 
-            request.Headers.Add("Authorization", $"Bearer {this.pbiAadToken}");
+            request.Headers.Add("Authorization", $"{this.pbiAadToken}");
 
             return request;
         }
@@ -462,7 +466,7 @@ namespace FabricUpgradeCmdlet
                 Content = new StringContent(updateItemDefinitionPayload.ToString(), encoding: Encoding.UTF8, mediaType: "application/json"),
             };
 
-            request.Headers.Add("Authorization", $"Bearer {this.pbiAadToken}");
+            request.Headers.Add("Authorization", $"{this.pbiAadToken}");
 
             return request;
         }

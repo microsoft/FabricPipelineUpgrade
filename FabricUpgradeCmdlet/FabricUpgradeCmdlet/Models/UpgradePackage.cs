@@ -14,7 +14,7 @@ namespace FabricUpgradeCmdlet.Models
     /// It contains only the "type" property, so that all UpgradePackages will have a common property.
     /// </summary>
     /// <remarks>
-    /// We may extend this module to include Import-ArmTemplate or Import-FabricPipeline.
+    /// We may extend this module to include Import-ArmTemplate or Import-FabricResources.
     /// </remarks>
     public class UpgradePackage
     {

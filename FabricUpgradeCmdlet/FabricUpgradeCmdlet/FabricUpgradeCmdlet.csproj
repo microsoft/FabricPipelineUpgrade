@@ -15,10 +15,6 @@
     <PackageReference Include="System.Management.Automation" Version="7.4.2" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="ToPublish\" />
-  </ItemGroup>
-
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
     <Exec Command="copy /y $(TargetPath) $(ProjectDir)\ToPublish\FabricUpgrade.dll" />
   </Target>
