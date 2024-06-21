@@ -12,7 +12,7 @@
 RootModule = 'FabricUpgrade.dll'
 
 # Version number of this module.
-ModuleVersion = '0.0.1'
+ModuleVersion = '0.0.4'
 
 # Supported PSEditions
 # CompatiblePSEditions = @()
@@ -74,9 +74,9 @@ FunctionsToExport = @()
 # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
 CmdletsToExport = @(
     "Import-AdfSupportFile",
-    "ConvertTo-FabricPipeline",
+    "ConvertTo-FabricResources",
     "Import-FabricResolutions",
-    "Export-FabricPipeline"
+    "Export-FabricResources"
 )
 
 # Variables to export from this module

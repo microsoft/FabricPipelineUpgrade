@@ -101,11 +101,11 @@ namespace FabricUpgradeCmdlet
         /// <summary>
         /// Accept a Progress that includes the result of Import-AdfSupportFile and
         /// upgrade it to a set of Fabric Resource descriptions that can be exported
-        /// by Export-FabricPipeline.
+        /// by Export-FabricResources.
         /// </summary>
         /// <param name="progressString">The progress sent by the client.</param>
-        /// <returns>A FabricUpgradeProgress that contains 'instructions' to Export-FabricPipeline.</returns>
-        public FabricUpgradeProgress ConvertToFabricPipeline(
+        /// <returns>A FabricUpgradeProgress that contains 'instructions' to Export-FabricResources.</returns>
+        public FabricUpgradeProgress ConvertToFabricResources(
             string progressString)
         {
             FabricUpgradeProgress.FabricUpgradeState previousState = this.CheckProgress(progressString);
@@ -245,7 +245,7 @@ namespace FabricUpgradeCmdlet
         /// <param name="fabricToken">The PowerBI AAD token to authenticate/authorize access to the workspace.</param>
         /// <param name="cancellationToken"/>
         /// <returns>A FabricUpgradeProgress that describes the created/updated resources.</returns>
-        public async Task<FabricUpgradeProgress> ExportFabricPipelineAsync(
+        public async Task<FabricUpgradeProgress> ExportFabricResourcesAsync(
             string progressString,
             string cluster,
             string workspaceId,

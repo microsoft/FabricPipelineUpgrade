@@ -106,7 +106,7 @@ namespace FabricUpgradeCmdlet.Utilities
                 alerts.AddPermanentError($"{resourcePath}/{from} must not be null.");
 
                 // We allow the operation to continue, to support the WhatIf scenario.
-                // (To wit: the user just wants to run ConvertTo-FabricPipeline to see what happens).
+                // (To wit: the user just wants to run ConvertTo-FabricResources to see what happens).
             }
 
             if (copyIfNull || value != null)

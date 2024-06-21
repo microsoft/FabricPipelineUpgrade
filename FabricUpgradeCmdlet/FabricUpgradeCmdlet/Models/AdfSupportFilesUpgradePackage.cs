@@ -9,7 +9,7 @@ using Newtonsoft.Json.Linq;
 namespace FabricUpgradeCmdlet.Models
 {
     /// <summary>
-    /// This class is part of the communication between Import-AdfSupportFile and ConvertTo-FabricPipeline.
+    /// This class is part of the communication between Import-AdfSupportFile and ConvertTo-FabricResources.
     /// It contains the unpacked contents of the ADF Support File.
     /// </summary>
 

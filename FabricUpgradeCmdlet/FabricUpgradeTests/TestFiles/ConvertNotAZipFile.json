@@ -1,7 +1,7 @@
 ﻿{
   "comments": [
     "Import-AdfSupportFile 'NotAZipFile.zip' will return an error response.",
-    "If you try to ConvertTo-FabricPipeline the result, you will get back the",
+    "If you try to ConvertTo-FabricResources the result, you will get back the",
     "same error response."
   ],
 
