@@ -6,7 +6,7 @@
     "alerts": [],
     "resolutions": [],
     "result": {
-      "fabricResources": [
+      "exportableFabricResources": [
         {
           "resourceName": "ArmtemplateStorageLinkedService",
           "resourceType": "Connection",

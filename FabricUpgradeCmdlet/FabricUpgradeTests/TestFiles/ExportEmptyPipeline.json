@@ -4,7 +4,7 @@
     "alerts": [],
 
     "result": {
-      "fabricResources": [
+      "exportableFabricResources": [
         {
           "resourceName": "EmptyPipeline",
           "resourceType": "DataPipeline",
@@ -48,12 +48,14 @@
     "state": "Succeeded",
     "alerts": [],
     "result": {
-      "EmptyPipeline": {
-        "type": "DataPipeline",
-        "workspaceId": "",
-        "id": 0,
-        "displayName": "EmptyPipeline",
-        "description": "This is an empty pipeline"
+      "exportedFabricResources": {
+        "EmptyPipeline": {
+          "type": "DataPipeline",
+          "workspaceId": "",
+          "id": 0,
+          "displayName": "EmptyPipeline",
+          "description": "This is an empty pipeline"
+        }
       }
     }
   },

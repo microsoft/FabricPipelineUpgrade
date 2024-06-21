@@ -11,12 +11,14 @@
     ],
     "resolutions": [],
     "result": {
-      "PipelineWithUnsupportedActivity": {
-        "type": "DataPipeline",
-        "workspaceId": "",
-        "id": 0,
-        "displayName": "PipelineWithUnsupportedActivity",
-        "description": null
+      "exportedFabricResources": {
+        "PipelineWithUnsupportedActivity": {
+          "type": "DataPipeline",
+          "workspaceId": "",
+          "id": 0,
+          "displayName": "PipelineWithUnsupportedActivity",
+          "description": null
+        }
       }
     }
   },

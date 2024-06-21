@@ -6,89 +6,90 @@
     "alerts": [],
     "resolutions": [],
     "result": {
-      "type": "AdfSupportFile",
-      "pipelines": {
-        "pipelineWithIf": {
-          "name": "pipelineWithIf",
-          "properties": {
-            "activities": [
-              {
-                "name": "WaitOrExecute",
-                "description": "This activity checks a condition and either waits or invokes another pipeline",
-                "type": "IfCondition",
-                "dependsOn": [],
-                "userProperties": [],
-                "typeProperties": {
-                  "expression": {
-                    "value": "@equals(dayOfWeek(utcNow()), 1)",
-                    "type": "Expression"
-                  },
-                  "ifFalseActivities": [
-                    {
-                      "name": "ExecuteOtherPipeline",
-                      "description": "This activity invokes another pipeline",
-                      "type": "ExecutePipeline",
-                      "dependsOn": [],
-                      "policy": {
-                        "secureInput": true
-                      },
-                      "userProperties": [],
-                      "typeProperties": {
-                        "pipeline": {
-                          "referenceName": "pipelineToInvoke",
-                          "type": "PipelineReference"
+      "importedResources": {
+        "type": "AdfSupportFile",
+        "pipelines": {
+          "pipelineWithIf": {
+            "name": "pipelineWithIf",
+            "properties": {
+              "activities": [
+                {
+                  "name": "WaitOrExecute",
+                  "description": "This activity checks a condition and either waits or invokes another pipeline",
+                  "type": "IfCondition",
+                  "dependsOn": [],
+                  "userProperties": [],
+                  "typeProperties": {
+                    "expression": {
+                      "value": "@equals(dayOfWeek(utcNow()), 1)",
+                      "type": "Expression"
+                    },
+                    "ifFalseActivities": [
+                      {
+                        "name": "ExecuteOtherPipeline",
+                        "description": "This activity invokes another pipeline",
+                        "type": "ExecutePipeline",
+                        "dependsOn": [],
+                        "policy": {
+                          "secureInput": true
                         },
-                        "waitOnCompletion": true
+                        "userProperties": [],
+                        "typeProperties": {
+                          "pipeline": {
+                            "referenceName": "pipelineToInvoke",
+                            "type": "PipelineReference"
+                          },
+                          "waitOnCompletion": true
+                        }
                       }
-                    }
-                  ],
-                  "ifTrueActivities": [
-                    {
-                      "name": "Wait3Seconds",
-                      "description": "This activity waits 3 seconds",
-                      "type": "Wait",
-                      "dependsOn": [],
-                      "userProperties": [],
-                      "typeProperties": {
-                        "waitTimeInSeconds": 3
+                    ],
+                    "ifTrueActivities": [
+                      {
+                        "name": "Wait3Seconds",
+                        "description": "This activity waits 3 seconds",
+                        "type": "Wait",
+                        "dependsOn": [],
+                        "userProperties": [],
+                        "typeProperties": {
+                          "waitTimeInSeconds": 3
+                        }
                       }
-                    }
-                  ]
+                    ]
+                  }
                 }
-              }
-            ],
-            "annotations": []
+              ],
+              "annotations": []
+            }
+          },
+          "pipelineToInvoke": {
+            "name": "pipelineToInvoke",
+            "properties": {
+              "activities": [
+                {
+                  "name": "Wait5Seconds",
+                  "description": "This activity waits 5 seconds",
+                  "type": "Wait",
+                  "dependsOn": [],
+                  "userProperties": [],
+                  "typeProperties": {
+                    "waitTimeInSeconds": 5
+                  }
+                }
+              ],
+              "variables": {
+                "aaa": {
+                  "type": "String"
+                }
+              },
+              "annotations": []
+            }
           }
         },
-        "pipelineToInvoke": {
-          "name": "pipelineToInvoke",
-          "properties": {
-            "activities": [
-              {
-                "name": "Wait5Seconds",
-                "description": "This activity waits 5 seconds",
-                "type": "Wait",
-                "dependsOn": [],
-                "userProperties": [],
-                "typeProperties": {
-                  "waitTimeInSeconds": 5
-                }
-              }
-            ],
-            "variables": {
-              "aaa": {
-                "type": "String"
-              }
-            },
-            "annotations": []
-          }
-        }
-      },
-      "adfName": "datafactoryqaaogpkbmturm",
-      "datasets": {},
-      "linkedServices": {},
-      "triggers": {}
+        "adfName": "datafactoryqaaogpkbmturm",
+        "datasets": {},
+        "linkedServices": {},
+        "triggers": {}
+      }
     }
   }
-
 }

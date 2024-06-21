@@ -20,15 +20,17 @@
       }
     ],
     "result": {
-      "ArmtemplateStorageLinkedService": {
-        "id": "d1fcfcfa-0b8c-469d-af92-5dcb300c8e6e"
-      },
-      "PipelineWithCopy_JsonToJson": {
-        "type": "DataPipeline",
-        "displayName": "PipelineWithCopy_JsonToJson",
-        "description": null,
-        "workspaceId": "",
-        "id": 0
+      "exportedFabricResources": {
+        "ArmtemplateStorageLinkedService": {
+          "id": "d1fcfcfa-0b8c-469d-af92-5dcb300c8e6e"
+        },
+        "PipelineWithCopy_JsonToJson": {
+          "type": "DataPipeline",
+          "displayName": "PipelineWithCopy_JsonToJson",
+          "description": null,
+          "workspaceId": "",
+          "id": 0
+        }
       }
     }
   },

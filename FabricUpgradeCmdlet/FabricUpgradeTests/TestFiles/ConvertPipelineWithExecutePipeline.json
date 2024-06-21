@@ -9,114 +9,115 @@
     "state": "Succeeded",
     "alerts": [],
     "resolutions": [],
-      "result": {
-        "fabricResources": [
-          {
-            "resourceName": "WaitPipeline",
-            "resourceType": "DataPipeline",
-            "link": [],
-            "resolve": [],
-            "export": {
-              "name": "WaitPipeline",
-              "properties": {
-                "activities": [
-                  {
-                    "name": "Wait10Seconds",
-                    "type": "Wait",
-                    "description": "This activity waits 10 seconds",
-                    "dependsOn": [],
-                    "userProperties": [
-                      {
-                        "name": "UserProperty1",
-                        "value": "\"Value1\""
-                      }
-                    ],
-                    "typeProperties": {
-                      "waitTimeInSeconds": 10
+
+    "result": {
+      "exportableFabricResources": [
+        {
+          "resourceName": "WaitPipeline",
+          "resourceType": "DataPipeline",
+          "link": [],
+          "resolve": [],
+          "export": {
+            "name": "WaitPipeline",
+            "properties": {
+              "activities": [
+                {
+                  "name": "Wait10Seconds",
+                  "type": "Wait",
+                  "description": "This activity waits 10 seconds",
+                  "dependsOn": [],
+                  "userProperties": [
+                    {
+                      "name": "UserProperty1",
+                      "value": "\"Value1\""
                     }
-                  }
-                ]
-              },
-              "annotations": []
-            }
-          },
-          {
-            "resourceName": "ExecutePipelinePipeline",
-            "resourceType": "DataPipeline",
-            "link": [
-              {
-                "from": "DataPipeline:WaitPipeline",
-                "targetPath": "properties.activities[1].typeProperties.pipelineId"
-              },
-              {
-                "from": "$workspace",
-                "targetPath": "properties.activities[1].typeProperties.workspaceId"
-              }
-            ],
-            "resolve": [
-              {
-                "type": "CredentialConnectionId",
-                "key": "user",
-                "targetPath": "properties.activities[1].externalReferences.connection",
-                "hint": {
-                  "connectionType": "Fabric Data Pipelines",
-                  "datasource": "FabricDataPipelines",
-                  "template": {
-                    "type": "CredentialConnectionId",
-                    "key": "user",
-                    "value": "<guid>"
+                  ],
+                  "typeProperties": {
+                    "waitTimeInSeconds": 10
                   }
                 }
-              }
-            ],
-            "export": {
-              "name": "ExecutePipelinePipeline",
-              "properties": {
-                "activities": [
-                  {
-                    "name": "Wait5Seconds",
-                    "type": "Wait",
-                    "description": "This activity waits 5 seconds",
-                    "dependsOn": [],
-                    "userProperties": [],
-                    "typeProperties": {
-                      "waitTimeInSeconds": 5
-                    }
-                  },
-                  {
-                    "name": "Execute Other Pipeline",
-                    "type": "InvokePipeline",
-                    "description": "This activity executes another pipeline",
-                    "dependsOn": [
-                      {
-                        "activity": "Wait5Seconds",
-                        "dependencyConditions": [
-                          "Succeeded"
-                        ]
-                      }
-                    ],
-                    "userProperties": [],
-                    "policy": {
-                      "secureInput": false
-                    },
-                    "typeProperties": {
-                      "waitOnCompletion": true,
-                      "parameters": null,
-                      "operationType": "InvokeFabricPipeline",
-                      "workspaceId": "00000000-0000-0000-0000-000000000000",
-                      "pipelineId": "00000000-0000-0000-0000-000000000000"
-                    },
-                    "externalReferences": {
-                      "connection": "00000000-0000-0000-0000-000000000000"
-                    }
-                  }
-                ]
-              },
-              "annotations": []
-            }
+              ]
+            },
+            "annotations": []
           }
-        ]
-      }
+        },
+        {
+          "resourceName": "ExecutePipelinePipeline",
+          "resourceType": "DataPipeline",
+          "link": [
+            {
+              "from": "DataPipeline:WaitPipeline",
+              "targetPath": "properties.activities[1].typeProperties.pipelineId"
+            },
+            {
+              "from": "$workspace",
+              "targetPath": "properties.activities[1].typeProperties.workspaceId"
+            }
+          ],
+          "resolve": [
+            {
+              "type": "CredentialConnectionId",
+              "key": "user",
+              "targetPath": "properties.activities[1].externalReferences.connection",
+              "hint": {
+                "connectionType": "Fabric Data Pipelines",
+                "datasource": "FabricDataPipelines",
+                "template": {
+                  "type": "CredentialConnectionId",
+                  "key": "user",
+                  "value": "<guid>"
+                }
+              }
+            }
+          ],
+          "export": {
+            "name": "ExecutePipelinePipeline",
+            "properties": {
+              "activities": [
+                {
+                  "name": "Wait5Seconds",
+                  "type": "Wait",
+                  "description": "This activity waits 5 seconds",
+                  "dependsOn": [],
+                  "userProperties": [],
+                  "typeProperties": {
+                    "waitTimeInSeconds": 5
+                  }
+                },
+                {
+                  "name": "Execute Other Pipeline",
+                  "type": "InvokePipeline",
+                  "description": "This activity executes another pipeline",
+                  "dependsOn": [
+                    {
+                      "activity": "Wait5Seconds",
+                      "dependencyConditions": [
+                        "Succeeded"
+                      ]
+                    }
+                  ],
+                  "userProperties": [],
+                  "policy": {
+                    "secureInput": false
+                  },
+                  "typeProperties": {
+                    "waitOnCompletion": true,
+                    "parameters": null,
+                    "operationType": "InvokeFabricPipeline",
+                    "workspaceId": "00000000-0000-0000-0000-000000000000",
+                    "pipelineId": "00000000-0000-0000-0000-000000000000"
+                  },
+                  "externalReferences": {
+                    "connection": "00000000-0000-0000-0000-000000000000"
+                  }
+                }
+              ]
+            },
+            "annotations": []
+          }
+        }
+      ]
+    }
   }
 
 }

@@ -4,10 +4,9 @@
   "expectedResponse": {
     "state": "Succeeded",
     "alerts": [],
-    "resolutions": [],
 
     "result": {
-      "fabricResources": [
+      "exportableFabricResources": [
         {
           "resourceName": "EmptyPipeline",
           "resourceType": "DataPipeline",
@@ -42,7 +41,9 @@
           }
         }
       ]
-    }
+    },
+
+    "resolutions": []
 
   }
 

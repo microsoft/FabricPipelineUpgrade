@@ -13,12 +13,14 @@
     "state": "Succeeded",
     "alerts": [],
     "result": {
-      "EmptyPipeline": {
-        "type": "DataPipeline",
-        "workspaceId": "",
-        "id": 0,
-        "displayName": "EmptyPipeline",
-        "description": null
+      "exportedFabricResources": {
+        "EmptyPipeline": {
+          "type": "DataPipeline",
+          "workspaceId": "",
+          "id": 0,
+          "displayName": "EmptyPipeline",
+          "description": null
+        }
       }
     }
   },

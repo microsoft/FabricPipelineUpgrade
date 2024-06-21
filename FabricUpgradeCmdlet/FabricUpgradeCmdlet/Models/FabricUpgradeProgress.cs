@@ -12,6 +12,10 @@ namespace FabricUpgradeCmdlet.Models
 {
     public class FabricUpgradeProgress
     {
+        public const string ImportedResourcesKey = "importedResources";
+        public const string ExportableFabricResourcesKey = "exportableFabricResources";
+        public const string ExportedFabricResourcesKey = "exportedFabricResources";
+
         /// <summary>
         /// The result of the FabricUpgrade operation.
         /// </summary>
@@ -105,14 +109,18 @@ namespace FabricUpgradeCmdlet.Models
             return JObject.Parse(this.ToString());
         }
 
-        public static FabricUpgradeProgress FromString(string fur)
+        public static FabricUpgradeProgress FromString(string fup)
         {
-            if (string.IsNullOrEmpty(fur))
+            if (string.IsNullOrEmpty(fup))
             {
-                return new FabricUpgradeProgress() { State = FabricUpgradeState.Succeeded };
+                return new FabricUpgradeProgress() 
+                {
+                    State = FabricUpgradeState.Succeeded,
+                    Alerts = new List<FabricUpgradeAlert>(),
+                };
             }
 
-            return JsonConvert.DeserializeObject<FabricUpgradeProgress>(fur);
+            return JsonConvert.DeserializeObject<FabricUpgradeProgress>(fup);
         }
 
         public static FabricUpgradeProgress FromJToken(JToken jToken)

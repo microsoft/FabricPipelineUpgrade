@@ -53,7 +53,9 @@ namespace FabricUpgradeCmdlet.Utilities
         /// <returns>The Result that will be returned to the client in the FabricUpgradeProgress.</returns>
         public JObject Build()
         {
-            return JObject.Parse(UpgradeSerialization.Serialize(upgradePackage));
+            JObject built = new JObject();
+            built[FabricUpgradeProgress.ImportedResourcesKey] = UpgradeSerialization.ToJToken(upgradePackage); // JObject.Parse(UpgradeSerialization.Serialize(upgradePackage));
+            return built;
         }
 
         /// <summary>

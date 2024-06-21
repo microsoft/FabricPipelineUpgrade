@@ -35,7 +35,7 @@
     ],
 
     "result": {
-      "fabricResources": [
+      "exportableFabricResources": [
         {
           "resourceName": "EmptyPipeline",
           "resourceType": "DataPipeline",

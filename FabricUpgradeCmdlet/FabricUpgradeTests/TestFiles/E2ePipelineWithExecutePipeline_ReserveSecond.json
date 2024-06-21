@@ -23,12 +23,14 @@
     ],
     "resolutions": [],
     "result": {
-      "WaitPipeline": {
-        "type": "DataPipeline",
-        "workspaceId": "",
-        "id": 0,
-        "displayName": "WaitPipeline",
-        "description": null
+      "exportedFabricResources": {
+        "WaitPipeline": {
+          "type": "DataPipeline",
+          "workspaceId": "",
+          "id": 0,
+          "displayName": "WaitPipeline",
+          "description": null
+        }
       }
     }
   },

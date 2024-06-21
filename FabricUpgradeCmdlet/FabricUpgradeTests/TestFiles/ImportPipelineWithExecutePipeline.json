@@ -6,78 +6,80 @@
     "alerts": [],
     "resolutions": [],
     "result": {
-      "type": "AdfSupportFile",
-      "adfName": "datafactoryqaaogpkbmturm",
-      "pipelines": {
-        "ExecutePipelinePipeline": {
-          "name": "ExecutePipelinePipeline",
-          "properties": {
-            "activities": [
-              {
-                "name": "Wait5Seconds",
-                "description": "This activity waits 5 seconds",
-                "type": "Wait",
-                "dependsOn": [],
-                "userProperties": [],
-                "typeProperties": {
-                  "waitTimeInSeconds": 5
-                }
-              },
-              {
-                "name": "Execute Other Pipeline",
-                "description": "This activity executes another pipeline",
-                "type": "ExecutePipeline",
-                "dependsOn": [
-                  {
-                    "activity": "Wait5Seconds",
-                    "dependencyConditions": [
-                      "Succeeded"
-                    ]
+      "importedResources": {
+        "type": "AdfSupportFile",
+        "adfName": "datafactoryqaaogpkbmturm",
+        "pipelines": {
+          "ExecutePipelinePipeline": {
+            "name": "ExecutePipelinePipeline",
+            "properties": {
+              "activities": [
+                {
+                  "name": "Wait5Seconds",
+                  "description": "This activity waits 5 seconds",
+                  "type": "Wait",
+                  "dependsOn": [],
+                  "userProperties": [],
+                  "typeProperties": {
+                    "waitTimeInSeconds": 5
                   }
-                ],
-                "policy": {
-                  "secureInput": false
                 },
-                "userProperties": [],
-                "typeProperties": {
-                  "pipeline": {
-                    "referenceName": "WaitPipeline",
-                    "type": "PipelineReference"
+                {
+                  "name": "Execute Other Pipeline",
+                  "description": "This activity executes another pipeline",
+                  "type": "ExecutePipeline",
+                  "dependsOn": [
+                    {
+                      "activity": "Wait5Seconds",
+                      "dependencyConditions": [
+                        "Succeeded"
+                      ]
+                    }
+                  ],
+                  "policy": {
+                    "secureInput": false
                   },
-                  "waitOnCompletion": true
+                  "userProperties": [],
+                  "typeProperties": {
+                    "pipeline": {
+                      "referenceName": "WaitPipeline",
+                      "type": "PipelineReference"
+                    },
+                    "waitOnCompletion": true
+                  }
                 }
-              }
-            ],
-            "annotations": []
+              ],
+              "annotations": []
+            }
+          },
+          "WaitPipeline": {
+            "name": "WaitPipeline",
+            "properties": {
+              "activities": [
+                {
+                  "name": "Wait10Seconds",
+                  "description": "This activity waits 10 seconds",
+                  "type": "Wait",
+                  "dependsOn": [],
+                  "userProperties": [
+                    {
+                      "name": "UserProperty1",
+                      "value": "\"Value1\""
+                    }
+                  ],
+                  "typeProperties": {
+                    "waitTimeInSeconds": 10
+                  }
+                }
+              ],
+              "annotations": []
+            }
           }
         },
-        "WaitPipeline": {
-          "name": "WaitPipeline",
-          "properties": {
-            "activities": [
-              {
-                "name": "Wait10Seconds",
-                "description": "This activity waits 10 seconds",
-                "type": "Wait",
-                "dependsOn": [],
-                "userProperties": [
-                  {
-                    "name": "UserProperty1",
-                    "value": "\"Value1\""
-                  }
-                ],
-                "typeProperties": {
-                  "waitTimeInSeconds": 10
-                }
-              }
-            ],
-            "annotations": []
-          }
-        }
-      },
-      "datasets": {},
-      "linkedServices": {},
-      "triggers": {}
+        "datasets": {},
+        "linkedServices": {},
+        "triggers": {}
+      }
     }
   }
 }

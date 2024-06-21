@@ -43,8 +43,8 @@ namespace FabricUpgradeCmdlet.UpgradeMachines
                 {
                     State = FabricUpgradeProgress.FabricUpgradeState.Succeeded,
                     Alerts = this.Alerts.ToList(),
-                    Resolutions = this.Resolutions,
                     Result = result,
+                    Resolutions = this.Resolutions,
                 };
             }
             catch (UpgradeFailureException)
@@ -172,7 +172,7 @@ namespace FabricUpgradeCmdlet.UpgradeMachines
             }
 
             JObject result = new JObject();
-            result["fabricResources"] = fabricResources;
+            result[FabricUpgradeProgress.ExportableFabricResourcesKey] = fabricResources;
 
             return result;
         }
@@ -183,7 +183,7 @@ namespace FabricUpgradeCmdlet.UpgradeMachines
         /// <returns>True if the Upgrade has failed; False otherwise.</returns>
         private bool AlertsIndicateFailure()
         {
-            return this.Alerts.Any(f => f.Severity != FabricUpgradeAlert.FailureSeverity.Warning);
+            return this.Alerts.Any(f => f.Severity != FabricUpgradeAlert.AlertSeverity.Warning);
         }
     }
 }

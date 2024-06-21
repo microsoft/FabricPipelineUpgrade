@@ -54,7 +54,7 @@ namespace FabricUpgradeCmdlet.Utilities
         /// <returns>this, for chaining.</returns>
         public AlertCollector AddPermanentError(string details)
         {
-            return this.AddAlert(FailureSeverity.Permanent, details);
+            return this.AddAlert(AlertSeverity.Permanent, details);
         }
 
         /// <summary>
@@ -64,7 +64,7 @@ namespace FabricUpgradeCmdlet.Utilities
         /// <returns>this, for chaining.</returns>
         public AlertCollector AddWarning(string details)
         {
-            return this.AddAlert(FailureSeverity.Warning, details);
+            return this.AddAlert(AlertSeverity.Warning, details);
         }
 
         /// <summary>
@@ -74,7 +74,7 @@ namespace FabricUpgradeCmdlet.Utilities
         /// <returns>this, for chaining.</returns>
         public AlertCollector AddUnsupportedResourceAlert(string details)
         {
-            return this.AddAlert(FailureSeverity.UnsupportedResource, details);
+            return this.AddAlert(AlertSeverity.UnsupportedResource, details);
         }
 
         /// <summary>
@@ -89,7 +89,7 @@ namespace FabricUpgradeCmdlet.Utilities
             FabricUpgradeConnectionHint connectionHint)
         {
             return this.AddAlert(
-                FailureSeverity.RequiresUserAction,
+                AlertSeverity.RequiresUserAction,
                 $"Please use the hint and template to create/find a new connection and add its ID to your resolutions.",
                 connectionHint);
         }
@@ -106,7 +106,7 @@ namespace FabricUpgradeCmdlet.Utilities
             string resolutionKey)
         {
             return this.AddAlert(
-                FailureSeverity.RequiresUserAction,
+                AlertSeverity.RequiresUserAction,
                 $"Please ensure that the resolution for {resolutionType} '{resolutionKey}' has a GUID value");
         }
 
@@ -117,7 +117,7 @@ namespace FabricUpgradeCmdlet.Utilities
         /// <param name="details">The details of the new alert.</param>
         /// <returns>this, for chaining.</returns>
         private AlertCollector AddAlert(
-            FailureSeverity severity,
+            AlertSeverity severity,
             string details,
             FabricUpgradeConnectionHint connectionHint = null,
             FabricUpgradeResolution resolutionTemplate = null)

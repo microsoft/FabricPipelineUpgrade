@@ -3,7 +3,7 @@
     "state": "Succeeded",
     "alerts": [],
     "result": {
-      "fabricResources": [
+      "exportableFabricResources": [
         {
           "resourceName": "WaitPipeline",
           "resourceType": "DataPipeline",
@@ -42,12 +42,14 @@
     "state": "Succeeded",
     "alerts": [],
     "result": {
-      "WaitPipeline": {
-        "type": "DataPipeline",
-        "workspaceId": "",
-        "id": 0,
-        "displayName": "WaitPipeline",
-        "description": "This activity waits 10 seconds"
+      "exportedFabricResources": {
+        "WaitPipeline": {
+          "type": "DataPipeline",
+          "workspaceId": "",
+          "id": 0,
+          "displayName": "WaitPipeline",
+          "description": "This activity waits 10 seconds"
+        }
       }
     }
   },

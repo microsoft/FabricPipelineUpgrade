@@ -19,7 +19,7 @@ namespace FabricUpgradeCmdlet.Models
         /// The severity of the failure.
         /// </summary>
         [JsonConverter(typeof(StringEnumConverter))]
-        public enum FailureSeverity
+        public enum AlertSeverity
         {
             /// <summary>
             /// Invalid enumeration value.
@@ -67,7 +67,7 @@ namespace FabricUpgradeCmdlet.Models
         /// Gets or sets the severity of the failure.
         /// </summary>
         [JsonProperty(PropertyName = "severity", Order = 1, NullValueHandling = NullValueHandling.Ignore)]
-        public FailureSeverity Severity { get; set; }
+        public AlertSeverity Severity { get; set; }
 
         /// <summary>
         /// Gets or sets the details of the failure.
