@@ -74,7 +74,7 @@ namespace FabricUpgradeCmdlet.Upgraders.DatasetUpgraders
                 this.BuildActiveParameters(parametersFromCaller),
                 alerts);
 
-            copier.Copy("properties.typeProperties", "typeProperties");
+            copier.Copy("properties.typeProperties", "typeProperties", copyIfNull: false);
 
             Dictionary<string, JToken> parametersToLinkedService = this.BuildParametersToPassToLinkedService(parametersFromCaller, alerts);
 
@@ -82,6 +82,9 @@ namespace FabricUpgradeCmdlet.Upgraders.DatasetUpgraders
                 Symbol.CommonNames.LinkedServiceDatabaseName,
                 parametersToLinkedService,
                 alerts);
+
+            string q = this.AdfResourceToken.ToString(Newtonsoft.Json.Formatting.Indented);
+            string r = fabricActivityObject.ToString(Newtonsoft.Json.Formatting.Indented);
 
             if (databaseNameSymbol.State == Symbol.SymbolState.Ready)
             {

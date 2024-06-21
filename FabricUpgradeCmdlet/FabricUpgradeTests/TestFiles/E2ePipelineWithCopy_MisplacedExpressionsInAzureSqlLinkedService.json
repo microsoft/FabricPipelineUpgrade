@@ -1,0 +1,41 @@
+﻿{
+  "comments": [
+    "The LinkedService has expressions in AccountName and EndpointSuffix.",
+    "This is an error."
+  ],
+
+  "adfSupportFile": "PipelineWithCopy_MisplacedExpressionsInAzureSqlLinkedService_support_live.zip",
+
+  "resolutions": [
+    {
+      "type": "LinkedServiceToConnectionId",
+      "key": "AzureSqlDatabase3",
+      "value": "99379220-ae1a-467f-b9f5-537cc3142b9f"
+    }
+  ],
+
+  "expectedResponse": {
+    "state": "Failed",
+    "alerts": [
+      {
+        "severity": "Permanent",
+        "details": "Cannot upgrade LinkedService 'AzureSqlDatabase4' because its property 'properties.typeProperties.server' is an expression."
+      },
+      {
+        "severity": "Permanent",
+        "details": "Cannot upgrade LinkedService 'AzureSqlDatabase4' because its property 'properties.typeProperties.userName' is an expression."
+      },
+      {
+        "severity": "Permanent",
+        "details": "Cannot upgrade LinkedService 'AzureSqlDatabase4' because its property 'properties.typeProperties.password' is an expression."
+      }
+    ],
+    "result": {},
+    "resolutions": []
+  },
+
+  "expectedItems": [],
+
+  "expectedEndpointEvents": []
+
+}

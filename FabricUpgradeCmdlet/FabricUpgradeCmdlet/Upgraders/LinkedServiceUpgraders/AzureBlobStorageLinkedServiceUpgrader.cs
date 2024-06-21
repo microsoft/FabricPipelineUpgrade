@@ -14,7 +14,14 @@ namespace FabricUpgradeCmdlet.Upgraders.LinkedServiceUpgraders
     /// </summary>
     public class AzureBlobStorageLinkedServiceUpgrader : LinkedServiceUpgrader
     {
+        private string AccountNameKey = "AccountName";
+        private string EndpointSuffixKey = "EndpointSuffix";
+
         private readonly List<string> requiredAdfProperties = new List<string>
+        {
+        };
+
+        private readonly List<string> mustNotBeExpressions = new List<string>
         {
         };
 
@@ -50,7 +57,8 @@ namespace FabricUpgradeCmdlet.Upgraders.LinkedServiceUpgraders
                 this.connectionSettings = this.BuildConnectionSettings(connectionStringToken.ToString());
             }
 
-            // TODO: Verify that AccountName and EndpointSuffix are not expressions.
+            this.CheckForExpressionInConnectionSettings(this.connectionSettings, AccountNameKey, alerts);
+            this.CheckForExpressionInConnectionSettings(this.connectionSettings, EndpointSuffixKey, alerts);
         }
 
         /// <inheritdoc/>
@@ -73,7 +81,7 @@ namespace FabricUpgradeCmdlet.Upgraders.LinkedServiceUpgraders
         /// <inheritdoc/>
         protected override FabricUpgradeConnectionHint BuildFabricConnectionHint()
         {
-            this.connectionSettings.TryGetValue("AccountName", out JToken accountName);
+            this.connectionSettings.TryGetValue(AccountNameKey, out JToken accountName);
 
             return base.BuildFabricConnectionHint()
                 .WithConnectionType(this.LinkedServiceType)
