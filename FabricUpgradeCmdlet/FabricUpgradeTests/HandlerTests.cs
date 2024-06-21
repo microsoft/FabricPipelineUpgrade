@@ -8,6 +8,7 @@ using FabricUpgradeTests.Utilities;
 using FabricUpgradeTests.TestConfigModels;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Microsoft.ApplicationInsights.DataContracts;
 
 namespace FabricUpgradeTests
 {
@@ -86,6 +87,28 @@ namespace FabricUpgradeTests
         }
 
         [TestMethod]
+        [DataRow("x")]
+        [DataRow(FabricUpgradeProgress.ExportableFabricResourcesKey)]
+        [DataRow(FabricUpgradeProgress.ExportedFabricResourcesKey)]
+        public void ConvertNotImportedResources_Test(
+            string resultKey)
+        {
+            FabricUpgradeProgress progress = new FabricUpgradeProgress()
+            {
+                State = FabricUpgradeProgress.FabricUpgradeState.Succeeded,
+            };
+            progress.Result = JObject.Parse($"{{ '{resultKey}': {{}} }}");
+
+            FabricUpgradeProgress actualResponse = new FabricUpgradeHandler().ConvertToFabricResources(progress.ToString());
+
+            Assert.AreEqual(FabricUpgradeProgress.FabricUpgradeState.Failed, actualResponse.State);
+            Assert.AreEqual(1, actualResponse.Alerts.Count);
+            Assert.AreEqual(FabricUpgradeAlert.AlertSeverity.Permanent, actualResponse.Alerts[0].Severity);
+            Assert.AreEqual("ConvertTo-FabricResources expects imported ADF resources.", actualResponse.Alerts[0].Details);
+        }
+
+
+        [TestMethod]
         [DataRow("{\"state\":\"Failed\", \"alerts\": []}", "passthrough")]
         [DataRow("{\"state\":\"Failed\", \"alerts\": [{\"severity\": \"Permanent\"}]}", "passthrough")]
         [DataRow("abc", "invalid")]
@@ -102,7 +125,7 @@ namespace FabricUpgradeTests
                     State = FabricUpgradeProgress.FabricUpgradeState.Failed,
                     Alerts = new List<FabricUpgradeAlert> {
                         new FabricUpgradeAlert() {
-                            Severity = FabricUpgradeAlert.FailureSeverity.Permanent,
+                            Severity = FabricUpgradeAlert.AlertSeverity.Permanent,
                             Details = "Input is not a valid JSON string."
                         }
                     },
@@ -212,6 +235,32 @@ namespace FabricUpgradeTests
 
                 nItem++;
             }
+        }
+
+        [TestMethod]
+        [DataRow("yyy")]
+        [DataRow(FabricUpgradeProgress.ImportedResourcesKey)]
+        [DataRow(FabricUpgradeProgress.ExportedFabricResourcesKey)]
+        public async Task ExportNotExportableResources_TestAsync(
+            string resultKey)
+        {
+            FabricUpgradeProgress progress = new FabricUpgradeProgress()
+            {
+                State = FabricUpgradeProgress.FabricUpgradeState.Succeeded,
+            };
+            progress.Result = JObject.Parse($"{{ '{resultKey}': {{}} }}");
+
+            FabricUpgradeProgress actualResponse = await new FabricUpgradeHandler().ExportFabricResourcesAsync(
+                progress.ToString(),
+                "daily",
+                "wsId",
+                "token",
+                CancellationToken.None).ConfigureAwait(false);
+
+            Assert.AreEqual(FabricUpgradeProgress.FabricUpgradeState.Failed, actualResponse.State);
+            Assert.AreEqual(1, actualResponse.Alerts.Count);
+            Assert.AreEqual(FabricUpgradeAlert.AlertSeverity.Permanent, actualResponse.Alerts[0].Severity);
+            Assert.AreEqual("Export-FabricResources expects exportable Fabric resources.", actualResponse.Alerts[0].Details);
         }
 
         private class ImportTestConfig

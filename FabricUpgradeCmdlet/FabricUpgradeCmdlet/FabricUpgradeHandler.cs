@@ -59,7 +59,7 @@ namespace FabricUpgradeCmdlet
                 .WithAlert(
                     new FabricUpgradeAlert()
                     {
-                        Severity = FabricUpgradeAlert.FailureSeverity.Permanent,
+                        Severity = FabricUpgradeAlert.AlertSeverity.Permanent,
                         Details = $"Failed to load Support File '{fileName}'.",
                     });
             }
@@ -77,7 +77,7 @@ namespace FabricUpgradeCmdlet
                 .WithAlert(
                     new FabricUpgradeAlert()
                     {
-                        Severity = FabricUpgradeAlert.FailureSeverity.Permanent,
+                        Severity = FabricUpgradeAlert.AlertSeverity.Permanent,
                         Details = "Failed to unzip Upgrade Package.",
                     });
             }
@@ -108,7 +108,7 @@ namespace FabricUpgradeCmdlet
 
             if (!progress.Result.ContainsKey(FabricUpgradeProgress.ImportedResourcesKey))
             {
-                this.alerts.AddPermanentError("ConvertTo-FabricResources expects imported ADF resources");
+                this.alerts.AddPermanentError("ConvertTo-FabricResources expects imported ADF resources.");
                 return new FabricUpgradeProgress()
                 {
                     State = FabricUpgradeProgress.FabricUpgradeState.Failed,
@@ -136,7 +136,7 @@ namespace FabricUpgradeCmdlet
             }
             .WithAlert(new FabricUpgradeAlert()
             {
-                Severity = FabricUpgradeAlert.FailureSeverity.Permanent,
+                Severity = FabricUpgradeAlert.AlertSeverity.Permanent,
                 Details = $"FabricUpgrade does not support package type '{upgradePackage.Type}'.",
             });
         }
@@ -188,7 +188,7 @@ namespace FabricUpgradeCmdlet
                 .WithAlert(
                     new FabricUpgradeAlert()
                     {
-                        Severity = FabricUpgradeAlert.FailureSeverity.Permanent,
+                        Severity = FabricUpgradeAlert.AlertSeverity.Permanent,
                         Details = detailsIfFail,
                     });
             }
@@ -243,7 +243,7 @@ namespace FabricUpgradeCmdlet
 
             if (!progress.Result.ContainsKey(FabricUpgradeProgress.ExportableFabricResourcesKey))
             {
-                this.alerts.AddPermanentError("Export-FabricResources expects exportable Fabric resources");
+                this.alerts.AddPermanentError("Export-FabricResources expects exportable Fabric resources.");
                 return new FabricUpgradeProgress()
                 {
                     State = FabricUpgradeProgress.FabricUpgradeState.Failed,

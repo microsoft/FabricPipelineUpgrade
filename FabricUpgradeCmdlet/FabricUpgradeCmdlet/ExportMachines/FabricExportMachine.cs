@@ -152,7 +152,7 @@ namespace FabricUpgradeCmdlet.ExportMachines
         /// <returns>True if the Export has failed; False otherwise.</returns>
         private bool AlertsIndicateFailure()
         {
-            return this.Alerts.Any(f => f.Severity != FabricUpgradeAlert.FailureSeverity.Warning);
+            return this.Alerts.Any(f => f.Severity != FabricUpgradeAlert.AlertSeverity.Warning);
         }
 
         private JObject BuildResult()

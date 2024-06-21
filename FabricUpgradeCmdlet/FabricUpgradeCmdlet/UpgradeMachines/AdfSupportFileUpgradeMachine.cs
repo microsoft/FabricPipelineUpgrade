@@ -183,7 +183,7 @@ namespace FabricUpgradeCmdlet.UpgradeMachines
         /// <returns>True if the Upgrade has failed; False otherwise.</returns>
         private bool AlertsIndicateFailure()
         {
-            return this.Alerts.Any(f => f.Severity != FabricUpgradeAlert.FailureSeverity.Warning);
+            return this.Alerts.Any(f => f.Severity != FabricUpgradeAlert.AlertSeverity.Warning);
         }
     }
 }
