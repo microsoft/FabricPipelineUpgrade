@@ -44,6 +44,7 @@ namespace FabricUpgradeTests
 
         [DataRow("E2ePipelineWithCopy_MisplacedExpressionsInBlobLinkedService")]
         [DataRow("E2ePipelineWithCopy_MisplacedExpressionsInAzureSqlLinkedService")]
+        [DataRow("E2ePipelineWithCopy_MisplacedExpressionsInAzureSqlLinkedService_RecommendedForm")]
 
         [DataRow("E2ePipelineWithCopy_JsonToJson")]
         [DataRow("E2ePipelineWithCopy_JsonToJson_MissingResolution")]
@@ -56,6 +57,7 @@ namespace FabricUpgradeTests
         [DataRow("E2ePipelineWithCopy_IntegerDatasetTypeProperty")]
 
         [DataRow("E2ePipelineWithCopy_SqlToSql")]
+        [DataRow("E2ePipelineWithCopy_SqlToSql_RecommendedForm")]
         [DataRow("E2ePipelineWithCopy_SqlToSql_MissingResolution")]
         [DataRow("E2ePipelineWithCopy_SqlToSql_NoConnectionStringAndNoServer")]
         [DataRow("E2ePipelineWithCopy_SqlToSql_ExpressionConnectionString")]
