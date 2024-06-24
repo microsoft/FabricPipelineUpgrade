@@ -1,0 +1,295 @@
+﻿// <copyright file="FabricUpgradeHandler.cs" company="Microsoft">
+// Copyright (c) Microsoft. All rights reserved.
+// </copyright>
+
+using FabricUpgradePowerShellModule.ExportMachines;
+using FabricUpgradePowerShellModule.Models;
+using FabricUpgradePowerShellModule.UpgradeMachines;
+using FabricUpgradePowerShellModule.Utilities;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+
+namespace FabricUpgradePowerShellModule
+{
+    /// <summary>
+    /// This class does all of the actual "work" exposed by the PowerShell Module.
+    /// By separating the exposed commands from the implementation, we can test.
+    /// </summary>
+    public class FabricUpgradeHandler
+    {
+        /// <summary>
+        /// This AlertCollector accumulates the Alerts generated during an Import/Upgrade/Export process.
+        /// </summary>
+        private AlertCollector alerts = new AlertCollector();
+
+        public FabricUpgradeHandler() { }
+
+        /// <summary>
+        /// Import an ADF Support File.
+        /// </summary>
+        /// <remarks>
+        /// ADF Studio can export a "Support File" that contains a Pipeline and all of the other 
+        /// ADF resources upon which that Pipeline depends (including other Pipelines!).
+        /// </remarks>
+        /// <param name="progressString">The progress sent by the client.</param>
+        /// <param name="fileName">The name of the ADF support file to import.</param>
+        /// <returns>A FabricUpgradeProgress that contains the unzipped contents of the ADF Support File.</returns>
+        public FabricUpgradeProgress ImportAdfSupportFile(
+            string progressString,
+            string fileName)
+        {
+            if (!this.CheckProgress(progressString, out FabricUpgradeProgress progress))
+            {
+                return progress;
+            }
+
+            AdfSupportFileUpgradePackageCollector collector = new AdfSupportFileUpgradePackageCollector();
+
+            byte[] supportFileData;
+            try
+            {
+                supportFileData = File.ReadAllBytes(fileName);
+            }
+            catch (Exception)
+            {
+                return new FabricUpgradeProgress()
+                {
+                    State = FabricUpgradeProgress.FabricUpgradeState.Failed,
+                }
+                .WithAlert(
+                    new FabricUpgradeAlert()
+                    {
+                        Severity = FabricUpgradeAlert.AlertSeverity.Permanent,
+                        Details = $"Failed to load Support File '{fileName}'.",
+                    });
+            }
+
+            try
+            {
+                UpgradeUnzipper.Unzip(supportFileData, collector);
+            }
+            catch (Exception)
+            {
+                return new FabricUpgradeProgress()
+                {
+                    State = FabricUpgradeProgress.FabricUpgradeState.Failed,
+                }
+                .WithAlert(
+                    new FabricUpgradeAlert()
+                    {
+                        Severity = FabricUpgradeAlert.AlertSeverity.Permanent,
+                        Details = "Failed to unzip Upgrade Package.",
+                    });
+            }
+
+            return new FabricUpgradeProgress()
+            {
+                State = FabricUpgradeProgress.FabricUpgradeState.Succeeded,
+                Alerts = progress.Alerts,
+                Result = collector.Build(),
+                Resolutions = progress.Resolutions,
+            };
+        }
+
+        /// <summary>
+        /// Accept a Progress that includes the result of Import-AdfSupportFile and
+        /// upgrade it to a set of Fabric Resource descriptions that can be exported
+        /// by Export-FabricResources.
+        /// </summary>
+        /// <param name="progressString">The progress sent by the client.</param>
+        /// <returns>A FabricUpgradeProgress that contains 'instructions' to Export-FabricResources.</returns>
+        public FabricUpgradeProgress ConvertToFabricResources(
+            string progressString)
+        {
+            if (!this.CheckProgress(progressString, out FabricUpgradeProgress progress))
+            {
+                return progress;
+            }
+
+            if (!progress.Result.ContainsKey(FabricUpgradeProgress.ImportedResourcesKey))
+            {
+                this.alerts.AddPermanentError("ConvertTo-FabricResources expects imported ADF resources.");
+                return new FabricUpgradeProgress()
+                {
+                    State = FabricUpgradeProgress.FabricUpgradeState.Failed,
+                    Alerts = this.alerts.ToList(),
+                };
+            }
+
+            JToken adfResourcesToken = progress.Result[FabricUpgradeProgress.ImportedResourcesKey];
+
+            UpgradePackage upgradePackage = UpgradePackage.FromJToken(adfResourcesToken);
+
+            if (upgradePackage.Type == UpgradePackage.UpgradePackageType.AdfSupportFile)
+            {
+                AdfSupportFileUpgradeMachine machine = new AdfSupportFileUpgradeMachine(
+                    (JObject)adfResourcesToken,
+                    progress.Resolutions,
+                    this.alerts);
+
+                return machine.Upgrade();
+            }
+
+            return new FabricUpgradeProgress()
+            {
+                State = FabricUpgradeProgress.FabricUpgradeState.Failed,
+            }
+            .WithAlert(new FabricUpgradeAlert()
+            {
+                Severity = FabricUpgradeAlert.AlertSeverity.Permanent,
+                Details = $"FabricUpgrade does not support package type '{upgradePackage.Type}'.",
+            });
+        }
+
+        /// <summary>
+        /// Prepend the resolutions in the file to the resolutions we already have.
+        /// </summary>
+        /// <remarks>
+        /// Newer resolutions will take precendence over older resolutions.
+        /// </remarks>
+        /// <param name="progressString">The progress sent by the client.</param>
+        /// <param name="resolutionsFilename">The filename to load.</param>
+        /// <returns>A FabricUpgradeProgress that includes the new resolutions.</returns>
+        public FabricUpgradeProgress ImportFabricResolutions(
+            string progressString,
+            string resolutionsFilename)
+        {
+            if (!this.CheckProgress(progressString, out FabricUpgradeProgress progress))
+            {
+                return progress;
+            }
+
+            string detailsIfFail = null;
+            try
+            {
+                detailsIfFail = $"Failed to load resolutions file '{resolutionsFilename}'.";
+                string resolutionsFileData = File.ReadAllText(resolutionsFilename);
+
+                detailsIfFail = $"Failed to parse contents of '{resolutionsFilename}'.";
+                List<FabricUpgradeResolution> newResolutions = JsonConvert.DeserializeObject<List<FabricUpgradeResolution>>(resolutionsFileData);
+
+                List<FabricUpgradeResolution> resolutions = newResolutions;
+                resolutions.AddRange(progress.Resolutions);
+
+                return new FabricUpgradeProgress()
+                {
+                    State = FabricUpgradeProgress.FabricUpgradeState.Succeeded,
+                    Alerts = this.alerts.ToList(),
+                    Result = progress.Result,
+                    Resolutions = resolutions,
+                };
+            }
+            catch (Exception)
+            {
+                return new FabricUpgradeProgress()
+                {
+                    State = FabricUpgradeProgress.FabricUpgradeState.Failed,
+                }
+                .WithAlert(
+                    new FabricUpgradeAlert()
+                    {
+                        Severity = FabricUpgradeAlert.AlertSeverity.Permanent,
+                        Details = detailsIfFail,
+                    });
+            }
+        }
+
+        /// <summary>
+        /// Prepend one resolutions to the resolutions we already have.
+        /// </summary>
+        /// <remarks>
+        /// Newer resolutions will take precendence over older resolutions.
+        /// </remarks>
+        /// <param name="progressString">The progress sent by the client.</param>
+        /// <param name="resolution">The resolution to add.</param>
+        /// <returns>A FabricUpgradeProgress that includes the new resolution.</returns>
+        public FabricUpgradeProgress AddFabricResolution(
+            string progressString,
+            string resolution)
+        {
+            if (!this.CheckProgress(progressString, out FabricUpgradeProgress progress))
+            {
+                return progress;
+            }
+
+            FabricUpgradeResolution newResolution = JsonConvert.DeserializeObject<FabricUpgradeResolution>(resolution);
+            // TODO: Handle parsing error
+
+            progress.Resolutions.Add(newResolution);
+
+            return progress;
+        }
+
+        /// <summary>
+        /// Export the Fabric Resources by following the instructions in the progress.
+        /// </summary>
+        /// <param name="progressString">The progress sent by the client.</param>
+        /// <param name="cluster">The cluster (aka region) of the user's workspace.</param>
+        /// <param name="workspaceId">The ID of the user's workspace.</param>
+        /// <param name="fabricToken">The PowerBI AAD token to authenticate/authorize access to the workspace.</param>
+        /// <param name="cancellationToken"/>
+        /// <returns>A FabricUpgradeProgress that describes the created/updated resources.</returns>
+        public async Task<FabricUpgradeProgress> ExportFabricResourcesAsync(
+            string progressString,
+            string cluster,
+            string workspaceId,
+            string fabricToken,
+            CancellationToken cancellationToken)
+        {
+            if (!this.CheckProgress(progressString, out FabricUpgradeProgress progress))
+            {
+                return progress;
+            }
+
+            if (!progress.Result.ContainsKey(FabricUpgradeProgress.ExportableFabricResourcesKey))
+            {
+                this.alerts.AddPermanentError("Export-FabricResources expects exportable Fabric resources.");
+                return new FabricUpgradeProgress()
+                {
+                    State = FabricUpgradeProgress.FabricUpgradeState.Failed,
+                    Alerts = this.alerts.ToList(),
+                };
+            }
+
+            FabricExportMachine machine = new FabricExportMachine(
+                    progress.Result,
+                    cluster,
+                    workspaceId,
+                    fabricToken,
+                    progress.Resolutions,
+                    this.alerts);
+
+            return await machine.ExportAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+        private bool CheckProgress(
+            string previousResponse,
+            out FabricUpgradeProgress currentProgress)
+        {
+            try
+            {
+                FabricUpgradeProgress previousProgress = FabricUpgradeProgress.FromString(previousResponse);
+
+                foreach (FabricUpgradeAlert alert in previousProgress.Alerts)
+                {
+                    this.alerts.AddAlert(alert);
+                }
+
+                currentProgress = previousProgress;
+                return currentProgress.State == FabricUpgradeProgress.FabricUpgradeState.Succeeded;
+            }
+            catch (Newtonsoft.Json.JsonException)
+            {
+                this.alerts.AddPermanentError("Input is not a valid JSON string.");
+
+                currentProgress = new FabricUpgradeProgress()
+                {
+                    State = FabricUpgradeProgress.FabricUpgradeState.Failed,
+                    Alerts = this.alerts.ToList(),
+                };
+
+                return false;
+            }
+        }
+    }
+}
