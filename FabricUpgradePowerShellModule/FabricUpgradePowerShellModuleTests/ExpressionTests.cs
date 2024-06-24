@@ -3,11 +3,11 @@
 // </copyright>
 
 using FabricUpgradePowerShellModule.Utilities;
-using FabricUpgradeTests.Utilities;
+using FabricUpgradePowerShellModuleTests.Utilities;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace FabricUpgradeTests
+namespace FabricUpgradePowerShellModuleTests
 {
     [TestClass]
     public class ExpressionTests

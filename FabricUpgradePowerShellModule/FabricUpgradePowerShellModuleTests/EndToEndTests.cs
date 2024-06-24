@@ -5,12 +5,12 @@
 using FabricUpgradePowerShellModule;
 using FabricUpgradePowerShellModule.Models;
 using FabricUpgradePowerShellModule.Utilities;
-using FabricUpgradeTests.Utilities;
-using FabricUpgradeTests.TestConfigModels;
+using FabricUpgradePowerShellModuleTests.Utilities;
+using FabricUpgradePowerShellModuleTests.TestConfigModels;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 
-namespace FabricUpgradeTests
+namespace FabricUpgradePowerShellModuleTests
 {
     [TestClass]
     public class EndToEndTests

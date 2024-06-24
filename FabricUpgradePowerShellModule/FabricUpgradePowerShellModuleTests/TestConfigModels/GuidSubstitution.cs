@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace FabricUpgradeTests.TestConfigModels
+namespace FabricUpgradePowerShellModuleTests.TestConfigModels
 {
     /// <summary>
     /// A description of how to update the expectedItems field to match

@@ -5,7 +5,7 @@
 using FabricUpgradePowerShellModule;
 using FabricUpgradePowerShellModule.Utilities;
 
-namespace FabricUpgradeTests.Utilities
+namespace FabricUpgradePowerShellModuleTests.Utilities
 {
     internal class TestHttpClientFactory : IHttpClientFactory
     {

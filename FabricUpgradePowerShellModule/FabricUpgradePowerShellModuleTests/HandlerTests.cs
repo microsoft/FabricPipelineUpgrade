@@ -4,13 +4,13 @@
 
 using FabricUpgradePowerShellModule;
 using FabricUpgradePowerShellModule.Models;
-using FabricUpgradeTests.Utilities;
-using FabricUpgradeTests.TestConfigModels;
+using FabricUpgradePowerShellModuleTests.Utilities;
+using FabricUpgradePowerShellModuleTests.TestConfigModels;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Microsoft.ApplicationInsights.DataContracts;
 
-namespace FabricUpgradeTests
+namespace FabricUpgradePowerShellModuleTests
 {
     [TestClass]
     public class HandlerTests
