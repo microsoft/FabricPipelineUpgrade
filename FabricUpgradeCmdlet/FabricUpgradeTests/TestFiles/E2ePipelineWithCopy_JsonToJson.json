@@ -12,13 +12,6 @@
   "expectedResponse": {
     "state": "Succeeded",
     "alerts": [],
-    "resolutions": [
-      {
-        "type": "LinkedServiceToConnectionId",
-        "key": "ArmtemplateStorageLinkedService",
-        "value": "d1fcfcfa-0b8c-469d-af92-5dcb300c8e6e"
-      }
-    ],
     "result": {
       "exportedFabricResources": {
         "ArmtemplateStorageLinkedService": {

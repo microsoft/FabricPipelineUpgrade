@@ -20,14 +20,8 @@ namespace FabricUpgradeCmdlet
             // exportResolves, exportLinks, and exportInstructions
             // that are passed to Export-FabricResources.
 
-            // The exportResolves tell the Exporter which properties to extract from the Resolutions
-            // and insert into the FabricResource.
-            public const string ExportResolves = "exportResolves";
-
-            // The exportLinks tell the Exporter to find the FabricResource ID from another exported
-            // Fabric Resource, and insert that ID into the Resource we are currently exporting.
-            // (Note: this is why we need to sort the FabricResources before we start Exporting them).
-            public const string ExportLinks = "exportLinks";
+            // The exportResolves tell the Exporter which properties to insert into the FabricResource.
+            public const string ExportResolveSteps = "exportResolveSteps";
 
             // The "exportFabricResource" tells the Exporter what to send to Create/Update Item.
             public const string ExportInstructions = "exportInstructions";

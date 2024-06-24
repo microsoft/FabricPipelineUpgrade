@@ -107,25 +107,28 @@
         {
           "resourceName": "CopyPipeline",
           "resourceType": "DataPipeline",
-          "link": [
+          "resolve": [
             {
-              "from": "Connection:AzureBlobStorage1",
+              "type": "AdfResourceNameToFabricResourceId",
+              "key": "Connection:AzureBlobStorage1",
               "targetPath": "properties.activities[0].typeProperties.source.datasetSettings.externalReferences.connection"
             },
             {
-              "from": "Connection:AzureBlobStorage2",
+              "type": "AdfResourceNameToFabricResourceId",
+              "key": "Connection:AzureBlobStorage2",
               "targetPath": "properties.activities[0].typeProperties.sink.datasetSettings.externalReferences.connection"
             },
             {
-              "from": "Connection:AzureBlobStorage3",
+              "type": "AdfResourceNameToFabricResourceId",
+              "key": "Connection:AzureBlobStorage3",
               "targetPath": "properties.activities[0].typeProperties.stagingSettings.externalReferences.connection"
             },
             {
-              "from": "Connection:ArmtemplateStorageLinkedService",
+              "type": "AdfResourceNameToFabricResourceId",
+              "key": "Connection:ArmtemplateStorageLinkedService",
               "targetPath": "properties.activities[0].typeProperties.logSettings.logLocationSettings.externalReferences.connection"
             }
           ],
-          "resolve": [],
           "export": {
             "name": "CopyPipeline",
             "properties": {

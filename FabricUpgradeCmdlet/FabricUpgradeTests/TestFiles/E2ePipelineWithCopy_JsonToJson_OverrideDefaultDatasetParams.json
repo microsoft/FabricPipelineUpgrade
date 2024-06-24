@@ -17,13 +17,6 @@
   "expectedResponse": {
     "state": "Succeeded",
     "alerts": [],
-    "resolutions": [
-      {
-        "type": "LinkedServiceToConnectionId",
-        "key": "AzureBlobStorage2",
-        "value": "aa090a13-26a9-47f5-91f6-a8edc0c3e452"
-      }
-    ],
     "result": {
       "exportedFabricResources": {
         "AzureBlobStorage2": {

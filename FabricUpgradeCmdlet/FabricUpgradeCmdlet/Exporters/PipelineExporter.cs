@@ -32,8 +32,15 @@ namespace FabricUpgradeCmdlet.Exporters
 
             // This DataPipeline (technically, its Activities) may need to resolve certain
             // connection IDs. If it cannot, then fail!
-            foreach (FabricExportResolve resolve in this.exportInstruction.Resolves)
+            foreach (FabricExportResolveStep resolve in this.exportInstruction.Resolves)
             {
+                if (resolve.Type == FabricUpgradeResolution.ResolutionType.AdfResourceNameToFabricResourceId)
+                {
+                    // We do not expect this resolution to exist yet.
+                    // This resolution is created when the "from" Fabric Resource is exported.
+                    continue;
+                }
+
                 var resolution = this.Machine.Resolve(resolve.Type, resolve.Key, alerts);
                 if (resolution == null)
                 {
@@ -53,8 +60,7 @@ namespace FabricUpgradeCmdlet.Exporters
             AlertCollector alerts,
             CancellationToken cancellationToken)
         {
-            this.ResolveLinks(alerts);
-            this.ResolveResolutions(alerts);
+            this.ExecuteResolveSteps(alerts);
 
             try
             {
@@ -75,33 +81,23 @@ namespace FabricUpgradeCmdlet.Exporters
             }
         }
 
-        /// <summary>
-        /// Find the IDs of the Fabric Resources that this Pipeline references.
+         /// <summary>
+        /// Find the Resource IDs of other Fabric Resources, and insert them into the 
+        /// export payload before Creating/Updating this Fabric Resource.
         /// </summary>
         /// <remarks>
-        /// The Execute/InvokePipeline Activity needs the ID of another Pipeline.
-        /// All sorts of Activities need the ID of a Connection.
-        /// </remarks>
-        /// <param name="alerts">Add any generated alerts to this collector.</param>
-        private void ResolveLinks(AlertCollector alerts)
-        {
-            foreach (FabricExportLink link in this.exportInstruction.Links)
-            {
-                JToken value = this.Machine.Link(link.From, alerts);
-                this.exportInstruction.Export.SelectToken(link.TargetPath).Replace(value);
-            }
-        }
-
-        /// <summary>
-        /// Find the IDs of the Connections that this Pipeline references.
-        /// </summary>
-        /// <remarks>
+        /// The Execute/Invoke Pipeline references another Pipeline, so that reference needs to 
+        /// be resolved, _after_ that other Pipeline has been Created/Updated.
+        ///
+        /// A CopyActivity (e.g.) references Dataset(s), which reference LinkedServices, to the
+        /// Pipeline needs to find the FabricResourceID of the corresponding Fabric Connection.
+        ///
         /// The Web Activity directly references a Connection, so that reference needs to be resolved.
         /// </remarks>
         /// <param name="alerts">Add any generated alerts to this collector.</param>
-        private void ResolveResolutions(AlertCollector alerts)
+        private void ExecuteResolveSteps(AlertCollector alerts)
         {
-            foreach (FabricExportResolve resolve in this.exportInstruction.Resolves)
+            foreach (FabricExportResolveStep resolve in this.exportInstruction.Resolves)
             {
                 var resolution = this.Machine.Resolve(resolve.Type, resolve.Key, alerts);
                 this.exportInstruction.Export.SelectToken(resolve.TargetPath).Replace(resolution);

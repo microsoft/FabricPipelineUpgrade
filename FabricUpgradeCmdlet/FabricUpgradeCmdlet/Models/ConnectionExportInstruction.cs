@@ -16,10 +16,10 @@ namespace FabricUpgradeCmdlet.Models
     /// </remarks>
     public class ConnectionExportInstruction : FabricExportInstruction
     {
-        // These Resolves describe which properties in the generated Resource should be set to the GUID
+        // Each ResolveStep describes a property in the generated Resource should be set to the GUID
         // of a Fabric Connection that was manually created.
         [JsonProperty(PropertyName = "resolve", Order = 100)]
-        public List<FabricExportResolve> Resolves { get; set; } = new List<FabricExportResolve>();
+        public List<FabricExportResolveStep> Resolves { get; set; } = new List<FabricExportResolveStep>();
 
         // This object describes the connection that we will "pretend" to export.
         // It also contains connection "hints" just in case the Resolutions do not contain this connection.

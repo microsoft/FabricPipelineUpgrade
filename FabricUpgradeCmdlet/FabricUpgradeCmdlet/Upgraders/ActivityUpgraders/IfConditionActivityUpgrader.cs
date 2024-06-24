@@ -53,19 +53,14 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
         }
 
         /// <inheritdoc/>
-        public override Symbol ResolveExportedSymbol(
+        public override Symbol EvaluateSymbol(
             string symbolName,
             Dictionary<string, JToken> parameters,
             AlertCollector alerts)
         {
-            if (symbolName == Symbol.CommonNames.ExportLinks)
+            if (symbolName == Symbol.CommonNames.ExportResolveSteps)
             {
-                return this.BuildExportLinksSymbol(parameters, alerts);
-            }
-
-            if (symbolName == Symbol.CommonNames.ExportResolves)
-            {
-                return this.BuildExportResolvesSymbol(parameters, alerts);
+                return this.BuildExportResolveStepsSymbol(parameters, alerts);
             }
 
             if (symbolName == Symbol.CommonNames.Activity)
@@ -73,7 +68,7 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
                 return this.BuildActivitySymbol(parameters, alerts);
             }
 
-            return base.ResolveExportedSymbol(symbolName, parameters, alerts);
+            return base.EvaluateSymbol(symbolName, parameters, alerts);
         }
 
         private List<Upgrader> CompileSubActivities(
@@ -99,27 +94,14 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
         }
 
         /// <inheritdoc/>
-        protected override Symbol BuildExportLinksSymbol(
+        protected override Symbol BuildExportResolveStepsSymbol(
             Dictionary<string, JToken> parameters,
             AlertCollector alerts)
         {
-            List<FabricExportLink> links = new List<FabricExportLink>();
+            List<FabricExportResolveStep> resolves = new List<FabricExportResolveStep>();
 
-            this.CollectSubActivityExportLinks(this.subActivityUpgraders["false"], "ifFalseActivities", links, alerts);
-            this.CollectSubActivityExportLinks(this.subActivityUpgraders["true"], "ifTrueActivities", links, alerts);
-
-            return Symbol.ReadySymbol(JArray.Parse(UpgradeSerialization.Serialize(links)));
-        }
-
-        /// <inheritdoc/>
-        protected override Symbol BuildExportResolvesSymbol(
-            Dictionary<string, JToken> parameters,
-            AlertCollector alerts)
-        {
-            List<FabricExportResolve> resolves = new List<FabricExportResolve>();
-
-            this.CollectSubActivityExportResolves(this.subActivityUpgraders["false"], "ifFalseActivities", resolves, alerts);
-            this.CollectSubActivityExportResolves(this.subActivityUpgraders["true"], "ifTrueActivities", resolves, alerts);
+            this.CollectSubActivityExportResolveSteps(this.subActivityUpgraders["false"], "ifFalseActivities", resolves, alerts);
+            this.CollectSubActivityExportResolveSteps(this.subActivityUpgraders["true"], "ifTrueActivities", resolves, alerts);
 
             return Symbol.ReadySymbol(JArray.Parse(UpgradeSerialization.Serialize(resolves)));
         }
@@ -129,7 +111,7 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
             Dictionary<string, JToken> parameters,
             AlertCollector alerts)
         {
-            Symbol activitySymbol = base.ResolveExportedSymbol(Symbol.CommonNames.Activity, parameters, alerts);
+            Symbol activitySymbol = base.EvaluateSymbol(Symbol.CommonNames.Activity, parameters, alerts);
 
             if (activitySymbol.State != Symbol.SymbolState.Ready)
             {

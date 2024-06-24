@@ -25,14 +25,7 @@
           "id": 0
         }
       }
-    },
-    "resolutions": [
-      {
-        "type": "LinkedServiceToConnectionId",
-        "key": "AzureSqlDatabase1",
-        "value": "4ceb8bb8-8506-42cf-856c-55aaa4a3452b"
-      }
-    ]
+    }
   },
 
   "expectedItems": [

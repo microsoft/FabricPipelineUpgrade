@@ -85,7 +85,7 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
         }
 
         // <inheritdoc/>
-        public override Symbol ResolveExportedSymbol(
+        public override Symbol EvaluateSymbol(
             string symbolName,
             Dictionary<string, JToken> parameters,
             AlertCollector alerts)
@@ -98,7 +98,7 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
                 return this.BuildCommonActivitySymbol(alerts);
             }
 
-            return base.ResolveExportedSymbol(symbolName, parameters, alerts);
+            return base.EvaluateSymbol(symbolName, parameters, alerts);
         }
 
         /// <summary>
@@ -128,37 +128,19 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
         }
 
         /// <summary>
-        /// Build the ExportLinks Symbol whose value will be included in this Activity's Pipeline's ExportLinks.
+        /// Build the ExportResolves Symbol whose value will be included in this Activity's Pipeline's ExportResolveSteps.
         /// </summary>
         /// <remarks>
         /// Before this Activity's Pipeline can be exported, we need to populate the IDs of 
-        /// the other Fabric Resources referenced by this Activity (see ExportPipeline).
-        /// Collect those rquirements now so that the Pipeline can fill out its exportResolves field.
+        /// this Activities dependencies (Connections used by this Activity's Datasets, or
+        /// other Pipelines).
+        /// Collect these dependencies now so that the Pipeline can fill out its 'resolve' field.
         /// </remarks>
-        /// <param name="parameters">The parameters from the caller.</param>
+        /// <param name="parametersFromCaller">The parameters from the caller.</param>
         /// <param name="alerts">Add any generated alerts to this collector.</param>
-        /// <returns>The ExportLinks Symbol whose value is added to the Pipeline's ExportLinks.</returns>
-        protected virtual Symbol BuildExportLinksSymbol(
-            Dictionary<string, JToken> parameters,
-            AlertCollector alerts)
-        {
-            // For Activities with no ExportLinks, return null.
-            return Symbol.ReadySymbol(null);
-        }
-
-        /// <summary>
-        /// Build the ExportResolves Symbol whose value will be included in this Activity's Pipeline's ExportResolves.
-        /// </summary>
-        /// <remarks>
-        /// Before this Activity's Pipeline can be exported, we need to populate the IDs of 
-        /// the Fabric Connections used by this Activity's Datasets. Collect them now so that
-        /// the Pipeline can fill out its exportLinks field.
-        /// </remarks>
-        /// <param name="parameters">The parameters from the caller.</param>
-        /// <param name="alerts">Add any generated alerts to this collector.</param>
-        /// <returns>The ExportLinks Symbol whose value is added to the Pipeline's ExportResolves.</returns>
-        protected virtual Symbol BuildExportResolvesSymbol(
-            Dictionary<string, JToken> parameters,
+        /// <returns>The ExportResolveSteps Symbol whose value is added to the Pipeline's ExportResolveSteps.</returns>
+        protected virtual Symbol BuildExportResolveStepsSymbol(
+            Dictionary<string, JToken> parametersFromCaller,
             AlertCollector alerts)
         {
             // For Activities with no ExportResolves, return null.

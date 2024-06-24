@@ -72,7 +72,7 @@ namespace FabricUpgradeCmdlet.Upgraders
         }
 
         /// <inheritdoc/>
-        public override Symbol ResolveExportedSymbol(
+        public override Symbol EvaluateSymbol(
             string symbolName,
             Dictionary<string, JToken> parameters,
             AlertCollector alerts)
@@ -80,8 +80,6 @@ namespace FabricUpgradeCmdlet.Upgraders
             if (symbolName == Symbol.CommonNames.ExportInstructions)
             {
                 PipelineExportInstruction exportInstruction = new PipelineExportInstruction(this.Name, this.adfModel.Description);
-
-                this.CollectActivityExportLinks(exportInstruction, alerts);
 
                 this.CollectActivityExportResolves(exportInstruction, alerts);
 
@@ -104,39 +102,7 @@ namespace FabricUpgradeCmdlet.Upgraders
                 return Symbol.ReadySymbol(exportInstruction.ToJObject());
             }
 
-            return base.ResolveExportedSymbol(symbolName, parameters, alerts);
-        }
-
-        /// <summary>
-        /// Collect the ExportLinks from all of the Activities and add them to this Pipeline's ExportLinks.
-        /// </summary>
-        /// <param name="exportInstruction">Where to put the ExportLinks.</param>
-        /// <param name="alerts">Add any generated alerts to this collector.</param>
-        private void CollectActivityExportLinks(
-            PipelineExportInstruction exportInstruction,
-            AlertCollector alerts)
-        {
-            int nActivity = 0;
-            foreach (Upgrader activityUpgrader in this.activityUpgraders)
-            {
-                Symbol resolutionSymbol = activityUpgrader.ResolveExportedSymbol(Symbol.CommonNames.ExportLinks, alerts);
-                if (resolutionSymbol.State != Symbol.SymbolState.Ready)
-                {
-                    // TODO!
-                }
-
-                if (resolutionSymbol.Value != null)
-                {
-                    foreach (JToken requiredLink in (JArray)resolutionSymbol.Value)
-                    {
-                        FabricExportLink link = FabricExportLink.FromJToken(requiredLink);
-                        link.TargetPath = $"properties.activities[{nActivity}].{link.TargetPath}";
-                        exportInstruction.Links.Add(link);
-                    }
-                }
-
-                nActivity++;
-            }
+            return base.EvaluateSymbol(symbolName, parameters, alerts);
         }
 
         /// <summary>
@@ -151,7 +117,7 @@ namespace FabricUpgradeCmdlet.Upgraders
             int nActivity = 0;
             foreach (Upgrader activityUpgrader in this.activityUpgraders)
             {
-                Symbol resolutionSymbol = activityUpgrader.ResolveExportedSymbol(Symbol.CommonNames.ExportResolves, alerts);
+                Symbol resolutionSymbol = activityUpgrader.EvaluateSymbol(Symbol.CommonNames.ExportResolveSteps, alerts);
                 if (resolutionSymbol.State != Symbol.SymbolState.Ready)
                 {
                     // TODO!
@@ -161,7 +127,7 @@ namespace FabricUpgradeCmdlet.Upgraders
                 {
                     foreach (JToken requiredResolution in (JArray)resolutionSymbol.Value)
                     {
-                        FabricExportResolve resolve = FabricExportResolve.FromJToken(requiredResolution);
+                        FabricExportResolveStep resolve = FabricExportResolveStep.FromJToken(requiredResolution);
                         resolve.TargetPath = $"properties.activities[{nActivity}].{resolve.TargetPath}";
                         exportInstruction.Resolves.Add(resolve);
                     }
@@ -182,7 +148,7 @@ namespace FabricUpgradeCmdlet.Upgraders
         {
             foreach (Upgrader activityUpgrader in this.activityUpgraders)
             {
-                Symbol activitySymbol = activityUpgrader.ResolveExportedSymbol(Symbol.CommonNames.Activity, alerts);
+                Symbol activitySymbol = activityUpgrader.EvaluateSymbol(Symbol.CommonNames.Activity, alerts);
                 if (activitySymbol.State != Symbol.SymbolState.Ready)
                 {
                     // TODO!

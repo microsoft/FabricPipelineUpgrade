@@ -35,17 +35,18 @@
         {
           "resourceName": "CopyPipelineSqltoSql7",
           "resourceType": "DataPipeline",
-          "link": [
+          "resolve": [
             {
-              "from": "Connection:rodenkewsql",
+              "type": "AdfResourceNameToFabricResourceId",
+              "key": "Connection:rodenkewsql",
               "targetPath": "properties.activities[0].typeProperties.source.datasetSettings.externalReferences.connection"
             },
             {
-              "from": "Connection:rodenkewsql",
+              "type": "AdfResourceNameToFabricResourceId",
+              "key": "Connection:rodenkewsql",
               "targetPath": "properties.activities[0].typeProperties.sink.datasetSettings.externalReferences.connection"
             }
           ],
-          "resolve": [],
           "export": {
             "name": "CopyPipelineSqltoSql7",
             "properties": {

@@ -48,8 +48,14 @@ namespace FabricUpgradeCmdlet.ExportMachines
 
         /// <summary>
         /// Find the manually constructed Resolution that matches what an Exporter needs to
-        /// populate its "connection ID" field(s).
+        /// populate those field(s) that it cannot populate until the Export phase.
         /// </summary>
+        /// <remarks>
+        /// These fields include the Fabric Resource IDs of a Connection, which must (currently)
+        /// be specified manually by the user.
+        /// These fields include the Fabric Resource IDs of other Pipelines, which we do not know
+        /// until we Create/Update those Pipelines.
+        /// </remarks>
         /// <param name="type">The Type of resolution to find.</param>
         /// <param name="key">The Key ('name') of the resolution to find.</param>
         /// <param name="alerts">Add any generated alerts to this collector.</param>
@@ -59,34 +65,16 @@ namespace FabricUpgradeCmdlet.ExportMachines
             string key,
             AlertCollector alerts)
         {
+            if (type == FabricUpgradeResolution.ResolutionType.WorkspaceId)
+            {
+                return this.WorkspaceId;
+            }
+
             FabricUpgradeResolution matchingResolution = this.Resolutions
                 .Where(r => r.Type == type && r.Key == key)
                 .FirstOrDefault();
 
-            if (matchingResolution == null)
-            {
-                return null;
-            }
-
-            return matchingResolution.Value;
-        }
-
-        /// <summary>
-        /// Find and return the ID of a previously exported Fabric Resource.
-        /// If key is '$workspace', then return the workspace ID.
-        /// </summary>
-        /// <remarks>
-        /// The Execute/InvokePipeline Activity needs the ID of a previously exported Pipeline.
-        /// All sorts of Activities need the ID of a Connection (which we _pretend_ to export!).
-        /// </remarks>
-        /// <param name="key">The (display) name of the Fabric Resource (or $workspace).</param>
-        /// <param name="alerts">Add any generated alerts to this collector.</param>
-        /// <returns>The corresponding ID.</returns>
-        public virtual JToken Link(
-            string key,
-            AlertCollector alerts)
-        {
-            return string.Empty;
+            return matchingResolution?.Value;
         }
     }
 }

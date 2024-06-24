@@ -13,14 +13,14 @@ namespace FabricUpgradeCmdlet.Exporters
     /// This class creates/updates a Connection Item.
     /// </summary>
     /// <remarks>
-    /// This is a little complicated, but bear with me for a little while.
+    /// This is a little complicated, so bear with me for a little while.
     /// 
     /// This class does not _actually_ create or update a Fabric Connection Item.
     /// That capability did not exist when this code was written.
     /// (Or, if it did exist, this capability was very very new, and not quite ready).
     /// 
     /// Therefore, we just _pretend_ to create the Connection.
-    /// What we are _really_ doing is getting the Resolution from the client and
+    /// What we are _really_ doing is getting a Resolution from the client and
     /// setting the Fabric Resource ID for this Item to what we find in the Resolution.
     /// This way, the Pipeline, etc., can act as though this Connection was created and
     /// has a Fabric Resource ID.
@@ -48,7 +48,7 @@ namespace FabricUpgradeCmdlet.Exporters
             base.CheckBeforeExports(alerts);
 
             // Make sure that this Connection has a Resolution from the client.
-            foreach (FabricExportResolve resolve in this.exportInstruction.Resolves)
+            foreach (FabricExportResolveStep resolve in this.exportInstruction.Resolves)
             {
                 var resolution = this.Machine.Resolve(resolve.Type, resolve.Key, alerts);
                 if (resolution == null)
@@ -78,12 +78,12 @@ namespace FabricUpgradeCmdlet.Exporters
         }
 
         /// <summary>
-        /// Find the IDs of the Connection that this Connection references.
+        /// Find the ID of the Connection that this Connection references.
         /// </summary>
         /// <param name="alerts">Add any generated alerts to this collector.</param>
         private void ResolveResolutions(AlertCollector alerts)
         {
-            foreach (FabricExportResolve resolve in this.exportInstruction.Resolves)
+            foreach (FabricExportResolveStep resolve in this.exportInstruction.Resolves)
             {
                 var resolution = this.Machine.Resolve(resolve.Type, resolve.Key, alerts);
                 this.exportInstruction.Export.SelectToken(resolve.TargetPath).Replace(resolution);

@@ -37,28 +37,6 @@
   "expectedResponse": {
     "state": "Succeeded",
     "alerts": [],
-    "resolutions": [
-      {
-        "type": "LinkedServiceToConnectionId",
-        "key": "rodenkewsql",
-        "value": "0f1083d3-8b19-44a2-bd3b-26a7e82ebe51"
-      },
-      {
-        "type": "LinkedServiceToConnectionId",
-        "key": "AzureBlobStorage2",
-        "value": "36b22d4d-9f24-423c-a7c1-58765809e6dc"
-      },
-      {
-        "type": "LinkedServiceToConnectionId",
-        "key": "AzureBlobStorage3",
-        "value": "77cd8131-e33b-4888-a51a-4a35c30e0858"
-      },
-      {
-        "type": "LinkedServiceToConnectionId",
-        "key": "ArmtemplateStorageLinkedService",
-        "value": "a10b2808-2356-4fa6-92b7-fccc540006ef"
-      }
-    ],
     "result": {
       "exportedFabricResources": {
         "rodenkewsql": {
