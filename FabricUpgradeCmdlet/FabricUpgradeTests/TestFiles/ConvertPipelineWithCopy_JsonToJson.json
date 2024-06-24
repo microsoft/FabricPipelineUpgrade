@@ -34,17 +34,18 @@
         {
           "resourceName": "PipelineWithCopy_JsonToJson",
           "resourceType": "DataPipeline",
-          "link": [
+          "resolve": [
             {
-              "from": "Connection:ArmtemplateStorageLinkedService",
+              "type": "AdfResourceNameToFabricResourceId",
+              "key": "Connection:ArmtemplateStorageLinkedService",
               "targetPath": "properties.activities[0].typeProperties.source.datasetSettings.externalReferences.connection"
             },
             {
-              "from": "Connection:ArmtemplateStorageLinkedService",
+              "type": "AdfResourceNameToFabricResourceId",
+              "key": "Connection:ArmtemplateStorageLinkedService",
               "targetPath": "properties.activities[0].typeProperties.sink.datasetSettings.externalReferences.connection"
             }
           ],
-          "resolve": [],
           "export": {
             "name": "PipelineWithCopy_JsonToJson",
             "properties": {

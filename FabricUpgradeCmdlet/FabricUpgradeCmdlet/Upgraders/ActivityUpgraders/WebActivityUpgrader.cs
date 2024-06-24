@@ -56,29 +56,29 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
         }
 
         /// <inheritdoc/>
-        public override Symbol ResolveExportedSymbol(
+        public override Symbol EvaluateSymbol(
             string symbolName,
             Dictionary<string, JToken> parameters,
             AlertCollector alerts)
         {
-            if (symbolName == Symbol.CommonNames.ExportResolves)
+            if (symbolName == Symbol.CommonNames.ExportResolveSteps)
             {
-                return this.BuildExportResolvesSymbol(parameters, alerts);
+                return this.BuildExportResolveStepsSymbol(parameters, alerts);
             }
             if (symbolName == Symbol.CommonNames.Activity)
             {
                 return this.BuildActivitySymbol(parameters, alerts);
             }
 
-            return base.ResolveExportedSymbol(symbolName, parameters, alerts);
+            return base.EvaluateSymbol(symbolName, parameters, alerts);
         }
 
         /// <inheritdoc/>
-        protected override Symbol BuildExportResolvesSymbol(
+        protected override Symbol BuildExportResolveStepsSymbol(
             Dictionary<string, JToken> parameters,
             AlertCollector alerts)
         {
-            List<FabricExportResolve> resolves = new List<FabricExportResolve>();
+            List<FabricExportResolveStep> resolves = new List<FabricExportResolveStep>();
 
             // The ADF WebActivity directly declares its URL, but the Fabric WebActivity uses a Connection instead.
             // Therefore, the client must provide a UrlHostToConnectionId Resolution to help us out.
@@ -86,7 +86,7 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
             (string hostName, _) = this.ProcessUrl();
 
             FabricUpgradeResolution.ResolutionType resolutionType = FabricUpgradeResolution.ResolutionType.UrlHostToConnectionId;
-            FabricExportResolve userCredentialConnectionResolve = new FabricExportResolve(
+            FabricExportResolveStep userCredentialConnectionResolve = new FabricExportResolveStep(
                 resolutionType,
                 hostName,
                 "externalReferences.connection")
@@ -114,7 +114,7 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
             Dictionary<string, JToken> parameters,
             AlertCollector alerts)
         {
-            Symbol activitySymbol = base.ResolveExportedSymbol(Symbol.CommonNames.Activity, parameters, alerts);
+            Symbol activitySymbol = base.EvaluateSymbol(Symbol.CommonNames.Activity, parameters, alerts);
 
             if (activitySymbol.State != Symbol.SymbolState.Ready)
             {

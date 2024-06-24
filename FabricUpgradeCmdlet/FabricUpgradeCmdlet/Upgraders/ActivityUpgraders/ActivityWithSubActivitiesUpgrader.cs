@@ -49,58 +49,22 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
         }
 
         /// <summary>
-        /// Ask each of the subactivities in a group for its exportLinks symbol.
-        /// </summary>
-        /// <param name="upgraders">The Upgraders to query.</param>
-        /// <param name="activityGroup">The JSON path to this group of subactivities.</param>
-        /// <param name="links">Put the gathered exportLinks here.</param>
-        /// <param name="alerts">Add any generated alerts to this collector.</param>
-        protected void CollectSubActivityExportLinks(
-            List<Upgrader> upgraders,
-            string activityGroup,
-            List<FabricExportLink> links,
-            AlertCollector alerts)
-        {
-            int nActivity = 0;
-            foreach (Upgrader activityUpgrader in upgraders)
-            {
-                Symbol resolutionSymbol = activityUpgrader.ResolveExportedSymbol(Symbol.CommonNames.ExportLinks, alerts);
-                if (resolutionSymbol.State != Symbol.SymbolState.Ready)
-                {
-                    // TODO!
-                }
-
-                if (resolutionSymbol.Value != null)
-                {
-                    foreach (JToken requiredResolution in (JArray)resolutionSymbol.Value)
-                    {
-                        FabricExportLink link = FabricExportLink.FromJToken(requiredResolution);
-                        link.TargetPath = $"typeProperties.{activityGroup}[{nActivity}].{link.TargetPath}";
-                        links.Add(link);
-                    }
-                }
-
-                nActivity++;
-            }
-        }
-
-        /// <summary>
-        /// Ask each of the subactivities in a group for its exportResolves symbol.
+        /// Ask each of the subactivities in a group for its exportResolveSteps symbol.
         /// </summary>
         /// <param name="upgraders">The Upgraders to query.</param>
         /// <param name="activityGroup">The JSON path to this group of subactivities.</param>
         /// <param name="resolves">Put the gathered exportResolves here.</param>
         /// <param name="alerts">Add any generated alerts to this collector.</param>
-        protected void CollectSubActivityExportResolves(
+        protected void CollectSubActivityExportResolveSteps(
             List<Upgrader> upgraders,
             string activityGroup,
-            List<FabricExportResolve> resolves,
+            List<FabricExportResolveStep> resolves,
             AlertCollector alerts)
         {
             int nActivity = 0;
             foreach (Upgrader activityUpgrader in upgraders)
             {
-                Symbol resolutionSymbol = activityUpgrader.ResolveExportedSymbol(Symbol.CommonNames.ExportResolves, alerts);
+                Symbol resolutionSymbol = activityUpgrader.EvaluateSymbol(Symbol.CommonNames.ExportResolveSteps, alerts);
                 if (resolutionSymbol.State != Symbol.SymbolState.Ready)
                 {
                     // TODO!
@@ -110,7 +74,7 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
                 {
                     foreach (JToken requiredResolution in (JArray)resolutionSymbol.Value)
                     {
-                        FabricExportResolve resolve = FabricExportResolve.FromJToken(requiredResolution);
+                        FabricExportResolveStep resolve = FabricExportResolveStep.FromJToken(requiredResolution);
                         resolve.TargetPath = $"typeProperties.{activityGroup}[{nActivity}].{resolve.TargetPath}";
                         resolves.Add(resolve);
                     }
@@ -134,7 +98,7 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
 
             foreach (Upgrader upgrader in upgraders)
             {
-                Symbol subActivitySymbol = upgrader.ResolveExportedSymbol(Symbol.CommonNames.Activity, alerts);
+                Symbol subActivitySymbol = upgrader.EvaluateSymbol(Symbol.CommonNames.Activity, alerts);
                 if (subActivitySymbol.State != Symbol.SymbolState.Ready)
                 {
                     // TODO!

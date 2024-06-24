@@ -71,6 +71,7 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
             base.PreLink(allUpgraders, alerts);
 
             // Find the Upgraders for the ADF Datasets, and mark them as prerequisites.
+            // Each Upgrader, in turn, depends on the LinkedService, so the dependency graph is correctly built.
             // We use that to sort the Upgraders, so that we Export them in the correct order.
 
             this.inputDatasetUpgrader = this.FindOtherUpgrader(
@@ -119,14 +120,14 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
         }
 
         /// <inheritdoc/>
-        public override Symbol ResolveExportedSymbol(
+        public override Symbol EvaluateSymbol(
             string symbolName,
             Dictionary<string, JToken> parameters,
             AlertCollector alerts)
         {
-            if (symbolName == Symbol.CommonNames.ExportLinks)
+            if (symbolName == Symbol.CommonNames.ExportResolveSteps)
             {
-                return this.BuildExportLinksSymbol(parameters, alerts);
+                return this.BuildExportResolveStepsSymbol(parameters, alerts);
             }
 
             if (symbolName == Symbol.CommonNames.Activity)
@@ -134,23 +135,23 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
                 return this.BuildActivitySymbol(parameters, alerts);
             }
 
-            return base.ResolveExportedSymbol(symbolName, parameters, alerts);
+            return base.EvaluateSymbol(symbolName, parameters, alerts);
         }
 
         /// <inheritdoc/>
-        protected override Symbol BuildExportLinksSymbol(
+        protected override Symbol BuildExportResolveStepsSymbol(
             Dictionary<string, JToken> parameters,
             AlertCollector alerts)
         {
-            List<FabricExportLink> links = new List<FabricExportLink>();
+            List<FabricExportResolveStep> resolveSteps = new List<FabricExportResolveStep>();
 
-            this.AddDatasetSettingsConnectionIdLink(links, this.inputDatasetUpgrader, sourceDatasetSettingsPath, alerts);
-            this.AddDatasetSettingsConnectionIdLink(links, this.outputDatasetUpgrader, sinkDatasetSettingsPath, alerts);
+            this.AddDatasetSettingsConnectionIdResolveStep(resolveSteps, this.inputDatasetUpgrader, sourceDatasetSettingsPath, alerts);
+            this.AddDatasetSettingsConnectionIdResolveStep(resolveSteps, this.outputDatasetUpgrader, sinkDatasetSettingsPath, alerts);
 
-            this.AddStagingSettingsLink(links);
-            this.AddLogSettingsLink(links);
+            this.AddStagingSettingsResolveStep(resolveSteps);
+            this.AddLogSettingsResolveStep(resolveSteps);
 
-            return Symbol.ReadySymbol(JArray.Parse(UpgradeSerialization.Serialize(links)));
+            return Symbol.ReadySymbol(JArray.Parse(UpgradeSerialization.Serialize(resolveSteps)));
         }
 
         /// <inheritdoc/>
@@ -158,7 +159,7 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
             Dictionary<string, JToken> parameters,
             AlertCollector alerts)
         {
-            Symbol activitySymbol = base.ResolveExportedSymbol(Symbol.CommonNames.Activity, parameters, alerts);
+            Symbol activitySymbol = base.EvaluateSymbol(Symbol.CommonNames.Activity, parameters, alerts);
 
             if (activitySymbol.State != Symbol.SymbolState.Ready)
             {
@@ -203,41 +204,42 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
         }
 
         /// <summary>
-        /// Ask a Dataset Upgrader to build an ExportLink to its LinkedService.
+        /// Ask a Dataset Upgrader to build a ResolveStep to include its LinkedService.
         /// </summary>
         /// <remarks>
-        /// Since the Dataset is not a Fabric Resource, the Dataset's links become this Activity's links.
-        /// And, of course, this Activity's links will become its Pipeline's links.
+        /// Since the Dataset is not a Fabric Resource, the Dataset's ResolveSteps
+        /// become part of this Activity's ResolveSteps.
+        /// And, of course, this Activity's ResolveSteps will become part of its Pipeline's ResolveSteps.
         /// </remarks>
-        /// <param name="links">Add the Dataset's ExportLinks to this list.</param>
+        /// <param name="resolveSteps">Add the Dataset's ResolveSteps to this list.</param>
         /// <param name="datasetUpgrader">The Upgrader to query.</param>
         /// <param name="targetDatasetSettings">The JSON path to the dataset.</param>
         /// <param name="alerts">Add any generated alerts to this collector.</param>
-        private void AddDatasetSettingsConnectionIdLink(
-            List<FabricExportLink> links,
+        private void AddDatasetSettingsConnectionIdResolveStep(
+            List<FabricExportResolveStep> resolveSteps,
             Upgrader datasetUpgrader,
             string targetDatasetSettings,
             AlertCollector alerts)
         {
-            Symbol datasetLinksSymbol = datasetUpgrader.ResolveExportedSymbol(Symbol.CommonNames.ExportLinks, alerts);
-            if (datasetLinksSymbol.State != Symbol.SymbolState.Ready)
+            Symbol datasetResolveStepsSymbol = datasetUpgrader.EvaluateSymbol(Symbol.CommonNames.ExportResolveSteps, alerts);
+            if (datasetResolveStepsSymbol.State != Symbol.SymbolState.Ready)
             {
                 // TODO!
             }
 
-            if (datasetLinksSymbol.Value != null)
+            if (datasetResolveStepsSymbol.Value != null)
             {
-                foreach (JToken requiredLink in (JArray)datasetLinksSymbol.Value)
+                foreach (JToken requiredLink in (JArray)datasetResolveStepsSymbol.Value)
                 {
-                    FabricExportLink link = FabricExportLink.FromJToken(requiredLink);
-                    link.TargetPath = $"{targetDatasetSettings}.{link.TargetPath}";
-                    links.Add(link);
+                    FabricExportResolveStep resolveStep = FabricExportResolveStep.FromJToken(requiredLink);
+                    resolveStep.TargetPath = $"{targetDatasetSettings}.{resolveStep.TargetPath}";
+                    resolveSteps.Add(resolveStep);
                 }
             }
         }
 
-        private void AddStagingSettingsLink(
-            List<FabricExportLink> links)
+        private void AddStagingSettingsResolveStep(
+            List<FabricExportResolveStep> resolveSteps)
         {
             string linkedServiceName = this.GetStagingSettingsLinkedServiceName();
             if (linkedServiceName == null)
@@ -245,15 +247,15 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
                 return;
             }
 
-            FabricExportLink link = new FabricExportLink(
+            FabricExportResolveStep resolveStep = FabricExportResolveStep.ForResourceId(
                 $"{FabricUpgradeResourceTypes.Connection}:{linkedServiceName}",
                 fabricStagingSettingsConnectionIdPath);
 
-            links.Add(link);
+            resolveSteps.Add(resolveStep);
         }
 
-        private void AddLogSettingsLink(
-            List<FabricExportLink> links)
+        private void AddLogSettingsResolveStep(
+            List<FabricExportResolveStep> resolveSteps)
         {
             string linkedServiceName = this.GetLogSettingsLinkedServiceName();
             if (linkedServiceName == null)
@@ -261,11 +263,11 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
                 return;
             }
 
-            FabricExportLink link = new FabricExportLink(
+            FabricExportResolveStep resolveStep = FabricExportResolveStep.ForResourceId(
                 $"{FabricUpgradeResourceTypes.Connection}:{linkedServiceName}",
                 fabricLogSettingsConnectionIdPath);
 
-            links.Add(link);
+            resolveSteps.Add(resolveStep);
         }
 
         /// <summary>
@@ -288,7 +290,7 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
             JObject parametersObject = (JObject)this.AdfResourceToken.SelectToken($"{datasetPath}[0].parameters") ?? new JObject();
             Dictionary<string, JToken> parameters = parametersObject.ToObject<Dictionary<string, JToken>>();
 
-            Symbol datasetSettingsSymbol = datasetUpgrader.ResolveExportedSymbol(
+            Symbol datasetSettingsSymbol = datasetUpgrader.EvaluateSymbol(
                 Symbol.CommonNames.DatasetSettings,
                 parameters,
                 alerts);

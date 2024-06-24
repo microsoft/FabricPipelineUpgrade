@@ -81,12 +81,12 @@ namespace FabricUpgradeCmdlet.Upgraders.LinkedServiceUpgraders
         }
 
         /// <inheritdoc/>
-        public override Symbol ResolveExportedSymbol(
+        public override Symbol EvaluateSymbol(
             string symbolName,
             Dictionary<string, JToken> parametersFromCaller,
             AlertCollector alerts)
         {
-            if (symbolName == Symbol.CommonNames.ExportResolves)
+            if (symbolName == Symbol.CommonNames.ExportResolveSteps)
             {
                 return this.BuildExportResolves(parametersFromCaller, alerts);
             }
@@ -95,7 +95,7 @@ namespace FabricUpgradeCmdlet.Upgraders.LinkedServiceUpgraders
                 return this.BuildExportInstructions(parametersFromCaller, alerts);
             }
 
-            return base.ResolveExportedSymbol(symbolName, parametersFromCaller, alerts);
+            return base.EvaluateSymbol(symbolName, parametersFromCaller, alerts);
         }
 
         protected virtual void CheckForExpressionsInConnectionString(
@@ -157,10 +157,10 @@ namespace FabricUpgradeCmdlet.Upgraders.LinkedServiceUpgraders
             Dictionary<string, JToken> parametersFromCaller,
             AlertCollector alerts)
         {
-            List<FabricExportResolve> resolves = new List<FabricExportResolve>();
+            List<FabricExportResolveStep> resolves = new List<FabricExportResolveStep>();
 
             FabricUpgradeResolution.ResolutionType resolutionType = FabricUpgradeResolution.ResolutionType.LinkedServiceToConnectionId;
-            FabricExportResolve userCredentialConnectionResolve = new FabricExportResolve(
+            FabricExportResolveStep userCredentialConnectionResolve = new FabricExportResolveStep(
                 resolutionType,
                 this.Name,
                 "id")
@@ -204,7 +204,7 @@ namespace FabricUpgradeCmdlet.Upgraders.LinkedServiceUpgraders
             {
                 foreach (JToken requiredResolution in (JArray)resolvesSymbol.Value)
                 {
-                    FabricExportResolve resolve = FabricExportResolve.FromJToken(requiredResolution);
+                    FabricExportResolveStep resolve = FabricExportResolveStep.FromJToken(requiredResolution);
                     exportInstruction.Resolves.Add(resolve);
                 }
             }
@@ -223,7 +223,7 @@ namespace FabricUpgradeCmdlet.Upgraders.LinkedServiceUpgraders
         /// <param name="pathToProperty">Where in the ADF JSON to find the property.</param>
         /// <param name="activeParameters">The parameters to apply to resolve symbol values.</param>
         /// <param name="alerts">Add any generated alerts to this collector.</param>
-        /// <returns>A Symbol that the LinkedService can return from ResolveExportedSymbol.</returns>
+        /// <returns>A Symbol that the LinkedService can return from EvaluateSymbol.</returns>
         protected Symbol BuildLinkedServiceExportableSymbol(
             string pathToProperty,
             ResourceParameters activeParameters,

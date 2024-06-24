@@ -89,11 +89,11 @@ namespace FabricUpgradeCmdlet.Upgraders
         /// <param name="symbolName">The 'name' of the Symbol to export (see Symbol.CommonNames).</param>
         /// <param name="alerts">Add any generated alerts to this collector.</param>
         /// <returns>A Symbol containing the requested JToken.</returns>
-        public Symbol ResolveExportedSymbol(
+        public Symbol EvaluateSymbol(
             string symbolName,
             AlertCollector alerts)
         {
-            return this.ResolveExportedSymbol(symbolName, null, alerts);
+            return this.EvaluateSymbol(symbolName, null, alerts);
         }
 
         /// <summary>
@@ -107,7 +107,7 @@ namespace FabricUpgradeCmdlet.Upgraders
         /// </param>
         /// <param name="alerts">Add any generated alerts to this collector.</param>
         /// <returns>A Symbol containing the requested JToken.</returns>
-        public virtual Symbol ResolveExportedSymbol(
+        public virtual Symbol EvaluateSymbol(
             string symbolName,
             Dictionary<string, JToken> parametersFromCaller,
             AlertCollector alerts)
@@ -119,14 +119,7 @@ namespace FabricUpgradeCmdlet.Upgraders
                 return Symbol.ReadySymbol(null);
             }
 
-            if (symbolName == Symbol.CommonNames.ExportLinks)
-            {
-                // If a subclass does not have any links, then return a null symbol value.
-                // Most Activities do not have any links.
-                return Symbol.ReadySymbol(null);
-            }
-
-            if (symbolName == Symbol.CommonNames.ExportResolves)
+            if (symbolName == Symbol.CommonNames.ExportResolveSteps)
             {
                 // If a subclass does not have any resolves, then return a null symbol value.
                 // Most Activities do not have any resolves, but Copy, Web, and ExecutePipeline do.

@@ -29,13 +29,6 @@
   "expectedResponse": {
     "state": "Succeeded",
     "alerts": [],
-    "resolutions": [
-      {
-        "type": "CredentialConnectionId",
-        "key": "user",
-        "value": "99ca07da-2163-4dc7-ac59-ae13cd46581f"
-      }
-    ],
     "result": {
       "exportedFabricResources": {
         "pipelineToInvoke": {

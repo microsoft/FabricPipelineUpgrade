@@ -9,7 +9,6 @@
         "details": "Cannot upgrade Activity 'PipelineWithUnsupportedActivity/AnUnsupportedActivity'; please inspect this Activity for more details"
       }
     ],
-    "resolutions": [],
     "result": {
       "exportedFabricResources": {
         "PipelineWithUnsupportedActivity": {

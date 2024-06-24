@@ -26,7 +26,7 @@ namespace FabricUpgradeCmdlet.Models
         /// <summary>
         /// The export process requires the display name of the resource.
         /// Also, we use this in the response to the user.
-        /// Also, we use this during the "Link" phase during export to find the ID of previously exported resources.
+        /// Also, we use this during Export to find the ID of previously exported resources.
         /// </summary>
         [JsonProperty(PropertyName = "resourceName", Order = 2)]
         public string ResourceName { get; set; }

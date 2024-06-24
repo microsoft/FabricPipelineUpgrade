@@ -15,7 +15,6 @@
         {
           "resourceName": "WaitPipeline",
           "resourceType": "DataPipeline",
-          "link": [],
           "resolve": [],
           "export": {
             "name": "WaitPipeline",
@@ -44,17 +43,11 @@
         {
           "resourceName": "ExecutePipelinePipeline",
           "resourceType": "DataPipeline",
-          "link": [
-            {
-              "from": "DataPipeline:WaitPipeline",
-              "targetPath": "properties.activities[1].typeProperties.pipelineId"
-            },
-            {
-              "from": "$workspace",
-              "targetPath": "properties.activities[1].typeProperties.workspaceId"
-            }
-          ],
           "resolve": [
+            {
+              "type": "WorkspaceId",
+              "targetPath": "properties.activities[1].typeProperties.workspaceId"
+            },
             {
               "type": "CredentialConnectionId",
               "key": "user",
@@ -68,6 +61,11 @@
                   "value": "<guid>"
                 }
               }
+            },
+            {
+              "type": "AdfResourceNameToFabricResourceId",
+              "key": "DataPipeline:WaitPipeline",
+              "targetPath": "properties.activities[1].typeProperties.pipelineId"
             }
           ],
           "export": {

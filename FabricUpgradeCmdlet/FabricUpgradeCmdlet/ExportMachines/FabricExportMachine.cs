@@ -14,7 +14,6 @@ namespace FabricUpgradeCmdlet.ExportMachines
     {
         private List<ResourceExporter> exporters = new List<ResourceExporter>();
         private JObject exportResults = new JObject();
-        private Dictionary<string, string> fabricResourceIds = new Dictionary<string, string>();
 
         public FabricExportMachine(
             JObject toExport,
@@ -42,7 +41,13 @@ namespace FabricUpgradeCmdlet.ExportMachines
             {
                 this.BuildAllExporters();
                 this.CheckAllExportersBeforeExport();
-                return await this.ExportAllExportersAsync(cancellationToken).ConfigureAwait(false);
+                JObject exportResult = await this.ExportAllExportersAsync(cancellationToken).ConfigureAwait(false);
+                return new FabricUpgradeProgress()
+                {
+                    State = FabricUpgradeProgress.FabricUpgradeState.Succeeded,
+                    Alerts = this.Alerts.ToList(),
+                    Result = exportResult,
+                };
             }
             catch (UpgradeFailureException)
             {
@@ -53,25 +58,6 @@ namespace FabricUpgradeCmdlet.ExportMachines
                     Result = this.BuildResult(),
                 };
             }
-        }
-
-        /// <inheritdoc/>
-        public override JToken Link(
-            string key,
-            AlertCollector alerts)
-        {
-            if (key == "$workspace")
-            {
-                return this.WorkspaceId;
-            }
-           
-            if (this.fabricResourceIds.ContainsKey(key))
-            {
-                return this.fabricResourceIds[key];
-            }
-
-            // The caller must add an alert.
-            return null;
         }
 
         /// <summary>
@@ -114,10 +100,14 @@ namespace FabricUpgradeCmdlet.ExportMachines
         /// <summary>
         /// Invoke ExportAsync() on all of the Exporters.
         /// </summary>
+        /// <remarks>
+        /// This method also collects the ID of each Fabric Resource, so that later
+        /// Exporters can resolve those values before Creating/Updating their resources.
+        /// </remarks>
         /// <param name="cancellationToken"/>
-        /// <returns>A FabricUpgradeProgress that is returned to the client.</returns>
+        /// <returns>A JObject that is the Result in the FabricUpgradeProgress returned to the client.</returns>
         /// <exception cref="UpgradeFailureException"></exception>
-        private async Task<FabricUpgradeProgress> ExportAllExportersAsync(CancellationToken cancellationToken)
+        private async Task<JObject> ExportAllExportersAsync(CancellationToken cancellationToken)
         {
             foreach (ResourceExporter exporter in this.exporters)
             {
@@ -134,16 +124,19 @@ namespace FabricUpgradeCmdlet.ExportMachines
                 }
 
                 this.exportResults[$"{exporter.Name}"] = uploadResult;
-                this.fabricResourceIds[$"{exporter.ResourceType}:{exporter.Name}"] = uploadResult.SelectToken("$.id")?.ToString();
+
+                // Keep track of the Fabric Resource ID of each Fabric Resource that we create,
+                // so that later Exporters can resolve this value.
+                var newResolution = new FabricUpgradeResolution()
+                {
+                    Type = FabricUpgradeResolution.ResolutionType.AdfResourceNameToFabricResourceId,
+                    Key = $"{exporter.ResourceType}:{exporter.Name}",
+                    Value = uploadResult.SelectToken("$.id")?.ToString(),
+                };
+                this.Resolutions.Add(newResolution);
             }
 
-            return new FabricUpgradeProgress()
-            {
-                State = FabricUpgradeProgress.FabricUpgradeState.Succeeded,
-                Alerts = this.Alerts.ToList(),
-                Result = this.BuildResult(),
-                Resolutions = this.Resolutions,
-            };
+            return this.BuildResult();
         }
 
         /// <summary>

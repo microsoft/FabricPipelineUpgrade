@@ -9,11 +9,12 @@ using Newtonsoft.Json.Linq;
 
 namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
 {
-    // TODO: ADF ExecutePipeline => Fabric InvokePipeline!
-
     /// <summary>
-    /// This class Upgrades an ADF ExecutePipeline Activity to a Fabric ExecutePipeline Activity.
+    /// This class Upgrades an ADF ExecutePipeline Activity to a Fabric InvokePipeline Activity.
     /// </summary>
+    /// <remarks>
+    /// Note the name change!
+    /// </remarks>
     public class ExecutePipelineActivityUpgrader : ActivityUpgrader
     {
         private const string adfPipelineToExecutePath = "typeProperties.pipeline.referenceName";
@@ -59,19 +60,14 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
         }
 
         /// <inheritdoc/>
-        public override Symbol ResolveExportedSymbol(
+        public override Symbol EvaluateSymbol(
             string symbolName,
             Dictionary<string, JToken> parameters,
             AlertCollector alerts)
         {
-            if (symbolName == Symbol.CommonNames.ExportLinks)
+            if (symbolName == Symbol.CommonNames.ExportResolveSteps)
             {
-                return this.BuildExportLinksSymbol(parameters, alerts);
-            }
-
-            if (symbolName == Symbol.CommonNames.ExportResolves)
-            {
-                return this.BuildExportResolvesSymbol(parameters, alerts);
+                return this.BuildExportResolveStepsSymbol(parameters, alerts);
             }
 
             if (symbolName == Symbol.CommonNames.Activity)
@@ -79,45 +75,27 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
                 return this.BuildActivitySymbol(parameters, alerts);
             }
 
-            return base.ResolveExportedSymbol(symbolName, parameters, alerts);
+            return base.EvaluateSymbol(symbolName, parameters, alerts);
         }
 
         /// <inheritdoc/>
-        protected override Symbol BuildExportLinksSymbol(
+        protected override Symbol BuildExportResolveStepsSymbol(
             Dictionary<string, JToken> parameters,
             AlertCollector alerts)
         {
-            List<FabricExportLink> links = new List<FabricExportLink>();
-
-            // We need to update the id of the pipeline to execute
-            // after that pipeline has been created and has a Fabric resource ID.
-            string pipelineToExecuteName = this.AdfResourceToken.SelectToken(adfPipelineToExecutePath)?.ToString();
-
-            FabricExportLink otherPipelineLink = new FabricExportLink(
-                $"{FabricUpgradeResourceTypes.DataPipeline}:{pipelineToExecuteName}",
-                "typeProperties.pipelineId");
-
-            links.Add(otherPipelineLink);
+            List<FabricExportResolveStep> resolves = new List<FabricExportResolveStep>();
 
             // The workspaceId is included in the ExportFabricPipeline phase.
-            FabricExportLink workspaceIdLink = new FabricExportLink(
-                "$workspace",
+            FabricExportResolveStep workspaceIdResolve = new FabricExportResolveStep(
+                FabricUpgradeResolution.ResolutionType.WorkspaceId,
+                null,
                 "typeProperties.workspaceId");
+            resolves.Add(workspaceIdResolve);
 
-            links.Add(workspaceIdLink);
 
-            return Symbol.ReadySymbol(JArray.Parse(UpgradeSerialization.Serialize(links)));
-        }
-
-        /// <inheritdoc/>
-        protected override Symbol BuildExportResolvesSymbol(
-            Dictionary<string, JToken> parameters,
-            AlertCollector alerts)
-        {
-            List<FabricExportResolve> resolves = new List<FabricExportResolve>();
 
             FabricUpgradeResolution.ResolutionType resolutionType = FabricUpgradeResolution.ResolutionType.CredentialConnectionId;
-            FabricExportResolve userCredentialConnectionResolve = new FabricExportResolve(
+            FabricExportResolveStep userCredentialConnectionResolve = new FabricExportResolveStep(
                 resolutionType,
                 "user",
                 "externalReferences.connection")
@@ -137,6 +115,17 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
 
             resolves.Add(userCredentialConnectionResolve);
 
+            // We need to update the id of the pipeline to execute
+            // after that pipeline has been created and has a Fabric resource ID.
+            string pipelineToExecuteName = this.AdfResourceToken.SelectToken(adfPipelineToExecutePath)?.ToString();
+
+            FabricExportResolveStep otherPipelineLink = new FabricExportResolveStep(
+                FabricUpgradeResolution.ResolutionType.AdfResourceNameToFabricResourceId,
+                $"{FabricUpgradeResourceTypes.DataPipeline}:{pipelineToExecuteName}",
+                "typeProperties.pipelineId");
+
+            resolves.Add(otherPipelineLink);
+
             return Symbol.ReadySymbol(JArray.Parse(UpgradeSerialization.Serialize(resolves)));
         }
 
@@ -145,7 +134,7 @@ namespace FabricUpgradeCmdlet.Upgraders.ActivityUpgraders
             Dictionary<string, JToken> parameters,
             AlertCollector alerts)
         {
-            Symbol activitySymbol = base.ResolveExportedSymbol(Symbol.CommonNames.Activity, parameters, alerts);
+            Symbol activitySymbol = base.EvaluateSymbol(Symbol.CommonNames.Activity, parameters, alerts);
 
             if (activitySymbol.State != Symbol.SymbolState.Ready)
             {

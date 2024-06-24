@@ -34,7 +34,7 @@ namespace FabricUpgradeCmdlet.Exporters
         public FabricUpgradeResourceTypes ResourceType { get; private set; }
 
         // The FabricExportMachine that is performing the overall Export process.
-        // This allows the individual Exporters to access some configuration, etc.
+        // This allows the individual Exporters to access configuration, Fabric Resource IDs, etc.
         protected FabricExportMachine Machine { get; private set; }
 
         /// <summary>

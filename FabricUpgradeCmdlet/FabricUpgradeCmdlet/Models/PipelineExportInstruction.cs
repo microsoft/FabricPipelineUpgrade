@@ -14,22 +14,17 @@ namespace FabricUpgradeCmdlet.Models
     /// <remarks>
     /// Before a DataPipeline can be created/updated, we need to populate
     /// the IDs of other Fabric Resources and Connections.
-    /// These are the "link" and "resolve" steps.
+    /// The instructions for doing so is found in the "resolve" step.
     /// </remarks>
     public class PipelineExportInstruction : FabricExportInstruction
     {
-        // These Links describe which properties in the generated code should be set to the
-        // value of a Fabric Resource ID of a previously exported Resource.
-        [JsonProperty(PropertyName = "link", Order = 100)]
-        public List<FabricExportLink> Links { get; set; } = new List<FabricExportLink>();
-
         // These Resolves describe which properties in the generated code should be set to the GUID
-        // of a Fabric Connection that was manually created.
-        [JsonProperty(PropertyName = "resolve", Order = 101)]
-        public List<FabricExportResolve> Resolves { get; set; } = new List<FabricExportResolve>();
+        // of a Fabric Resource that was previously Created/Updated.
+        [JsonProperty(PropertyName = "resolve", Order = 100)]
+        public List<FabricExportResolveStep> Resolves { get; set; } = new List<FabricExportResolveStep>();
 
         // This object describes the DataPipeline Resource that the PipelineExporter will create/update.
-        [JsonProperty(PropertyName = "export", Order = 102)]
+        [JsonProperty(PropertyName = "export", Order = 101)]
         public JObject Export { get; set; } = new JObject();
 
         public PipelineExportInstruction(

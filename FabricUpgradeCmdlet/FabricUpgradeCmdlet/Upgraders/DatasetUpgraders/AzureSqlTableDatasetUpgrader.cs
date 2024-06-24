@@ -41,7 +41,7 @@ namespace FabricUpgradeCmdlet.Upgraders.DatasetUpgraders
         }
 
         /// <inheritdoc/>
-        public override Symbol ResolveExportedSymbol(
+        public override Symbol EvaluateSymbol(
             string symbolName,
             Dictionary<string, JToken> parametersFromCaller,
             AlertCollector alerts)
@@ -51,7 +51,7 @@ namespace FabricUpgradeCmdlet.Upgraders.DatasetUpgraders
                 return this.BuildDatasetSettings(parametersFromCaller, alerts);
             }
 
-            return base.ResolveExportedSymbol(symbolName, parametersFromCaller, alerts);
+            return base.EvaluateSymbol(symbolName, parametersFromCaller, alerts);
         }
 
         /// <inheritdoc/>
@@ -59,7 +59,7 @@ namespace FabricUpgradeCmdlet.Upgraders.DatasetUpgraders
             Dictionary<string, JToken> parametersFromCaller,
             AlertCollector alerts)
         {
-            Symbol datasetSettingsSymbol = base.ResolveExportedSymbol(Symbol.CommonNames.DatasetSettings, parametersFromCaller, alerts);
+            Symbol datasetSettingsSymbol = base.EvaluateSymbol(Symbol.CommonNames.DatasetSettings, parametersFromCaller, alerts);
 
             if (datasetSettingsSymbol.State != Symbol.SymbolState.Ready)
             {
@@ -78,7 +78,7 @@ namespace FabricUpgradeCmdlet.Upgraders.DatasetUpgraders
 
             Dictionary<string, JToken> parametersToLinkedService = this.BuildParametersToPassToLinkedService(parametersFromCaller, alerts);
 
-            Symbol databaseNameSymbol = this.LinkedServiceUpgrader.ResolveExportedSymbol(
+            Symbol databaseNameSymbol = this.LinkedServiceUpgrader.EvaluateSymbol(
                 Symbol.CommonNames.LinkedServiceDatabaseName,
                 parametersToLinkedService,
                 alerts);

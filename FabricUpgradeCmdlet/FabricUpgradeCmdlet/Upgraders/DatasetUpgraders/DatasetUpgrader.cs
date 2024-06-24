@@ -110,14 +110,14 @@ namespace FabricUpgradeCmdlet.Upgraders.DatasetUpgraders
         }
 
         /// <inheritdoc/>
-        public override Symbol ResolveExportedSymbol(
+        public override Symbol EvaluateSymbol(
             string symbolName,
             Dictionary<string, JToken> parametersFromCaller,
             AlertCollector alerts)
         {
-            if (symbolName == Symbol.CommonNames.ExportLinks)
+            if (symbolName == Symbol.CommonNames.ExportResolveSteps)
             {
-                return this.BuildExportLinks(parametersFromCaller, alerts);
+                return this.BuildExportResolveSteps(parametersFromCaller, alerts);
             }
 
             if (symbolName == Symbol.CommonNames.DatasetSettings)
@@ -125,7 +125,7 @@ namespace FabricUpgradeCmdlet.Upgraders.DatasetUpgraders
                 return this.BuildCommonDatasetSettings(parametersFromCaller, alerts);
             }
 
-            return base.ResolveExportedSymbol(symbolName, parametersFromCaller, alerts);
+            return base.EvaluateSymbol(symbolName, parametersFromCaller, alerts);
         }
 
         /// <summary>
@@ -140,23 +140,23 @@ namespace FabricUpgradeCmdlet.Upgraders.DatasetUpgraders
         /// <param name="parametersFromCaller">The parameters from the caller.</param>
         /// <param name="alerts">Add any generated alerts to this collector.</param>
         /// <returns>A Symbol whose value describes the other Fabric Resources upon which this Dataset depends.</returns>
-        protected virtual Symbol BuildExportLinks(
+        protected virtual Symbol BuildExportResolveSteps(
             Dictionary<string, JToken> parametersFromCaller,
             AlertCollector alerts)
         {
             // Datasets may override this method.
 
-            List<FabricExportLink> links = new List<FabricExportLink>();
+            List<FabricExportResolveStep> resolveSteps = new List<FabricExportResolveStep>();
 
             string linkedServiceName = this.AdfResourceToken.SelectToken(AdfLinkedServiceNamePath)?.ToString();
 
-            FabricExportLink linkedServiceLink = new FabricExportLink(
+            FabricExportResolveStep linkedServiceLink = FabricExportResolveStep.ForResourceId(
                 $"{FabricUpgradeResourceTypes.Connection}:{linkedServiceName}",
                 FabricConnectionIdPath);
 
-            links.Add(linkedServiceLink);
+            resolveSteps.Add(linkedServiceLink);
 
-            return Symbol.ReadySymbol(JArray.Parse(UpgradeSerialization.Serialize(links)));
+            return Symbol.ReadySymbol(JArray.Parse(UpgradeSerialization.Serialize(resolveSteps)));
         }
 
         /// <summary>

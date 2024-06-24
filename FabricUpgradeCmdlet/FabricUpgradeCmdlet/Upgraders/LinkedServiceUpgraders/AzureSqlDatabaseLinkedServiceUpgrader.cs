@@ -61,7 +61,7 @@ namespace FabricUpgradeCmdlet.Upgraders.LinkedServiceUpgraders
         }
 
         /// <inheritdoc/>
-        public override Symbol ResolveExportedSymbol(
+        public override Symbol EvaluateSymbol(
             string symbolName,
             Dictionary<string, JToken> parametersFromCaller,
             AlertCollector alerts)
@@ -71,7 +71,7 @@ namespace FabricUpgradeCmdlet.Upgraders.LinkedServiceUpgraders
                 return this.BuildLinkedServiceDatabaseNameSymbol(parametersFromCaller, alerts);
             }
 
-            return base.ResolveExportedSymbol(symbolName, parametersFromCaller, alerts);
+            return base.EvaluateSymbol(symbolName, parametersFromCaller, alerts);
         }
 
         /// <summary>
