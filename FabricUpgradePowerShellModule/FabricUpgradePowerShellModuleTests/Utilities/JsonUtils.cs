@@ -4,7 +4,7 @@
 
 using Newtonsoft.Json.Linq;
 
-namespace FabricUpgradeTests.Utilities
+namespace FabricUpgradePowerShellModuleTests.Utilities
 {
     internal static class JsonUtils
     {

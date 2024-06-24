@@ -8,7 +8,7 @@ using Newtonsoft.Json;
 using System.Net;
 using System.Text.RegularExpressions;
 
-namespace FabricUpgradeTests.Utilities
+namespace FabricUpgradePowerShellModuleTests.Utilities
 {
     public class TestPublicApiEndpoints
     {
