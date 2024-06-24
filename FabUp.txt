@@ -1,1 +1,0 @@
-.\FabricUpgrade.ps1 -cluster <daily or dxt> -workspace <your workspace ID> -fabricToken <from browser>
