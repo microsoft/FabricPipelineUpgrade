@@ -32,7 +32,7 @@ namespace FabricUpgradePowerShellModule.Utilities
                 fileContentsStream.Read(fileBytes, 0, (int)entry.Length);
                 string fileContents = Encoding.UTF8.GetString(fileBytes);
 
-                packageCollector.Collect(entry.FullName, fileContents);
+                packageCollector.CollectZipFileEntry(entry.FullName, fileContents);
             }
         }
     }

@@ -126,7 +126,7 @@ namespace FabricUpgradePowerShellModuleTests
                     Alerts = new List<FabricUpgradeAlert> {
                         new FabricUpgradeAlert() {
                             Severity = FabricUpgradeAlert.AlertSeverity.Permanent,
-                            Details = "Input is not a valid JSON string."
+                            Details = "Input is not a valid JSON FabricUpgradeProgress."
                         }
                     },
                 },

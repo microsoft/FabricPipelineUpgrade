@@ -15,6 +15,6 @@ namespace FabricUpgradePowerShellModule.Utilities
         /// </summary>
         /// <param name="entryName">The name of the record (file, folder, etc.).</param>
         /// <param name="entryData">The contents of this file.</param>
-        void Collect(string entryName, string entryData);
+        void CollectZipFileEntry(string entryName, string entryData);
     }
 }

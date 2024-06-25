@@ -3,6 +3,7 @@
 // </copyright>
 
 using FabricUpgradePowerShellModule.ExportMachines;
+using FabricUpgradePowerShellModule.Importers;
 using FabricUpgradePowerShellModule.Models;
 using FabricUpgradePowerShellModule.UpgradeMachines;
 using FabricUpgradePowerShellModule.Utilities;
@@ -43,52 +44,9 @@ namespace FabricUpgradePowerShellModule
                 return progress;
             }
 
-            AdfSupportFileUpgradePackageCollector collector = new AdfSupportFileUpgradePackageCollector();
+            AdfSupportFileImporter importer = new AdfSupportFileImporter(progress, fileName, this.alerts);
 
-            byte[] supportFileData;
-            try
-            {
-                supportFileData = File.ReadAllBytes(fileName);
-            }
-            catch (Exception)
-            {
-                return new FabricUpgradeProgress()
-                {
-                    State = FabricUpgradeProgress.FabricUpgradeState.Failed,
-                }
-                .WithAlert(
-                    new FabricUpgradeAlert()
-                    {
-                        Severity = FabricUpgradeAlert.AlertSeverity.Permanent,
-                        Details = $"Failed to load Support File '{fileName}'.",
-                    });
-            }
-
-            try
-            {
-                UpgradeUnzipper.Unzip(supportFileData, collector);
-            }
-            catch (Exception)
-            {
-                return new FabricUpgradeProgress()
-                {
-                    State = FabricUpgradeProgress.FabricUpgradeState.Failed,
-                }
-                .WithAlert(
-                    new FabricUpgradeAlert()
-                    {
-                        Severity = FabricUpgradeAlert.AlertSeverity.Permanent,
-                        Details = "Failed to unzip Upgrade Package.",
-                    });
-            }
-
-            return new FabricUpgradeProgress()
-            {
-                State = FabricUpgradeProgress.FabricUpgradeState.Succeeded,
-                Alerts = progress.Alerts,
-                Result = collector.Build(),
-                Resolutions = progress.Resolutions,
-            };
+            return importer.Import();
         }
 
         /// <summary>
@@ -262,6 +220,15 @@ namespace FabricUpgradePowerShellModule
             return await machine.ExportAsync(cancellationToken).ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// Inspect the progress "so far" to see if we should continue.
+        /// </summary>
+        /// <remarks>
+        /// This method also copies the Alerts from the previous progress to this.alerts.
+        /// </remarks>
+        /// <param name="previousResponse">The string sent by the client to represent the progress "so far."</param>
+        /// <param name="currentProgress">An out parameter that holds the parsed progress.</param>
+        /// <returns>True if and only if the previous progress is acceptable for continuing.</returns>
         private bool CheckProgress(
             string previousResponse,
             out FabricUpgradeProgress currentProgress)
@@ -280,7 +247,7 @@ namespace FabricUpgradePowerShellModule
             }
             catch (Newtonsoft.Json.JsonException)
             {
-                this.alerts.AddPermanentError("Input is not a valid JSON string.");
+                this.alerts.AddPermanentError("Input is not a valid JSON FabricUpgradeProgress.");
 
                 currentProgress = new FabricUpgradeProgress()
                 {
