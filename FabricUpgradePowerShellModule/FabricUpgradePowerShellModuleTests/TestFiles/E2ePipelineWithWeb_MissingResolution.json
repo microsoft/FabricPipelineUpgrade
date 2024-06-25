@@ -15,7 +15,7 @@
           "template": {
             "type": "UrlHostToConnectionId",
             "key": "www.bing.com",
-            "value": "<guid>"
+            "value": "<Fabric Connection ID>"
           }
         }
       }

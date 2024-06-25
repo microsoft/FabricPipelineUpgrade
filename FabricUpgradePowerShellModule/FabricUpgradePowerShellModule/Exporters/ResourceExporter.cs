@@ -67,14 +67,14 @@ namespace FabricUpgradePowerShellModule.Exporters
         /// <summary>
         /// Actually perform the Export!
         /// </summary>
-        /// <param name="cluster">The cluster (aka region) of the user's workspace.</param>
+        /// <param name="region">The region of the user's workspace.</param>
         /// <param name="workspace">The user's workspace, into which the pipeline, etc., will be exported.</param>
         /// <param name="fabricToken">The PowerBI AAD token to authenticate/authorize access to the workspace.</param>
         /// <param name="alerts">Add any generated alerts to this collector.</param>
         /// <param name="cancellationToken"/>
         /// <returns>The response from the Create/UpdateItem PublicAPI call.</returns>
         public virtual Task<JObject> ExportAsync(
-            string cluster,
+            string region,
             string workspace,
             string fabricToken,
             AlertCollector alerts,

@@ -24,8 +24,8 @@ namespace FabricUpgradePowerShellModule
             { FabricUpgradeResourceTypes.DataPipeline, "pipeline-content.json" },
         };
 
-        // The cluster (aka region) of the user's workspace.
-        private readonly string cluster;
+        // The region of the user's workspace.
+        private readonly string region;
 
         // The ID of the user's workspace.
         private readonly string workspaceId;
@@ -34,11 +34,11 @@ namespace FabricUpgradePowerShellModule
         private readonly string pbiAadToken;
 
         public PublicApiClient(
-            string cluster,
+            string region,
             string workspaceId,
             string pbiAadToken)
         {
-            this.cluster = cluster;
+            this.region = region;
             this.workspaceId = workspaceId;
             this.pbiAadToken = pbiAadToken;
             if (!this.pbiAadToken.StartsWith("Bearer "))
@@ -489,12 +489,12 @@ namespace FabricUpgradePowerShellModule
         }
 
         /// <summary>
-        /// Compute the PublicApiBaseUrl from the cluster name.
+        /// Compute the PublicApiBaseUrl from the region name.
         /// </summary>
         /// <returns>the PublicApiBaseUrl for this region.</returns>
         private string ComputePublicApiBaseUrl()
         {
-            return this.cluster switch
+            return this.region switch
             {
                 "daily" => "https://dailyapi.fabric.microsoft.com/v1/",
                 "dxt" => "https://dxtapi.fabric.microsoft.com/v1",

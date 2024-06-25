@@ -109,7 +109,7 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
                     {
                         Type = resolutionType,
                         Key = "user",
-                        Value = "<guid>"
+                        Value = "<Fabric Connection ID>"
                     }
                ));
 

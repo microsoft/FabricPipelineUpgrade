@@ -224,14 +224,14 @@ namespace FabricUpgradePowerShellModule
         /// Export the Fabric Resources by following the instructions in the progress.
         /// </summary>
         /// <param name="progressString">The progress sent by the client.</param>
-        /// <param name="cluster">The cluster (aka region) of the user's workspace.</param>
+        /// <param name="region">The region of the user's workspace.</param>
         /// <param name="workspaceId">The ID of the user's workspace.</param>
         /// <param name="fabricToken">The PowerBI AAD token to authenticate/authorize access to the workspace.</param>
         /// <param name="cancellationToken"/>
         /// <returns>A FabricUpgradeProgress that describes the created/updated resources.</returns>
         public async Task<FabricUpgradeProgress> ExportFabricResourcesAsync(
             string progressString,
-            string cluster,
+            string region,
             string workspaceId,
             string fabricToken,
             CancellationToken cancellationToken)
@@ -253,7 +253,7 @@ namespace FabricUpgradePowerShellModule
 
             FabricExportMachine machine = new FabricExportMachine(
                     progress.Result,
-                    cluster,
+                    region,
                     workspaceId,
                     fabricToken,
                     progress.Resolutions,

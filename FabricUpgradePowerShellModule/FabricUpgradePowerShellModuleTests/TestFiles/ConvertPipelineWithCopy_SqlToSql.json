@@ -23,7 +23,7 @@
                 "template": {
                   "type": "LinkedServiceToConnectionId",
                   "key": "rodenkewsql",
-                  "value": "<guid>"
+                  "value": "<Fabric Connection ID>"
                 }
               }
             }

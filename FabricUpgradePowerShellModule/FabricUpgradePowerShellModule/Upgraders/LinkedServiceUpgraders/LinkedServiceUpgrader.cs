@@ -169,7 +169,7 @@ namespace FabricUpgradePowerShellModule.Upgraders.LinkedServiceUpgraders
                     {
                         Type = resolutionType,
                         Key = this.Name,
-                        Value = "<guid>"
+                        Value = "<Fabric Connection ID>"
                     }
                ));
 
