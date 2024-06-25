@@ -17,19 +17,19 @@ namespace FabricUpgradePowerShellModule.ExportMachines
 
         public FabricExportMachine(
             JObject toExport,
-            string cluster,
+            string region,
             string workspaceId,
             string fabricToken,
             List<FabricUpgradeResolution> resolutions,
             AlertCollector alerts)
             : base(toExport, workspaceId, resolutions, alerts)
         {
-            this.Cluster = cluster;
+            this.Region = region;
             this.FabricToken = fabricToken;
         }
 
-        // The cluster (aka region) of the user's workspace.
-        protected string Cluster { get; private set; }
+        // The region of the user's workspace.
+        protected string Region { get; private set; }
 
         // The user's PowerBI AAD token.
         protected string FabricToken { get; private set; }
@@ -112,7 +112,7 @@ namespace FabricUpgradePowerShellModule.ExportMachines
             foreach (ResourceExporter exporter in this.exporters)
             {
                 JObject uploadResult = await exporter.ExportAsync(
-                    this.Cluster,
+                    this.Region,
                     this.WorkspaceId,
                     this.FabricToken,
                     this.Alerts,

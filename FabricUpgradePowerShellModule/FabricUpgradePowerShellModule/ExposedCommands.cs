@@ -163,12 +163,12 @@ namespace FabricUpgradePowerShellModule
         private string progress;
 
         [Parameter(Mandatory = false)]
-        public string Cluster
+        public string Region
         {
-            get { return cluster; }
-            set { this.cluster = value; }
+            get { return region; }
+            set { this.region = value; }
         }
-        private string cluster = "daily";
+        private string region = "prod";
 
         [Alias("ws")]
         [Parameter(Mandatory = true)]
@@ -193,7 +193,7 @@ namespace FabricUpgradePowerShellModule
             CancellationTokenSource cts = new CancellationTokenSource(TimeSpan.FromSeconds(120));
             string result = new FabricUpgradeHandler().ExportFabricResourcesAsync(
                 this.progress,
-                this.cluster,
+                this.region,
                 this.workspaceId,
                 this.fabricToken,
                 cts.Token).Result.ToString();

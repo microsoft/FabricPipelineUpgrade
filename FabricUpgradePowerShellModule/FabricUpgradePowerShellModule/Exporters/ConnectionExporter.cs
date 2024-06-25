@@ -63,7 +63,7 @@ namespace FabricUpgradePowerShellModule.Exporters
 
         /// <inheritdoc/>
         public override Task<JObject> ExportAsync(
-            string cluster,
+            string region,
             string workspace,
             string fabricToken,
             AlertCollector alerts,

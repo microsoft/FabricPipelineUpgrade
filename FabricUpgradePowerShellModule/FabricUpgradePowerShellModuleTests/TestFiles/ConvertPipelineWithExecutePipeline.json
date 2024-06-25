@@ -58,7 +58,7 @@
                 "template": {
                   "type": "CredentialConnectionId",
                   "key": "user",
-                  "value": "<guid>"
+                  "value": "<Fabric Connection ID>"
                 }
               }
             },

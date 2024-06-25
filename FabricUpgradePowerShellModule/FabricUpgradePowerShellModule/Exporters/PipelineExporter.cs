@@ -54,7 +54,7 @@ namespace FabricUpgradePowerShellModule.Exporters
 
         /// <inheritdoc/>
         public override async Task<JObject> ExportAsync(
-            string cluster,
+            string region,
             string workspaceId,
             string fabricToken,
             AlertCollector alerts,
@@ -64,7 +64,7 @@ namespace FabricUpgradePowerShellModule.Exporters
 
             try
             {
-                string exportResult = await new PublicApiClient(cluster, workspaceId, fabricToken)
+                string exportResult = await new PublicApiClient(region, workspaceId, fabricToken)
                     .CreateOrUpdateArtifactAsync(
                         FabricUpgradeResourceTypes.DataPipeline,
                         this.exportInstruction.ResourceName,

@@ -23,7 +23,7 @@
                 "template": {
                   "type": "LinkedServiceToConnectionId",
                   "key": "AzureBlobStorage1",
-                  "value": "<guid>"
+                  "value": "<Fabric Connection ID>"
                 }
               }
             }
@@ -47,7 +47,7 @@
                 "template": {
                   "type": "LinkedServiceToConnectionId",
                   "key": "AzureBlobStorage2",
-                  "value": "<guid>"
+                  "value": "<Fabric Connection ID>"
                 }
               }
             }
@@ -71,7 +71,7 @@
                 "template": {
                   "type": "LinkedServiceToConnectionId",
                   "key": "AzureBlobStorage3",
-                  "value": "<guid>"
+                  "value": "<Fabric Connection ID>"
                 }
               }
             }
@@ -95,7 +95,7 @@
                 "template": {
                   "type": "LinkedServiceToConnectionId",
                   "key": "ArmtemplateStorageLinkedService",
-                  "value": "<guid>"
+                  "value": "<Fabric Connection ID>"
                 }
               }
             }
