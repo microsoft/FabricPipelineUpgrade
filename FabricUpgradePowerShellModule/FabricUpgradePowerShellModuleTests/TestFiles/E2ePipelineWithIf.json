@@ -112,9 +112,6 @@
                     "description": "This activity invokes another pipeline",
                     "dependsOn": [],
                     "userProperties": [],
-                    "policy": {
-                      "secureInput": true
-                    },
                     "typeProperties": {
                       "waitOnCompletion": true,
                       "parameters": null,

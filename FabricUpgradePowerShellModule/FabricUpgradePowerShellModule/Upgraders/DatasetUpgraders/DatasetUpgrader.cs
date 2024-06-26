@@ -87,11 +87,11 @@ namespace FabricUpgradePowerShellModule.Upgraders.DatasetUpgraders
         }
 
         /// <inheritdoc/>
-        public override void PreLink(
+        public override void PreSort(
             List<Upgrader> allUpgraders,
             AlertCollector alerts)
         {
-            base.PreLink(allUpgraders, alerts);
+            base.PreSort(allUpgraders, alerts);
 
             // All datasets need to find a LinkedService, and that LinkedService is always in the same place!
             Upgrader linkedServiceUpgrader = this.FindOtherUpgrader(
@@ -111,20 +111,20 @@ namespace FabricUpgradePowerShellModule.Upgraders.DatasetUpgraders
         /// <inheritdoc/>
         public override Symbol EvaluateSymbol(
             string symbolName,
-            Dictionary<string, JToken> parametersFromCaller,
+            Dictionary<string, JToken> parameterAssignments,
             AlertCollector alerts)
         {
             if (symbolName == Symbol.CommonNames.ExportResolveSteps)
             {
-                return this.BuildExportResolveSteps(parametersFromCaller, alerts);
+                return this.BuildExportResolveSteps(parameterAssignments, alerts);
             }
 
             if (symbolName == Symbol.CommonNames.DatasetSettings)
             {
-                return this.BuildCommonDatasetSettings(parametersFromCaller, alerts);
+                return this.BuildCommonDatasetSettings(parameterAssignments, alerts);
             }
 
-            return base.EvaluateSymbol(symbolName, parametersFromCaller, alerts);
+            return base.EvaluateSymbol(symbolName, parameterAssignments, alerts);
         }
 
         /// <summary>
@@ -136,11 +136,11 @@ namespace FabricUpgradePowerShellModule.Upgraders.DatasetUpgraders
         /// In the Export phase, we will acquire the Fabric Resource ID for the Connection
         /// that corresponds to the LinkedService, and _then_ we will insert it into this JSON.
         /// </remarks>
-        /// <param name="parametersFromCaller">The parameters from the caller.</param>
+        /// <param name="parameterAssignments">The parameters from the caller.</param>
         /// <param name="alerts">Add any generated alerts to this collector.</param>
         /// <returns>A Symbol whose value describes the other Fabric Resources upon which this Dataset depends.</returns>
         protected virtual Symbol BuildExportResolveSteps(
-            Dictionary<string, JToken> parametersFromCaller,
+            Dictionary<string, JToken> parameterAssignments,
             AlertCollector alerts)
         {
             // Datasets may override this method.
@@ -162,11 +162,11 @@ namespace FabricUpgradePowerShellModule.Upgraders.DatasetUpgraders
         /// Create a Symbol whose Value is a JObject that contains all of the 
         /// common datasetSetting properties.
         /// </summary>
-        /// <param name="parametersFromCaller">The parameters from the caller.</param>
+        /// <param name="parameterAssignments">The parameters from the caller.</param>
         /// <param name="alerts">Add any generated alerts to this collector.</param>
         /// <returns>A Symbol whose value describes the common Fabric datasetSettings.</returns>
         private Symbol BuildCommonDatasetSettings(
-            Dictionary<string, JToken> parametersFromCaller,
+            Dictionary<string, JToken> parameterAssignments,
             AlertCollector alerts)
         {
             // Populate the common dataset settings.
@@ -176,7 +176,7 @@ namespace FabricUpgradePowerShellModule.Upgraders.DatasetUpgraders
                 this.Path,
                 this.AdfResourceToken,
                 datasetSettings,
-                this.BuildActiveParameters(parametersFromCaller),
+                this.BuildActiveParameters(parameterAssignments),
                 alerts);
 
             copier.Copy("properties.annotations", "annotations");
@@ -189,11 +189,11 @@ namespace FabricUpgradePowerShellModule.Upgraders.DatasetUpgraders
         /// <summary>
         /// Build the datasetSettings Symbol whose value will be included in an Activity.
         /// </summary>
-        /// <param name="parameters">The parameters from the caller.</param>
+        /// <param name="parameterAssignments">The parameters from the caller.</param>
         /// <param name="alerts">Add any generated alerts to this collector.</param>
         /// <returns>The datasetSettings Symbol whose value will be included in an Activity.</returns>
         protected virtual Symbol BuildDatasetSettings(
-            Dictionary<string, JToken> parametersFromCaller,
+            Dictionary<string, JToken> parameterAssignments,
             AlertCollector alerts)
         {
             // Datasets should override this method!
@@ -201,9 +201,9 @@ namespace FabricUpgradePowerShellModule.Upgraders.DatasetUpgraders
         }
 
         protected ResourceParameters BuildActiveParameters(
-            Dictionary<string, JToken> callerValues)
+            Dictionary<string, JToken> parameterAssignments)
         {
-            return this.DatasetParameters.BuildResolutionContext(callerValues);
+            return this.DatasetParameters.BuildResolutionContext(parameterAssignments);
         }
 
         /// <summary>

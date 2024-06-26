@@ -37,33 +37,33 @@ namespace FabricUpgradePowerShellModule.Upgraders.DatasetUpgraders
         }
 
         /// <inheritdoc/>
-        public override void PreLink(
+        public override void PreSort(
             List<Upgrader> allUpgraders,
             AlertCollector alerts)
         {
-            base.PreLink(allUpgraders, alerts);
+            base.PreSort(allUpgraders, alerts);
         }
 
         /// <inheritdoc/>
         public override Symbol EvaluateSymbol(
             string symbolName,
-            Dictionary<string, JToken> parametersFromCaller,
+            Dictionary<string, JToken> parameterAssignments,
             AlertCollector alerts)
         {
             if (symbolName == Symbol.CommonNames.DatasetSettings)
             {
-                return this.BuildDatasetSettings(parametersFromCaller, alerts);
+                return this.BuildDatasetSettings(parameterAssignments, alerts);
             }
 
-            return base.EvaluateSymbol(symbolName, parametersFromCaller, alerts);
+            return base.EvaluateSymbol(symbolName, parameterAssignments, alerts);
         }
 
         /// <inheritdoc/>
         protected override Symbol BuildDatasetSettings(
-            Dictionary<string, JToken> parametersFromCaller,
+            Dictionary<string, JToken> parameterAssignments,
             AlertCollector alerts)
         {
-            Symbol datasetSettingsSymbol = base.EvaluateSymbol(Symbol.CommonNames.DatasetSettings, parametersFromCaller, alerts);
+            Symbol datasetSettingsSymbol = base.EvaluateSymbol(Symbol.CommonNames.DatasetSettings, parameterAssignments, alerts);
 
             if (datasetSettingsSymbol.State != Symbol.SymbolState.Ready)
             {
@@ -75,7 +75,7 @@ namespace FabricUpgradePowerShellModule.Upgraders.DatasetUpgraders
                 this.Path,
                 this.AdfResourceToken,
                 fabricActivityObject,
-                this.BuildActiveParameters(parametersFromCaller),
+                this.BuildActiveParameters(parameterAssignments),
                 alerts);
 
             copier.Copy(adfLocationPath, fabricLocationPath);

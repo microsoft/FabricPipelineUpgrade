@@ -21,10 +21,6 @@ namespace FabricUpgradePowerShellModule.Upgraders.LinkedServiceUpgraders
         {
         };
 
-        private readonly List<string> mustNotBeExpressions = new List<string>
-        {
-        };
-
         // A dictionary parsed from the connectionSettings property.
         private Dictionary<string, JToken> connectionSettings;
 
@@ -62,20 +58,20 @@ namespace FabricUpgradePowerShellModule.Upgraders.LinkedServiceUpgraders
         }
 
         /// <inheritdoc/>
-        public override void PreLink(
+        public override void PreSort(
             List<Upgrader> allUpgraders,
             AlertCollector alerts)
         {
-            base.PreLink(allUpgraders, alerts);
+            base.PreSort(allUpgraders, alerts);
         }
 
         /// <inheritdoc/>
         public override Symbol EvaluateSymbol(
             string symbolName,
-            Dictionary<string, JToken> parameters,
+            Dictionary<string, JToken> parameterAssignments,
             AlertCollector alerts)
         {
-            return base.EvaluateSymbol(symbolName, parameters, alerts);
+            return base.EvaluateSymbol(symbolName, parameterAssignments, alerts);
         }
 
         /// <inheritdoc/>

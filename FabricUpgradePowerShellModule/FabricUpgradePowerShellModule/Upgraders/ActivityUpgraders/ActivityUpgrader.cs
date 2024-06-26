@@ -77,17 +77,17 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
         }
 
         // <inheritdoc/>
-        public override void PreLink(
+        public override void PreSort(
             List<Upgrader> allUpgraders,
             AlertCollector alerts)
         {
-            base.PreLink(allUpgraders, alerts);
+            base.PreSort(allUpgraders, alerts);
         }
 
         // <inheritdoc/>
         public override Symbol EvaluateSymbol(
             string symbolName,
-            Dictionary<string, JToken> parameters,
+            Dictionary<string, JToken> parameterAssignments,
             AlertCollector alerts)
         {
             if (symbolName == Symbol.CommonNames.Activity)
@@ -98,7 +98,7 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
                 return this.BuildCommonActivitySymbol(alerts);
             }
 
-            return base.EvaluateSymbol(symbolName, parameters, alerts);
+            return base.EvaluateSymbol(symbolName, parameterAssignments, alerts);
         }
 
         /// <summary>
@@ -136,11 +136,11 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
         /// other Pipelines).
         /// Collect these dependencies now so that the Pipeline can fill out its 'resolve' field.
         /// </remarks>
-        /// <param name="parametersFromCaller">The parameters from the caller.</param>
+        /// <param name="parameterAssignments">The parameters from the caller.</param>
         /// <param name="alerts">Add any generated alerts to this collector.</param>
         /// <returns>The ExportResolveSteps Symbol whose value is added to the Pipeline's ExportResolveSteps.</returns>
         protected virtual Symbol BuildExportResolveStepsSymbol(
-            Dictionary<string, JToken> parametersFromCaller,
+            Dictionary<string, JToken> parameterAssignments,
             AlertCollector alerts)
         {
             // For Activities with no ExportResolves, return null.
@@ -150,11 +150,11 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
         /// <summary>
         /// Build the Activity Symbol whose value will be included in this Activity's Pipeline.
         /// </summary>
-        /// <param name="parameters">The parameters from the caller.</param>
+        /// <param name="parameterAssignments">The parameters from the caller.</param>
         /// <param name="alerts">Add any generated alerts to this collector.</param>
         /// <returns>The Activity Symbol whose value is added to the Pipeline's Activities.</returns>
         protected virtual Symbol BuildActivitySymbol(
-            Dictionary<string, JToken> parameters,
+            Dictionary<string, JToken> parameterAssignments,
             AlertCollector alerts)
         {
             // Each Activity should override this.

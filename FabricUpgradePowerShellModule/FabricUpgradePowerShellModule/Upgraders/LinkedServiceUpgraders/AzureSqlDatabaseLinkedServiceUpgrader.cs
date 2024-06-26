@@ -53,41 +53,41 @@ namespace FabricUpgradePowerShellModule.Upgraders.LinkedServiceUpgraders
         }
 
         /// <inheritdoc/>
-        public override void PreLink(
+        public override void PreSort(
             List<Upgrader> allUpgraders,
             AlertCollector alerts)
         {
-            base.PreLink(allUpgraders, alerts);
+            base.PreSort(allUpgraders, alerts);
         }
 
         /// <inheritdoc/>
         public override Symbol EvaluateSymbol(
             string symbolName,
-            Dictionary<string, JToken> parametersFromCaller,
+            Dictionary<string, JToken> parameterAssignments,
             AlertCollector alerts)
         {
             if (symbolName == Symbol.CommonNames.LinkedServiceDatabaseName)
             {
-                return this.BuildLinkedServiceDatabaseNameSymbol(parametersFromCaller, alerts);
+                return this.BuildLinkedServiceDatabaseNameSymbol(parameterAssignments, alerts);
             }
 
-            return base.EvaluateSymbol(symbolName, parametersFromCaller, alerts);
+            return base.EvaluateSymbol(symbolName, parameterAssignments, alerts);
         }
 
         /// <summary>
         /// Build and return a Symbol that contains the name of the database.
         /// This handles the possibility that the database is a LinkedService Expression.
         /// </summary>
-        /// <param name="parametersFromCaller">The parameters from the caller.</param>
+        /// <param name="parameterAssignments">The parameters from the caller.</param>
         /// <param name="alerts">Add any generated alerts to this collector.</param>
         /// <returns>A Symbol whose value is the database name.</returns>
         private Symbol BuildLinkedServiceDatabaseNameSymbol(
-            Dictionary<string, JToken> parametersFromCaller,
+            Dictionary<string, JToken> parameterAssignments,
             AlertCollector alerts)
         {
             return this.BuildLinkedServiceExportableSymbol(
                 DatabaseNamePath,
-                this.BuildActiveParameters(parametersFromCaller),
+                this.BuildActiveParameters(parameterAssignments),
                 alerts);
         }
 

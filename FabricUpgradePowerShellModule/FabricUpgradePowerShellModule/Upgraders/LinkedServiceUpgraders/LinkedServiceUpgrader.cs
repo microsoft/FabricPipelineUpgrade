@@ -83,19 +83,19 @@ namespace FabricUpgradePowerShellModule.Upgraders.LinkedServiceUpgraders
         /// <inheritdoc/>
         public override Symbol EvaluateSymbol(
             string symbolName,
-            Dictionary<string, JToken> parametersFromCaller,
+            Dictionary<string, JToken> parameterAssignments,
             AlertCollector alerts)
         {
             if (symbolName == Symbol.CommonNames.ExportResolveSteps)
             {
-                return this.BuildExportResolves(parametersFromCaller, alerts);
+                return this.BuildExportResolves(parameterAssignments, alerts);
             }
             if (symbolName == Symbol.CommonNames.ExportInstructions)
             {
-                return this.BuildExportInstructions(parametersFromCaller, alerts);
+                return this.BuildExportInstructions(parameterAssignments, alerts);
             }
 
-            return base.EvaluateSymbol(symbolName, parametersFromCaller, alerts);
+            return base.EvaluateSymbol(symbolName, parameterAssignments, alerts);
         }
 
         protected virtual void CheckForExpressionsInConnectionString(
@@ -154,7 +154,7 @@ namespace FabricUpgradePowerShellModule.Upgraders.LinkedServiceUpgraders
         /// <param name="alerts">Add any generated alerts to this collector.</param>
         /// <returns>The Symbol whose value will instruct the LinkedServiceExporter how to find the Fabric Connection ID.</returns>
         protected virtual Symbol BuildExportResolves(
-            Dictionary<string, JToken> parametersFromCaller,
+            Dictionary<string, JToken> parameterAssignments,
             AlertCollector alerts)
         {
             List<FabricExportResolveStep> resolves = new List<FabricExportResolveStep>();
@@ -186,16 +186,16 @@ namespace FabricUpgradePowerShellModule.Upgraders.LinkedServiceUpgraders
         /// You will see in the LinkedServiceExporter that we do not _actually_ export a Fabric Connection.
         /// The exportInstructions tell the LinkedServiceExporter how to "pretend" to export a Fabric Connection.
         /// </remarks>
-        /// <param name="parametersFromCaller">The parameters from the caller.</param>
+        /// <param name="parameterAssignments">The parameters from the caller.</param>
         /// <param name="alerts">Add any generated alerts to this collector.</param>
         /// <returns>The Symbol whose value will instruct the LinkedServiceExporter how to export the Connection.</returns>
         protected virtual Symbol BuildExportInstructions(
-            Dictionary<string, JToken> parametersFromCaller,
+            Dictionary<string, JToken> parameterAssignments,
             AlertCollector alerts)
         {
             ConnectionExportInstruction exportInstruction = new ConnectionExportInstruction(this.Name);
 
-            Symbol resolvesSymbol = this.BuildExportResolves(parametersFromCaller, alerts);
+            Symbol resolvesSymbol = this.BuildExportResolves(parameterAssignments, alerts);
             if (resolvesSymbol.State != Symbol.SymbolState.Ready)
             {
                 // TODO!
@@ -268,12 +268,12 @@ namespace FabricUpgradePowerShellModule.Upgraders.LinkedServiceUpgraders
         /// Combine the default parameter values with the overrides passed in from the caller
         /// to create "active" parameters that can be used when resolving parameters in expressions.
         /// </summary>
-        /// <param name="callerValues">Values passed in from the caller.</param>
+        /// <param name="parameterAssignments">Values passed in from the caller.</param>
         /// <returns>A ResourceParameters object that can be used in the PropertyCopier.</returns>
         protected ResourceParameters BuildActiveParameters(
-            Dictionary<string, JToken> callerValues)
+            Dictionary<string, JToken> parameterAssignments)
         {
-            return this.LinkedServiceParameters.BuildResolutionContext(callerValues);
+            return this.LinkedServiceParameters.BuildResolutionContext(parameterAssignments);
         }
 
 

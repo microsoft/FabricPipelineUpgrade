@@ -7,6 +7,7 @@ using FabricUpgradePowerShellModule.Models;
 using FabricUpgradePowerShellModule.Upgraders;
 using FabricUpgradePowerShellModule.Upgraders.DatasetUpgraders;
 using FabricUpgradePowerShellModule.Upgraders.LinkedServiceUpgraders;
+using FabricUpgradePowerShellModule.Upgraders.TriggerUpgraders;
 using FabricUpgradePowerShellModule.Utilities;
 using Newtonsoft.Json.Linq;
 
@@ -35,7 +36,7 @@ namespace FabricUpgradePowerShellModule.UpgradeMachines
             {
                 this.BuildUpgraders();
                 this.CompileUpgraders();
-                this.PreLinkUpgraders();
+                this.PreSortUpgraders();
                 this.SortUpgraders();
                 JObject result = this.GenerateExportInstructions();
 
@@ -80,8 +81,15 @@ namespace FabricUpgradePowerShellModule.UpgradeMachines
             foreach (var entry in this.upgradePackage.LinkedServices)
             {
                 JToken linkedServiceToken = entry.Value;
-                Upgrader pipelineUpgrader = LinkedServiceUpgrader.CreateLinkedServiceUpgrader(linkedServiceToken, this);
-                this.Upgraders.Add(pipelineUpgrader);
+                Upgrader linkedServiceUpgrader = LinkedServiceUpgrader.CreateLinkedServiceUpgrader(linkedServiceToken, this);
+                this.Upgraders.Add(linkedServiceUpgrader);
+            }
+
+            foreach (var entry in this.upgradePackage.Triggers)
+            {
+                JToken triggerToken = entry.Value;
+                Upgrader triggerUpgrader = TriggerUpgrader.CreateTriggerUpgrader(triggerToken, this);
+                this.Upgraders.Add(triggerUpgrader);
             }
         }
 
@@ -103,19 +111,19 @@ namespace FabricUpgradePowerShellModule.UpgradeMachines
         }
 
         /// <summary>
-        /// Invoke the PreLink method on all of the Upgraders.
+        /// Invoke the PreSort method on all of the Upgraders.
         /// </summary>
         /// <exception cref="UpgradeFailureException"></exception>
-        private void PreLinkUpgraders()
+        private void PreSortUpgraders()
         {
             foreach (Upgrader upgrader in this.Upgraders)
             {
-                upgrader.PreLink(this.Upgraders, this.Alerts);
+                upgrader.PreSort(this.Upgraders, this.Alerts);
             }
 
             if (this.AlertsIndicateFailure())
             {
-                throw new UpgradeFailureException("PreLink");
+                throw new UpgradeFailureException("PreSort");
             }
         }
 

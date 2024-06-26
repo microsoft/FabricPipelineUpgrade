@@ -6,18 +6,18 @@ using FabricUpgradePowerShellModule.UpgradeMachines;
 using FabricUpgradePowerShellModule.Utilities;
 using Newtonsoft.Json.Linq;
 
-namespace FabricUpgradePowerShellModule.Upgraders.LinkedServiceUpgraders
+namespace FabricUpgradePowerShellModule.Upgraders.TriggerUpgraders
 {
 
     /// <summary>
-    /// This class handles an unsupported LinkedService type by failing in the Compile step.
+    /// This class handles an unsupported Trigger type by generating a Warning in the Compile step.
     /// </summary>
-    public class UnsupportedLinkedServiceUpgrader : LinkedServiceUpgrader
+    public class UnsupportedTriggerUpgrader : TriggerUpgrader
     {
-        public UnsupportedLinkedServiceUpgrader(
-            JToken adfLinkedServiceToken,
+        public UnsupportedTriggerUpgrader(
+            JToken adfTriggerToken,
             IFabricUpgradeMachine machine)
-            : base(adfLinkedServiceToken, machine)
+            : base(adfTriggerToken, machine)
         {
         }
 
@@ -27,7 +27,7 @@ namespace FabricUpgradePowerShellModule.Upgraders.LinkedServiceUpgraders
             base.Compile(alerts);
 
             // Here, we add an Alert that will prevent the Upgrader from continuing.
-            alerts.AddUnsupportedResourceAlert($"Cannot upgrade LinkedService '{this.Name}' because its Type is '{this.LinkedServiceType}'");
+            alerts.AddWarning($"Cannot upgrade the {this.TriggerType} '{this.Name}'; Fabric Upgrade does not yet support upgrading Triggers");
         }
     }
 }

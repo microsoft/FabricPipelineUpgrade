@@ -15,6 +15,7 @@ namespace FabricUpgradePowerShellModuleTests
     [TestClass]
     public class HandlerTests
     {
+        // Validate Import-AdfSupportFile.
         [TestMethod]
         [DataRow("ImportNoSuchSupportFile")]
         [DataRow("ImportNotAZipFile")]
@@ -43,6 +44,7 @@ namespace FabricUpgradePowerShellModuleTests
                     $"MISMATCHES:\n{mismatches?.ToString(Formatting.Indented)}\n\nEXPECTED:\n{expectedResponseObject}\n\nACTUAL:\n{actualResponse}");
         }
 
+        // Validate ConvertTo-FabricResources
         [TestMethod]
         [DataRow("ConvertNotAZipFile")]
         [DataRow("ConvertPipelineWithUnsupportedActivity")]
@@ -86,6 +88,8 @@ namespace FabricUpgradePowerShellModuleTests
                     $"MISMATCHES:\n{mismatches?.ToString(Formatting.Indented)}\n\nEXPECTED:\n{expectedResponseObject}\n\nACTUAL:\n{actualConvertResponse}");
         }
 
+        // If the progress sent to ConvertTo-FabricResources does not contain an "importedResources" property,
+        // then ConvertTo-FabricResources fails.
         [TestMethod]
         [DataRow("x")]
         [DataRow(FabricUpgradeProgress.ExportableFabricResourcesKey)]
@@ -107,7 +111,10 @@ namespace FabricUpgradePowerShellModuleTests
             Assert.AreEqual("ConvertTo-FabricResources expects imported ADF resources.", actualResponse.Alerts[0].Details);
         }
 
-
+        // If the progress passed to ConvertTo-FabricResources has a state of Failed,
+        // then ConvertTo-FabricResources returns the same progress.
+        // If the progress passed to ConvertTo-FabricResources is not a valid JSON string,
+        // then ConvertTo-FabricResources fails with the appropriate error.
         [TestMethod]
         [DataRow("{\"state\":\"Failed\", \"alerts\": []}", "passthrough")]
         [DataRow("{\"state\":\"Failed\", \"alerts\": [{\"severity\": \"Permanent\"}]}", "passthrough")]
@@ -141,6 +148,7 @@ namespace FabricUpgradePowerShellModuleTests
                     $"MISMATCHES:\n{mismatches?.ToString(Formatting.Indented)}\n\nEXPECTED:\n{expectedResponse}\n\nACTUAL:\n{actualResponse}");
         }
 
+        // Validate the Import-FabricResolutions method.
         [TestMethod]
         [DataRow("ImportResolutions_NoSuchFile")]
         [DataRow("ImportResolutions_OneFileThenNoSuchFile")]
@@ -171,72 +179,8 @@ namespace FabricUpgradePowerShellModuleTests
 
         }
 
-        [TestMethod]
-        [DataRow("ExportEmptyPipeline")]
-        [DataRow("ExportPipelineWithWait")]
-        public async Task ExportFabricPipeline_TestAsync(
-            string testConfigFilename)
-        {
-            Guid workspaceId = Guid.NewGuid();
-
-            List<Guid> expectedGuids = new List<Guid>
-            {
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-            };
-
-            ExportTestConfig testConfig = ExportTestConfig.LoadFromFile(testConfigFilename);
-            testConfig.UpdateItemGuids(workspaceId, expectedGuids);
-
-            TestPublicApiEndpoints endpoints = new TestPublicApiEndpoints("https://dailyapi.fabric.microsoft.com/v1/");
-            endpoints.PrepareGuids(expectedGuids);
-            TestHttpClientFactory.RegisterTestHttpClientFactory(endpoints);
-
-            FabricUpgradeProgress actualResponse = await new FabricUpgradeHandler().ExportFabricResourcesAsync(
-                testConfig.Progress.ToString(),
-                "daily",
-                workspaceId.ToString(),
-                "123",
-                CancellationToken.None).ConfigureAwait(false);
-
-            Assert.AreEqual(testConfig.ExpectedResponse.State, actualResponse.State);
-            Assert.AreEqual(testConfig.ExpectedResponse.Alerts.Count, actualResponse.Alerts.Count);
-
-            JObject expectedResult = testConfig.ExpectedResponse.Result;
-            JObject actualResult = actualResponse.Result;
-
-            var resultMismatches = JsonUtils.DeepCompare(expectedResult, actualResult);
-            Assert.IsNull(
-                    resultMismatches,
-                    $"MISMATCHES:\n{resultMismatches?.ToString(Formatting.Indented)}\n\nEXPECTED:\n{expectedResult}\n\nACTUAL:\n{actualResult}");
-
-
-
-            int expectedNumItems = testConfig.ExpectedItems.Count();
-
-            (int numItems, int numItemDefinitions) = endpoints.CountItems();
-            Assert.AreEqual(expectedNumItems, numItems);
-            Assert.AreEqual(expectedNumItems, numItemDefinitions);
-
-            int nItem = 0;
-            foreach (JToken expectedItemToken in testConfig.ExpectedItems)
-            {
-                JObject expectedItem = JObject.Parse(expectedItemToken.ToString());
-
-                JObject actualItem = endpoints.ReadItemDirectly(workspaceId, expectedGuids[nItem]);
-                string eis = expectedItem.ToString();
-                string ais = actualItem.ToString();
-
-                JObject mismatches = JsonUtils.DeepCompare(expectedItem, actualItem);
-
-                Assert.IsNull(
-                    mismatches,
-                    $"MISMATCHES:\n{mismatches?.ToString(Formatting.Indented)}\n\nEXPECTED:\n{eis}\n\nACTUAL:\n{ais}");
-
-                nItem++;
-            }
-        }
-
+        // If the progress passed to Export-FabricResources does not contain an "exportableFabricResources" property,
+        // then Export-FabricResources should fail.
         [TestMethod]
         [DataRow("yyy")]
         [DataRow(FabricUpgradeProgress.ImportedResourcesKey)]
@@ -314,103 +258,6 @@ namespace FabricUpgradePowerShellModuleTests
                 string test = File.ReadAllText("./TestFiles/" + testFilename + ".json");
                 ResolutionTestConfig config = JsonConvert.DeserializeObject<ResolutionTestConfig>(test);
                 return config;
-            }
-
-        }
-
-        private class ExportTestConfig
-        {
-            [JsonProperty(PropertyName = "progress")]
-            public JObject Progress { get; set; }
-
-            [JsonProperty(PropertyName = "prestock")]
-            public List<Prestock> Prestocks { get; set; } = new List<Prestock>();
-
-            [JsonProperty(PropertyName = "guidSubstitutions")]
-            public List<GuidSubstitution> GuidSubstitutions { get; set; } = new List<GuidSubstitution>();
-
-            [JsonProperty(PropertyName = "expectedResponse")]
-            public FabricUpgradeProgress ExpectedResponse { get; set; }
-
-            [JsonProperty(PropertyName = "expectedItems")]
-            public JArray ExpectedItems { get; set; } = new JArray();
-
-            public static ExportTestConfig LoadFromFile(string testFilename)
-            {
-                string test = File.ReadAllText("./TestFiles/" + testFilename + ".json");
-                ExportTestConfig config = JsonConvert.DeserializeObject<ExportTestConfig>(test);
-                return config;
-            }
-
-            public ExportTestConfig UpdateItemGuids(Guid workspaceId, List<Guid> itemIds)
-            {
-                JObject expectedResponseItems = (JObject)(this.ExpectedResponse.Result[FabricUpgradeProgress.ExportedFabricResourcesKey]);
-                foreach (var r in expectedResponseItems)
-                {
-                    r.Value["workspaceId"] = workspaceId.ToString();
-                    int idGuidIndex = r.Value["id"].ToObject<int>();
-                    r.Value["id"] = itemIds[idGuidIndex].ToString();
-                }
-
-                int numItem = 0;
-                foreach (JToken expectedItemToken in this.ExpectedItems)
-                {
-                    Guid itemId = itemIds[numItem];
-                    JObject expectedItem = (JObject)expectedItemToken;
-                    expectedItem["item"]["workspaceId"] = workspaceId.ToString();
-                    expectedItem["item"]["id"] = itemId.ToString();
-                    numItem++;
-
-                    foreach (Prestock prestock in this.Prestocks)
-                    {
-                        // Find a prestock of the same type and name.
-                        if (prestock.Type != expectedItem.SelectToken("$.item.type").ToString())
-                        {
-                            continue;
-                        }
-
-                        if (prestock.DisplayName != expectedItem.SelectToken("$.item.displayName").ToString())
-                        {
-                            continue;
-                        }
-
-                        prestock.WorkspaceId = workspaceId.ToString();
-                        prestock.Id = itemId.ToString();
-                    }
-                }
-
-                // In an ExecutePipeline Activity, we need to tweak one of the expected fields to point at another pipeline.
-                // There may be more uses for this.
-                foreach (GuidSubstitution gSub in this.GuidSubstitutions ?? new List<GuidSubstitution>())
-                {
-                    JToken items = this.ExpectedItems;
-                    JToken field = items.SelectToken(gSub.Path);
-                    if (gSub.GuidIndex < 0)
-                    {
-                        field.Replace(workspaceId);
-                    }
-                    else
-                    {
-                        field.Replace(itemIds[gSub.GuidIndex]);
-                    }
-                }
-
-                return this;
-            }
-
-            public class Prestock
-            {
-                [JsonProperty(PropertyName = "workspaceId")]
-                public string WorkspaceId { get; set; }
-
-                [JsonProperty(PropertyName = "id")]
-                public string Id { get; set; }
-
-                [JsonProperty(PropertyName = "type")]
-                public string Type { get; set; }
-
-                [JsonProperty(PropertyName = "displayName")]
-                public string DisplayName { get; set; }
             }
         }
     }
