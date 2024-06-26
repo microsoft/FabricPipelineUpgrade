@@ -1,0 +1,82 @@
+﻿{
+  "adfSupportFile": "PipelineWithTriggerAndUnsupportedActivity_support_live.zip",
+
+  "expectedResponse": {
+    "state": "Succeeded",
+    "alerts": [
+      {
+        "severity": "Warning",
+        "details": "Cannot upgrade the ScheduleTrigger 'trigger1'; Fabric Upgrade does not yet support upgrading Triggers"
+      },
+      {
+        "severity": "Warning",
+        "details": "Cannot upgrade Activity 'pipelineWithTriggerAndUnsupportedActivity/Execute SSIS package1'; please inspect this Activity for more details"
+      }
+    ],
+    "result": {
+      "exportedFabricResources": {
+        "pipelineWithTriggerAndUnsupportedActivity": {
+          "type": "DataPipeline",
+          "displayName": "pipelineWithTriggerAndUnsupportedActivity",
+          "description": null,
+          "workspaceId": "",
+          "id": 0
+        }
+      }
+    },
+    "resolutions": []
+  },
+
+  "expectedItems": [
+    {
+      "item": {
+        "type": "DataPipeline",
+        "workspaceId": "",
+        "id": 0,
+        "displayName": "pipelineWithTriggerAndUnsupportedActivity",
+        "description": null
+      },
+      "definition": {
+        "name": "pipelineWithTriggerAndUnsupportedActivity",
+        "properties": {
+          "activities": [
+            {
+              "name": "Wait1",
+              "type": "Wait",
+              "dependsOn": [],
+              "userProperties": [],
+              "description": null,
+              "typeProperties": {
+                "waitTimeInSeconds": 1
+              }
+            },
+            {
+              "name": "Execute SSIS package1",
+              "type": "Wait",
+              "dependsOn": [
+                {
+                  "activity": "Wait1",
+                  "dependencyConditions": [
+                    "Succeeded"
+                  ]
+                }
+              ],
+              "userProperties": [],
+              "description": "Failed to upgrade activity 'Execute SSIS package1' because it has type 'ExecuteSSISPackage'.\nTo run this pipeline anyway, mark this Activity as 'Deactivated' and select the desired value for 'Mark activity as'.",
+              "typeProperties": {
+                "waitTimeInSeconds": 0
+              }
+            }
+          ]
+        },
+        "annotations": []
+      }
+    }
+  ],
+
+  "expectedEndpointEvents": [
+    "LIST DataPipeline",
+    "CREATE DataPipeline 'pipelineWithTriggerAndUnsupportedActivity' => $0"
+  ]
+
+}

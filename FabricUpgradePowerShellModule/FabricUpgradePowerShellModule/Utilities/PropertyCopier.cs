@@ -135,7 +135,7 @@ namespace FabricUpgradePowerShellModule.Utilities
 
         /// <summary>
         /// Ensure that the token value does not contain an invalid expression.
-        /// The definition of "invalid" can be found in TODO.
+        /// The definition of "invalid" can be found in UpgradeExpression.
         /// If the token is valid, then resolve any references to Dataset or LinkedService parameters.
         /// </summary>
         /// <param name="path">The path to the token, for Alerting purposes.</param>

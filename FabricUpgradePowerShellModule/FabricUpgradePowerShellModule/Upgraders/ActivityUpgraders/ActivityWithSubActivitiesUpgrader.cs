@@ -31,19 +31,19 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
         }
 
         /// <summary>
-        /// PreLink a group of subactivities.
+        /// PreSort a group of subactivities.
         /// </summary>
-        /// <param name="upgraders">The group of subactivites to PreLink.</param>
+        /// <param name="upgraders">The group of subactivites to PreSort.</param>
         /// <param name="allUpgraders">All the upgraders.</param>
         /// <param name="alerts">Add any generated alerts to this collector.</param>
-        protected void PreLinkSubActivities(
+        protected void PreSortSubActivities(
             List<Upgrader> upgraders,
             List<Upgrader> allUpgraders,
             AlertCollector alerts)
         {
             foreach (Upgrader activityUpgrader in upgraders)
             {
-                activityUpgrader.PreLink(allUpgraders, alerts);
+                activityUpgrader.PreSort(allUpgraders, alerts);
                 this.DependsOn.AddRange(activityUpgrader.DependsOn);
             }
         }

@@ -58,13 +58,13 @@ namespace FabricUpgradePowerShellModule.Upgraders
         }
 
         /// <inheritdoc/>
-        public override void PreLink(
+        public override void PreSort(
             List<Upgrader> allUpgraders,
             AlertCollector alerts)
         {
             foreach (Upgrader activityUpgrader in this.activityUpgraders)
             {
-                activityUpgrader.PreLink(allUpgraders, alerts);
+                activityUpgrader.PreSort(allUpgraders, alerts);
 
                 // Used in Sort().
                 this.DependsOn.AddRange(activityUpgrader.DependsOn);
@@ -74,7 +74,7 @@ namespace FabricUpgradePowerShellModule.Upgraders
         /// <inheritdoc/>
         public override Symbol EvaluateSymbol(
             string symbolName,
-            Dictionary<string, JToken> parameters,
+            Dictionary<string, JToken> parameterAssignments,
             AlertCollector alerts)
         {
             if (symbolName == Symbol.CommonNames.ExportInstructions)
@@ -102,7 +102,7 @@ namespace FabricUpgradePowerShellModule.Upgraders
                 return Symbol.ReadySymbol(exportInstruction.ToJObject());
             }
 
-            return base.EvaluateSymbol(symbolName, parameters, alerts);
+            return base.EvaluateSymbol(symbolName, parameterAssignments, alerts);
         }
 
         /// <summary>

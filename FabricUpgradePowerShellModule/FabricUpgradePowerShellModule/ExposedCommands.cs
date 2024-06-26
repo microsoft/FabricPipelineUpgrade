@@ -110,39 +110,6 @@ namespace FabricUpgradePowerShellModule
         }
     }
 
-    /// <summary>
-    /// This cmdlet updates the "progress" field with a single resolution.
-    /// </summary>
-    [Cmdlet(VerbsCommon.Add, "FabricResolution")]
-    public class AddFabricResolution : Cmdlet
-    {
-        [Parameter(
-            Position = 0,
-            ValueFromPipeline = true,
-            ValueFromPipelineByPropertyName = true)]
-        [ValidateNotNullOrEmpty]
-        public string Progress
-        {
-            get { return progress; }
-            set { progress = value; }
-        }
-        private string progress;
-
-        [Alias("rf")]
-        [Parameter(Mandatory = false)]
-        public string ResolutionsFilename
-        {
-            get { return resolutionsFilename; }
-            set { resolutionsFilename = value; }
-        }
-        private string resolutionsFilename;
-
-        protected override void ProcessRecord()
-        {
-            WriteObject("NOT YET IMPLEMENTED");
-        }
-    }
-
     // This cmdlet takes the progress payload produced by ConvertTo-FabricResources,
     // and takes the workspace and AAD token from named parameters:
     // Import-AdfSupportFile '...' | ConvertTo-FabricResources | Export-FabricResources -Workspace ABC -Token 123
@@ -199,37 +166,6 @@ namespace FabricUpgradePowerShellModule
                 cts.Token).Result.ToString();
 
             WriteObject(result);
-        }
-    }
-
-    // This is just a playground to experiment with PowerShell details.
-    [Cmdlet(VerbsData.Export, "Junk")]
-    public class ExportJunk : Cmdlet
-    {
-        [Parameter(
-            Position = 0,
-            ValueFromPipeline = true,
-            ValueFromPipelineByPropertyName = true)]
-        [ValidateNotNullOrEmpty]
-        public string Item1
-        {
-            get { return item1; }
-            set { item1 = value; }
-        }
-        private string item1;
-
-        [Parameter(Mandatory = true)]
-        public string Item2
-        {
-            get { return item2; }
-            set { this.item2 = value; }
-        }
-        private string item2;
-
-        protected override void ProcessRecord()
-        {
-            // No pipeline => item1 is null.
-            WriteObject((item1 ?? "<null>") + " and then " + item2);
         }
     }
 }

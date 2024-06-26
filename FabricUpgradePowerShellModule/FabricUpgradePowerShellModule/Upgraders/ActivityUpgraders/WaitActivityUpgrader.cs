@@ -27,23 +27,23 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
         /// <inheritdoc/>
         public override Symbol EvaluateSymbol(
             string symbolName,
-            Dictionary<string, JToken> parameters,
+            Dictionary<string, JToken> parameterAssignments,
             AlertCollector alerts)
         {
             if (symbolName == Symbol.CommonNames.Activity)
             {
-                return this.BuildActivitySymbol(parameters, alerts);
+                return this.BuildActivitySymbol(parameterAssignments, alerts);
             }
 
-            return base.EvaluateSymbol(symbolName, parameters, alerts);
+            return base.EvaluateSymbol(symbolName, parameterAssignments, alerts);
         }
 
         /// <inheritdoc/>
         protected override Symbol BuildActivitySymbol(
-            Dictionary<string, JToken> parameters,
+            Dictionary<string, JToken> parameterAssignments,
             AlertCollector alerts)
         {
-            Symbol activitySymbol = base.EvaluateSymbol(Symbol.CommonNames.Activity, parameters, alerts);
+            Symbol activitySymbol = base.EvaluateSymbol(Symbol.CommonNames.Activity, parameterAssignments, alerts);
 
             if (activitySymbol.State != Symbol.SymbolState.Ready)
             {

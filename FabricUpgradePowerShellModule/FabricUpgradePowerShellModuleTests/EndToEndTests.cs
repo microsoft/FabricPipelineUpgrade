@@ -21,6 +21,7 @@ namespace FabricUpgradePowerShellModuleTests
         [DataRow("E2eEmptyPipeline")]
         [DataRow("E2eEmptyPipeline_Update")]
         [DataRow("E2ePipelineWithUnsupportedActivity")]
+        [DataRow("E2ePipelineWithTriggerAndUnsupportedActivity")]
 
         [DataRow("E2ePipelineWithWait")]
         [DataRow("E2ePipelineWithIf")]
@@ -211,12 +212,16 @@ namespace FabricUpgradePowerShellModuleTests
             [JsonProperty(PropertyName = "resolutions")]
             public List<FabricUpgradeResolution> Resolutions { get; set; } = new List<FabricUpgradeResolution>();
 
+            // Before running the test, create these Pipelines in the TestPublicApiEndpoints.
             [JsonProperty(PropertyName = "prestocks")]
             public List<Prestock> Prestocks { get; set; } = new List<Prestock>();
 
+            // Return an ItemDisplayNameAlreadyInUse error if the upgrade tries to create a Pipeline with this name.
             [JsonProperty(PropertyName = "reservedDisplayNames")]
             public List<string> ReservedDisplayNames { get; set; } = new List<string>();
 
+            // Fix up an expectedItem's JSON by inserting a GUID at the correct spot.
+            // This is used for ExecutePipeline, so that we can "expect" the correct GUID in that activity.
             [JsonProperty(PropertyName = "guidSubstitutions")]
             public List<GuidSubstitution> GuidSubstitutions { get; set; } = new List<GuidSubstitution>();
 

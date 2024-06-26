@@ -113,9 +113,6 @@
                 }
               ],
               "userProperties": [],
-              "policy": {
-                "secureInput": false
-              },
               "typeProperties": {
                 "waitOnCompletion": true,
                 "parameters": null,

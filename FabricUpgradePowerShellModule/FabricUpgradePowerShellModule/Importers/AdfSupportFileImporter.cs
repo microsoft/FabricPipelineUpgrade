@@ -73,7 +73,7 @@ namespace FabricUpgradePowerShellModule.Importers
             {
                 State = FabricUpgradeProgress.FabricUpgradeState.Succeeded,
                 Alerts = this.alerts.ToList(),
-                Result = this.Build(),
+                Result = this.BuildResult(),
                 Resolutions = this.progress.Resolutions,
             };
         }
@@ -115,7 +115,7 @@ namespace FabricUpgradePowerShellModule.Importers
         /// Construct the JObject that can be inserted into the FabricUpgradeProgress' Result field.
         /// </summary>
         /// <returns>The Result that will be returned to the client in the FabricUpgradeProgress.</returns>
-        public JObject Build()
+        public JObject BuildResult()
         {
             JObject built = new JObject();
             built[FabricUpgradeProgress.ImportedResourcesKey] = UpgradeSerialization.ToJToken(upgradePackage);

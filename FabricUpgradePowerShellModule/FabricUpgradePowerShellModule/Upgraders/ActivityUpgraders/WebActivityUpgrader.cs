@@ -48,34 +48,34 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
         }
 
         /// <inheritdoc/>
-        public override void PreLink(
+        public override void PreSort(
             List<Upgrader> allUpgraders,
             AlertCollector alerts)
         {
-            base.PreLink(allUpgraders, alerts);
+            base.PreSort(allUpgraders, alerts);
         }
 
         /// <inheritdoc/>
         public override Symbol EvaluateSymbol(
             string symbolName,
-            Dictionary<string, JToken> parameters,
+            Dictionary<string, JToken> parameterAssignments,
             AlertCollector alerts)
         {
             if (symbolName == Symbol.CommonNames.ExportResolveSteps)
             {
-                return this.BuildExportResolveStepsSymbol(parameters, alerts);
+                return this.BuildExportResolveStepsSymbol(parameterAssignments, alerts);
             }
             if (symbolName == Symbol.CommonNames.Activity)
             {
-                return this.BuildActivitySymbol(parameters, alerts);
+                return this.BuildActivitySymbol(parameterAssignments, alerts);
             }
 
-            return base.EvaluateSymbol(symbolName, parameters, alerts);
+            return base.EvaluateSymbol(symbolName, parameterAssignments, alerts);
         }
 
         /// <inheritdoc/>
         protected override Symbol BuildExportResolveStepsSymbol(
-            Dictionary<string, JToken> parameters,
+            Dictionary<string, JToken> parameterAssignments,
             AlertCollector alerts)
         {
             List<FabricExportResolveStep> resolves = new List<FabricExportResolveStep>();
@@ -111,10 +111,10 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
 
         /// <inheritdoc/>
         protected override Symbol BuildActivitySymbol(
-            Dictionary<string, JToken> parameters,
+            Dictionary<string, JToken> parameterAssignments,
             AlertCollector alerts)
         {
-            Symbol activitySymbol = base.EvaluateSymbol(Symbol.CommonNames.Activity, parameters, alerts);
+            Symbol activitySymbol = base.EvaluateSymbol(Symbol.CommonNames.Activity, parameterAssignments, alerts);
 
             if (activitySymbol.State != Symbol.SymbolState.Ready)
             {

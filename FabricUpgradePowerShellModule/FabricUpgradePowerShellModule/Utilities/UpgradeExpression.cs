@@ -46,7 +46,7 @@ namespace FabricUpgradePowerShellModule.Utilities
             ResourceParameters parameters)
         {
            
-            // TODO: Deal with Object parameters and Object parameter values.
+            // TODO: Deal with Object parameters and Object parameter assignments.
 
             this.TokenizeExpression();
 

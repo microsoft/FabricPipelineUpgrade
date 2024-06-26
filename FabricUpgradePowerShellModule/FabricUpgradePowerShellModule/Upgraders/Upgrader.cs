@@ -77,14 +77,14 @@ namespace FabricUpgradePowerShellModule.Upgraders
         /// </remarks>
         /// <param name="allUpgraders">A list of all the upgraders</param>
         /// <param name="alerts">Add any generated alerts to this collector.</param>
-        public virtual void PreLink(
+        public virtual void PreSort(
             List<Upgrader> allUpgraders,
             AlertCollector alerts)
         {
         }
 
         /// <summary>
-        /// A shortcut method for backwards compatibility when the caller does not have any invocationParameters.
+        /// A shortcut method for backwards compatibility when the caller does not have any parameterAssignments.
         /// </summary>
         /// <param name="symbolName">The 'name' of the Symbol to export (see Symbol.CommonNames).</param>
         /// <param name="alerts">Add any generated alerts to this collector.</param>
@@ -101,7 +101,7 @@ namespace FabricUpgradePowerShellModule.Upgraders
         /// This method handles checking parameters and expressions.
         /// </summary>
         /// <param name="symbolName">The 'name' of the Symbol to export (see Symbol.CommonNames).</param>
-        /// <param name="parametersFromCaller">
+        /// <param name="parameterAssignments">
         /// If a property has an expression, and that expression includes a parameter like 'dataset().xyz',
         /// then override the default parameter values with the ones in this dictionary.
         /// </param>
@@ -109,7 +109,7 @@ namespace FabricUpgradePowerShellModule.Upgraders
         /// <returns>A Symbol containing the requested JToken.</returns>
         public virtual Symbol EvaluateSymbol(
             string symbolName,
-            Dictionary<string, JToken> parametersFromCaller,
+            Dictionary<string, JToken> parameterAssignments,
             AlertCollector alerts)
         {
             if (symbolName == Symbol.CommonNames.ExportInstructions)

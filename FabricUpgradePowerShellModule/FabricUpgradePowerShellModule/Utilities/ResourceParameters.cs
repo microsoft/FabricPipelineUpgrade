@@ -76,10 +76,10 @@ namespace FabricUpgradePowerShellModule.Utilities
         /// When a Copy Activity asks a Dataset to build its datasetSettings Symbol, the Copy Activity passes
         /// the 'override' values that overwrite the Dataset's default values.
         /// </remarks>
-        /// <param name="overrideValues">Override the current values with the contents of this dictionary.</param>
+        /// <param name="parameterAssignments">Override the current values with the contents of this dictionary.</param>
         /// <returns>A new ResourceParameters with the updated values.</returns>
         public ResourceParameters BuildResolutionContext(
-            Dictionary<string, JToken> overrideValues)
+            Dictionary<string, JToken> parameterAssignments)
         {
             Dictionary<string, Parameter> activeParameters = new Dictionary<string, Parameter>();
 
@@ -88,7 +88,7 @@ namespace FabricUpgradePowerShellModule.Utilities
                 activeParameters[myParam.Key] = myParam.Value?.Clone();
             }
 
-            foreach (var incomingParam in overrideValues ?? new Dictionary<string, JToken>())
+            foreach (var incomingParam in parameterAssignments ?? new Dictionary<string, JToken>())
             {
                 string key = this.prefix + incomingParam.Key;
                 activeParameters[key] = activeParameters[key].WithValue(incomingParam.Value);
