@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="copy /y $(TargetPath) $(ProjectDir)\ToPublish\FabricUpgrade.dll" />
+    <Exec Command="copy /y $(TargetPath) $(ProjectDir)ToPublish\FabricUpgrade.dll" />
   </Target>
 
 </Project>

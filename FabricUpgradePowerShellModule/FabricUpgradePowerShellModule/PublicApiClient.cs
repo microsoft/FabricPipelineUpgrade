@@ -497,10 +497,10 @@ namespace FabricUpgradePowerShellModule
             return this.region switch
             {
                 "daily" => "https://dailyapi.fabric.microsoft.com/v1/",
-                "dxt" => "https://dxtapi.fabric.microsoft.com/v1",
-                "msit" => "https://msitapi.fabric.microsoft.com/v1",
-                "prod" => "https://api.fabric.microsoft.com/v1",
-                _ => "https://api.fabric.microsoft.com/v1",
+                "dxt" => "https://dxtapi.fabric.microsoft.com/v1/",
+                "msit" => "https://msitapi.fabric.microsoft.com/v1/",
+                "prod" => "https://api.fabric.microsoft.com/v1/",
+                _ => "https://api.fabric.microsoft.com/v1/",
             };
         }
 
