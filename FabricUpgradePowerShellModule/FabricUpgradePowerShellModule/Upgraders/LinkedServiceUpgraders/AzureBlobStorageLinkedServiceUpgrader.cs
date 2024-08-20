@@ -43,10 +43,12 @@ namespace FabricUpgradePowerShellModule.Upgraders.LinkedServiceUpgraders
             if (connectionStringToken == null)
             {
                 alerts.AddPermanentError($"Cannot upgrade LinkedService '{this.Path}' because its ConnectionString is missing.");
+                return;
             }
             else if (connectionStringToken.Type != JTokenType.String)
             {
                 alerts.AddPermanentError($"Cannot upgrade LinkedService '{this.Path}' because its ConnectionString is not a string.");
+                return;
             }
             else
             {

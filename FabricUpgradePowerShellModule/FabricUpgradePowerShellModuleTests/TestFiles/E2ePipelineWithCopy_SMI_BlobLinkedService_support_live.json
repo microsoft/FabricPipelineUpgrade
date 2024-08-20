@@ -1,0 +1,33 @@
+﻿{
+  "comments": [
+    "The LinkedService uses System Managed Identity for authentication.",
+    "This is not supported."
+  ],
+
+  "adfSupportFile": "PipelineWithCopy_SMI_BlobLinkedService_support_live.zip",
+
+  "resolutions": [
+    {
+      "type": "LinkedServiceToConnectionId",
+      "key": "shghatgeblobsmi",
+      "value": "99379220-ae1a-467f-b9f5-537cc3142b9f"
+    }
+  ],
+
+  "expectedResponse": {
+    "state": "Failed",
+    "alerts": [
+      {
+        "severity": "Permanent",
+        "details": "Cannot upgrade LinkedService 'LinkedService shghatgeblobsmi' because its ConnectionString is missing."
+      }
+    ],
+    "result": {},
+    "resolutions": []
+  },
+
+  "expectedItems": [],
+
+  "expectedEndpointEvents": []
+
+}
