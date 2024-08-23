@@ -101,10 +101,10 @@ namespace FabricUpgradePowerShellModule
 
         /// <summary>
         /// Accept a Progress that includes the result of ConvertTo-FabricResources and
-        /// selects only the permanent errors and state
+        /// selects only the permanent alerts and state
         /// </summary>
         /// <param name="progressString">The progress sent by the client.</param>
-        /// <returns>A FabricUpgradeProgress that contains only the Permanent error alerts.</returns>
+        /// <returns>A FabricUpgradeProgress that contains only the Permanent alerts.</returns>
         public FabricUpgradeProgress SelectPermanentAlerts(
             string progressString)
         {
