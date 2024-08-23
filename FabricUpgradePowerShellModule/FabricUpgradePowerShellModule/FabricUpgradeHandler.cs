@@ -105,15 +105,19 @@ namespace FabricUpgradePowerShellModule
         /// </summary>
         /// <param name="progressString">The progress sent by the client.</param>
         /// <returns>A FabricUpgradeProgress that contains only the Permanent error alerts.</returns>
-        public FabricUpgradeProgress SelectPermanentErrors(
+        public FabricUpgradeProgress SelectPermanentAlerts(
             string progressString)
         {
-            if (!this.CheckProgress(progressString, out FabricUpgradeProgress progress))
+            if (!this.CheckValidJSON(progressString, out FabricUpgradeProgress previousProgress))
             {
-                return progress;
+                return new FabricUpgradeProgress()
+                {
+                    State = FabricUpgradeProgress.FabricUpgradeState.Failed,
+                    Alerts = this.alerts.ToList(),
+                };
             }
             List<FabricUpgradeAlert> alerts = new List<FabricUpgradeAlert>();
-            foreach (FabricUpgradeAlert alert in progress.Alerts)
+            foreach (FabricUpgradeAlert alert in previousProgress.Alerts)
             {
                 if (alert.Severity == FabricUpgradeAlert.AlertSeverity.Permanent)
                 {
@@ -122,7 +126,7 @@ namespace FabricUpgradePowerShellModule
             }
             return new FabricUpgradeProgress()
             {
-                State = progress.State,
+                State = previousProgress.State,
                 Alerts = alerts.ToList(),
             };
         }
@@ -261,28 +265,34 @@ namespace FabricUpgradePowerShellModule
             string previousResponse,
             out FabricUpgradeProgress currentProgress)
         {
-            try
+            if (!this.CheckValidJSON(previousResponse, out FabricUpgradeProgress previousProgress))
             {
-                FabricUpgradeProgress previousProgress = FabricUpgradeProgress.FromString(previousResponse);
-
-                foreach (FabricUpgradeAlert alert in previousProgress.Alerts)
-                {
-                    this.alerts.AddAlert(alert);
-                }
-
-                currentProgress = previousProgress;
-                return currentProgress.State == FabricUpgradeProgress.FabricUpgradeState.Succeeded;
-            }
-            catch (Newtonsoft.Json.JsonException)
-            {
-                this.alerts.AddPermanentError("Input is not a valid JSON FabricUpgradeProgress.");
-
                 currentProgress = new FabricUpgradeProgress()
                 {
                     State = FabricUpgradeProgress.FabricUpgradeState.Failed,
                     Alerts = this.alerts.ToList(),
                 };
+                return false;
+            }
+            foreach (FabricUpgradeAlert alert in previousProgress.Alerts)
+            {
+                this.alerts.AddAlert(alert);
+            }
+            currentProgress = previousProgress;
+            return currentProgress.State == FabricUpgradeProgress.FabricUpgradeState.Succeeded;
+        }
 
+        private bool CheckValidJSON(string previousResponse, out FabricUpgradeProgress previousProgress)
+        {
+            try
+            {
+                previousProgress = FabricUpgradeProgress.FromString(previousResponse);
+                return true;
+            }
+            catch (Newtonsoft.Json.JsonException)
+            {
+                this.alerts.AddPermanentError("Input is not a valid JSON FabricUpgradeProgress.");
+                previousProgress = null;
                 return false;
             }
         }

@@ -116,7 +116,7 @@ namespace FabricUpgradePowerShellModuleTests
 
             runningProgress = new FabricUpgradeHandler().ConvertToFabricResources(runningProgress?.ToString());
 
-            FabricUpgradeProgress permanentErrorsProgress = new FabricUpgradeHandler().SelectPermanentErrors(runningProgress?.ToString());
+            FabricUpgradeProgress whatIfProgress = new FabricUpgradeHandler().SelectPermanentAlerts(runningProgress?.ToString());
 
             foreach (FabricUpgradeResolution resolution in testConfig.Resolutions)
             {
@@ -134,8 +134,8 @@ namespace FabricUpgradePowerShellModuleTests
 
             Assert.AreEqual(testConfig.ExpectedResponse.State, runningProgress.State, runningProgress.ToString());
             Assert.AreEqual(testConfig.ExpectedResponse.Alerts.Count, runningProgress.Alerts.Count, runningProgress.ToString());
-            Assert.AreEqual(testConfig.ExpectedWhatIfResponse.State, permanentErrorsProgress.State, permanentErrorsProgress.ToString());
-            Assert.AreEqual(testConfig.ExpectedWhatIfResponse.Alerts.Count, permanentErrorsProgress.Alerts.Count, permanentErrorsProgress.ToString());
+            Assert.AreEqual(testConfig.ExpectedWhatIfResponse.State, whatIfProgress.State, whatIfProgress.ToString());
+            Assert.AreEqual(testConfig.ExpectedWhatIfResponse.Alerts.Count, whatIfProgress.Alerts.Count, whatIfProgress.ToString());
             for (int nAlert = 0; nAlert < testConfig.ExpectedResponse.Alerts.Count; nAlert++)
             {
                 var expectedAlert = testConfig.ExpectedResponse.Alerts[nAlert].ToJToken();
