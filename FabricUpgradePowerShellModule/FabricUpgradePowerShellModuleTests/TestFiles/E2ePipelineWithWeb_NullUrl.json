@@ -21,5 +21,17 @@
     "result": {}
   },
 
+  "expectedWhatIfResponse": {
+    "state": "Failed",
+    "alerts": [
+      {
+        "severity": "Permanent",
+        "details": "PipelineWithWebActivity_NullUrl/Web1 property typeProperties.url must not be null."
+      }
+    ],
+    "resolutions": [],
+    "result": {}
+  },
+
   "expectedItems": []
 }

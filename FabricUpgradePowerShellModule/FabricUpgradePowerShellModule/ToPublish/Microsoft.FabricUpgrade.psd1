@@ -76,7 +76,8 @@ CmdletsToExport = @(
     "Import-AdfSupportFile",
     "ConvertTo-FabricResources",
     "Import-FabricResolutions",
-    "Export-FabricResources"
+    "Export-FabricResources",
+    "Select-PermanentErrors"
 )
 
 # Variables to export from this module

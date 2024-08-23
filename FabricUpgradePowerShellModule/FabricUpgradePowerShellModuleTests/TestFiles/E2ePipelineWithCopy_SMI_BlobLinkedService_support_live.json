@@ -26,6 +26,18 @@
     "resolutions": []
   },
 
+  "expectedWhatIfResponse": {
+    "state": "Failed",
+    "alerts": [
+      {
+        "severity": "Permanent",
+        "details": "Cannot upgrade LinkedService 'LinkedService shghatgeblobsmi' because its ConnectionString is missing."
+      }
+    ],
+    "result": {},
+    "resolutions": []
+  },
+
   "expectedItems": [],
 
   "expectedEndpointEvents": []

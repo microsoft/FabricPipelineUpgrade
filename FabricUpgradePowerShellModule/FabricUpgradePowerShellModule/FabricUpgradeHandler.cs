@@ -100,6 +100,34 @@ namespace FabricUpgradePowerShellModule
         }
 
         /// <summary>
+        /// Accept a Progress that includes the result of ConvertTo-FabricResources and
+        /// selects only the permanent errors and state
+        /// </summary>
+        /// <param name="progressString">The progress sent by the client.</param>
+        /// <returns>A FabricUpgradeProgress that contains only the Permanent error alerts.</returns>
+        public FabricUpgradeProgress SelectPermanentErrors(
+            string progressString)
+        {
+            if (!this.CheckProgress(progressString, out FabricUpgradeProgress progress))
+            {
+                return progress;
+            }
+            List<FabricUpgradeAlert> alerts = new List<FabricUpgradeAlert>();
+            foreach (FabricUpgradeAlert alert in progress.Alerts)
+            {
+                if (alert.Severity == FabricUpgradeAlert.AlertSeverity.Permanent)
+                {
+                    alerts.Add(alert);
+                }
+            }
+            return new FabricUpgradeProgress()
+            {
+                State = progress.State,
+                Alerts = alerts.ToList(),
+            };
+        }
+
+        /// <summary>
         /// Prepend the resolutions in the file to the resolutions we already have.
         /// </summary>
         /// <remarks>

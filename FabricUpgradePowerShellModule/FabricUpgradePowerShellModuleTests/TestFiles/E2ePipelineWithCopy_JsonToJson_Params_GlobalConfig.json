@@ -21,6 +21,18 @@
     "result": {}
   },
 
+  "expectedWhatIfResponse": {
+    "state": "Failed",
+    "alerts": [
+      {
+        "severity": "Permanent",
+        "details": "PipelineWithCopy_JsonToJson_Params_GlobalParams/Copy data1.typeProperties.sink.formatSettings.filePattern references GlobalParameters and that is not allowed in an Upgrade"
+      }
+    ],
+    "resolutions": [],
+    "result": {}
+  },
+
   "expectedItems": [],
 
   "expectedEndpointEvents": []

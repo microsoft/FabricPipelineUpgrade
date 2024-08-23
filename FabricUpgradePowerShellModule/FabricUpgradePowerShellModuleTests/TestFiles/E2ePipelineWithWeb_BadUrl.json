@@ -19,5 +19,17 @@
     ],
     "resolutions": [],
     "result": {}
+  },
+
+  "expectedWhatIfResponse": {
+    "state": "Failed",
+    "alerts": [
+      {
+        "severity": "Permanent",
+        "details": "Cannot upgrade Web Activity 'PipelineWithWebActivity_BadUrl/Web1' because its URL is improperly formatted."
+      }
+    ],
+    "resolutions": [],
+    "result": {}
   }
 }

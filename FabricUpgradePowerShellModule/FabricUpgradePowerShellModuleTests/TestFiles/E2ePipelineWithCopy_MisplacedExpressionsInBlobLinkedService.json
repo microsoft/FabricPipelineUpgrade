@@ -30,6 +30,22 @@
     "resolutions": []
   },
 
+  "expectedWhatIfResponse": {
+    "state": "Failed",
+    "alerts": [
+      {
+        "severity": "Permanent",
+        "details": "Cannot upgrade LinkedService 'AzureBlobStorage3' because its connection setting 'AccountName' is an expression."
+      },
+      {
+        "severity": "Permanent",
+        "details": "Cannot upgrade LinkedService 'AzureBlobStorage3' because its connection setting 'EndpointSuffix' is an expression."
+      }
+    ],
+    "result": {},
+    "resolutions": []
+  },
+
   "expectedItems": [],
 
   "expectedEndpointEvents": []

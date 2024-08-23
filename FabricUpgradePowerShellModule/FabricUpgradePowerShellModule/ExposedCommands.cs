@@ -168,4 +168,30 @@ namespace FabricUpgradePowerShellModule
             WriteObject(result);
         }
     }
+
+    // This cmdlet takes the progress payload produced by ConvertTo-FabricResources
+    // Import-AdfSupportFile '...' | ConvertTo-FabricResources | Select-PermanentErrors
+    // This cmdlet outputs whether the conversion to Fabric resources will succeed and permanent error alerts if present.
+    [Cmdlet("Select", "PermanentErrors")]
+    public class SelectPermanentErrors : Cmdlet
+    {
+        [Parameter(
+            Position = 0,
+            ValueFromPipeline = true,
+            ValueFromPipelineByPropertyName = true)]
+        [ValidateNotNullOrEmpty]
+        public string Progress
+        {
+            get { return progress; }
+            set { progress = value; }
+        }
+        private string progress;
+
+        protected override void ProcessRecord()
+        {
+            CancellationTokenSource cts = new CancellationTokenSource(TimeSpan.FromSeconds(120));
+            string result = new FabricUpgradeHandler().SelectPermanentErrors(this.progress).Result.ToString();
+            WriteObject(result);
+        }
+    }
 }

@@ -10,5 +10,16 @@
       }
     ],
     "result": {}
+  },
+
+  "expectedWhatIfResponse": {
+    "state": "Failed",
+    "alerts": [
+      {
+        "severity": "Permanent",
+        "details": "Failed to load Support File './TestFiles/AdfSupportFiles/NoSuch_support_live.zip'."
+      }
+    ],
+    "result": {}
   }
 }

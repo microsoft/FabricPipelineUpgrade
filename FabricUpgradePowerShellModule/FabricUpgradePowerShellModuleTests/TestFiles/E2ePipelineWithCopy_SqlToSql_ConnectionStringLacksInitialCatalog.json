@@ -36,6 +36,18 @@
     "result": {}
   },
 
+  "expectedWhatIfResponse": {
+    "state": "Failed",
+    "alerts": [
+      {
+        "severity": "Permanent",
+        "details": "LinkedService rodenkewsql property properties.typeProperties.database must not be null."
+      }
+    ],
+    "resolutions": [],
+    "result": {}
+  },
+
   "expectedItems": []
 
 }
