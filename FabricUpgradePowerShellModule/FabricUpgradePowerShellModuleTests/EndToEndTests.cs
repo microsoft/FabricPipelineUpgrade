@@ -1,4 +1,4 @@
-// <copyright file="EndToEndTests.cs" company="Microsoft">
+﻿// <copyright file="EndToEndTests.cs" company="Microsoft">
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
@@ -29,7 +29,6 @@ namespace FabricUpgradePowerShellModuleTests
 
         [DataRow("E2ePipelineWithExecutePipeline")]
         [DataRow("E2ePipelineWithExecutePipeline_MissingResolution")]
-
 
         [DataRow("E2ePipelineWithWeb")]
         [DataRow("E2ePipelineWithWeb_Post")]
@@ -117,6 +116,8 @@ namespace FabricUpgradePowerShellModuleTests
 
             runningProgress = new FabricUpgradeHandler().ConvertToFabricResources(runningProgress?.ToString());
 
+            FabricUpgradeProgress whatIfProgress = new FabricUpgradeHandler().SelectPermanentAlerts(runningProgress?.ToString());
+
             foreach (FabricUpgradeResolution resolution in testConfig.Resolutions)
             {
                 runningProgress = new FabricUpgradeHandler().AddFabricResolution(
@@ -133,7 +134,9 @@ namespace FabricUpgradePowerShellModuleTests
 
             Assert.AreEqual(testConfig.ExpectedResponse.State, runningProgress.State, runningProgress.ToString());
             Assert.AreEqual(testConfig.ExpectedResponse.Alerts.Count, runningProgress.Alerts.Count, runningProgress.ToString());
-            for (int nAlert = 0; nAlert <  testConfig.ExpectedResponse.Alerts.Count; nAlert++)
+            Assert.AreEqual(testConfig.ExpectedWhatIfResponse.State, whatIfProgress.State, whatIfProgress.ToString());
+            Assert.AreEqual(testConfig.ExpectedWhatIfResponse.Alerts.Count, whatIfProgress.Alerts.Count, whatIfProgress.ToString());
+            for (int nAlert = 0; nAlert < testConfig.ExpectedResponse.Alerts.Count; nAlert++)
             {
                 var expectedAlert = testConfig.ExpectedResponse.Alerts[nAlert].ToJToken();
                 var actualAlert = runningProgress.Alerts[nAlert].ToJToken();
@@ -234,6 +237,9 @@ namespace FabricUpgradePowerShellModuleTests
 
             [JsonProperty(PropertyName = "expectedEndpointEvents")]
             public List<string> ExpectedEndpointEvents { get; set; } = new List<string>();
+
+            [JsonProperty(PropertyName = "expectedWhatIfResponse")]
+            public FabricUpgradeProgress ExpectedWhatIfResponse { get; set; } = new FabricUpgradeProgress() { State = FabricUpgradeProgress.FabricUpgradeState.Succeeded };
 
             public static EndToEndTestConfig LoadFromFile(string testFilename)
             {

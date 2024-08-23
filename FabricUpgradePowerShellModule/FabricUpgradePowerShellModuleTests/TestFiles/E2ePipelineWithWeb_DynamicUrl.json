@@ -21,5 +21,17 @@
     "result": {}
   },
 
+  "expectedWhatIfResponse": {
+    "state": "Failed",
+    "alerts": [
+      {
+        "severity": "Permanent",
+        "details": "PipelineWithWebActivity_DynamicUrl/Web1.typeProperties.url is not a string and the FabricUpgrader cannot upgrade a WebActivity whose URL is not a string."
+      }
+    ],
+    "resolutions": [],
+    "result": {}
+  },
+
   "expectedItems": []
 }

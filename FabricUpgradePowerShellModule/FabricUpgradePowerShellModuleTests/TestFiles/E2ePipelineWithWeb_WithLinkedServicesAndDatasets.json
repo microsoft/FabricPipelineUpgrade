@@ -23,5 +23,21 @@
     ],
     "resolutions": [],
     "result": {}
+  },
+
+  "expectedWhatIfResponse": {
+    "state": "Failed",
+    "alerts": [
+      {
+        "severity": "Permanent",
+        "details": "Cannot upgrade Web Activity 'PipelineWithWebActivity_WithLinkedServicesAndDatasets/Web1' because it includes LinkedServices"
+      },
+      {
+        "severity": "Permanent",
+        "details": "Cannot upgrade Web Activity 'PipelineWithWebActivity_WithLinkedServicesAndDatasets/Web1' because it includes Datasets"
+      }
+    ],
+    "resolutions": [],
+    "result": {}
   }
 }
