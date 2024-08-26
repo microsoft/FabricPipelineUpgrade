@@ -23,6 +23,8 @@ namespace FabricUpgradePowerShellModule.Upgraders.LinkedServiceUpgraders
         protected const string AdfLinkedServiceTypePath = "properties.type";
         protected const string AdfParametersPath = "properties.parameters";
         protected const string AdfConnectionStringPath = "properties.typeProperties.connectionString";
+        protected const string AdfStorageServiceEndpointPath = "properties.typeProperties.serviceEndpoint";
+        protected const string AdfSasUriPath = "properties.typeProperties.sasUri";
 
         private readonly List<string> requiredAdfProperties = new List<string>
         {

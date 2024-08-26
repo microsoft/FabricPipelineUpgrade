@@ -36,6 +36,11 @@ namespace FabricUpgradePowerShellModule.Upgraders.LinkedServiceUpgraders
         {
             base.Compile(alerts);
 
+            if (!this.IsSupportedAuthenticationType(alerts))
+            {
+                return;
+            }
+
             this.CheckRequiredAdfProperties(this.requiredAdfProperties, alerts);
 
             JToken connectionStringToken = this.AdfResourceToken.SelectToken(AdfConnectionStringPath);
@@ -84,6 +89,18 @@ namespace FabricUpgradePowerShellModule.Upgraders.LinkedServiceUpgraders
             return base.BuildFabricConnectionHint()
                 .WithConnectionType(this.LinkedServiceType)
                 .WithDatasource(accountName?.ToString() ?? "unknown");
+        }
+
+        protected bool IsSupportedAuthenticationType(AlertCollector alerts)
+        {
+            JToken storageServiceEndpoint = this.AdfResourceToken.SelectToken(AdfStorageServiceEndpointPath);
+            JToken sasUri = this.AdfResourceToken.SelectToken(AdfSasUriPath);
+            if (storageServiceEndpoint != null || sasUri != null)
+            {
+                alerts.AddPermanentError($"Cannot upgrade LinkedService '{this.Path}' because only authentication with Account Key is supported for Azure Blob Storage LinkedService upgrade.");
+                return false;
+            }
+            return true;
         }
     }
 }
