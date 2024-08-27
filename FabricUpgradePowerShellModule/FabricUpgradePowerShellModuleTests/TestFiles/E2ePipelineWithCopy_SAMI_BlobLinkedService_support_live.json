@@ -1,6 +1,6 @@
 ﻿{
   "comments": [
-    "The LinkedService uses System Managed Identity for authentication.",
+    "The LinkedService uses System Assigned Managed Identity for authentication.",
     "This is not supported."
   ],
 
@@ -19,7 +19,7 @@
     "alerts": [
       {
         "severity": "Permanent",
-        "details": "Cannot upgrade LinkedService 'LinkedService shghatgeblobsmi' because its ConnectionString is missing."
+        "details": "Cannot upgrade LinkedService 'LinkedService shghatgeblobsmi' because only authentication with Account Key is supported for Azure Blob Storage LinkedService upgrade."
       }
     ],
     "result": {},
@@ -31,7 +31,7 @@
     "alerts": [
       {
         "severity": "Permanent",
-        "details": "Cannot upgrade LinkedService 'LinkedService shghatgeblobsmi' because its ConnectionString is missing."
+        "details": "Cannot upgrade LinkedService 'LinkedService shghatgeblobsmi' because only authentication with Account Key is supported for Azure Blob Storage LinkedService upgrade."
       }
     ],
     "result": {},
