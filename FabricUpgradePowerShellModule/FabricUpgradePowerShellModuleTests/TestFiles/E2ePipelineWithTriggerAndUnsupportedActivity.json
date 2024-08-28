@@ -77,6 +77,20 @@
   "expectedEndpointEvents": [
     "LIST DataPipeline",
     "CREATE DataPipeline 'pipelineWithTriggerAndUnsupportedActivity' => $0"
-  ]
+  ],
+
+  "expectedWhatIfResponse": {
+    "state": "Succeeded",
+    "alerts": [
+      {
+        "severity": "Warning",
+        "details": "Cannot upgrade the ScheduleTrigger 'trigger1'; Fabric Upgrade does not yet support upgrading Triggers"
+      },
+      {
+        "severity": "Warning",
+        "details": "Cannot upgrade Activity 'pipelineWithTriggerAndUnsupportedActivity/Execute SSIS package1'; please inspect this Activity for more details"
+      }
+    ]
+  }
 
 }
