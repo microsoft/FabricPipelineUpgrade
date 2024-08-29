@@ -116,7 +116,7 @@ namespace FabricUpgradePowerShellModuleTests
 
             runningProgress = new FabricUpgradeHandler().ConvertToFabricResources(runningProgress?.ToString());
 
-            FabricUpgradeProgress whatIfProgress = new FabricUpgradeHandler().SelectPermanentAlerts(runningProgress?.ToString());
+            FabricUpgradeProgress whatIfProgress = new FabricUpgradeHandler().SelectWhatIf(runningProgress?.ToString());
 
             foreach (FabricUpgradeResolution resolution in testConfig.Resolutions)
             {

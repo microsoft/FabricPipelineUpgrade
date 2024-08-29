@@ -170,10 +170,10 @@ namespace FabricUpgradePowerShellModule
     }
 
     // This cmdlet takes the progress payload produced by ConvertTo-FabricResources
-    // Import-AdfSupportFile '...' | ConvertTo-FabricResources | Select-PermanentAlerts
-    // This cmdlet outputs whether the conversion to Fabric resources will succeed and permanent alerts if present.
-    [Cmdlet("Select", "PermanentAlerts")]
-    public class SelectPermanentAlerts : Cmdlet
+    // Import-AdfSupportFile '...' | ConvertTo-FabricResources | Select-WhatIf
+    // This cmdlet outputs whether the conversion to Fabric resources will succeed and alerts.
+    [Cmdlet("Select", "WhatIf")]
+    public class SelectWhatIf : Cmdlet
     {
         [Parameter(
             Position = 0,
@@ -189,7 +189,7 @@ namespace FabricUpgradePowerShellModule
 
         protected override void ProcessRecord()
         {
-            string result = new FabricUpgradeHandler().SelectPermanentAlerts(this.progress).ToString();
+            string result = new FabricUpgradeHandler().SelectWhatIf(this.progress).ToString();
             WriteObject(result);
         }
     }

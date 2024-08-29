@@ -101,11 +101,11 @@ namespace FabricUpgradePowerShellModule
 
         /// <summary>
         /// Accept a Progress that includes the result of ConvertTo-FabricResources and
-        /// selects only the permanent alerts and state
+        /// selects only alerts and state
         /// </summary>
         /// <param name="progressString">The progress sent by the client.</param>
-        /// <returns>A FabricUpgradeProgress that contains only the Permanent alerts.</returns>
-        public FabricUpgradeProgress SelectPermanentAlerts(
+        /// <returns>A FabricUpgradeProgress that contains state and alerts.</returns>
+        public FabricUpgradeProgress SelectWhatIf(
             string progressString)
         {
             if (!this.CheckValidJSON(progressString, out FabricUpgradeProgress previousProgress))
@@ -119,10 +119,7 @@ namespace FabricUpgradePowerShellModule
             List<FabricUpgradeAlert> alerts = new List<FabricUpgradeAlert>();
             foreach (FabricUpgradeAlert alert in previousProgress.Alerts)
             {
-                if (alert.Severity == FabricUpgradeAlert.AlertSeverity.Permanent)
-                {
-                    alerts.Add(alert);
-                }
+                alerts.Add(alert);
             }
             return new FabricUpgradeProgress()
             {

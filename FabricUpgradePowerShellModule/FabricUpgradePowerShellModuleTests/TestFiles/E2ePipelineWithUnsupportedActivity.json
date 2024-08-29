@@ -56,6 +56,16 @@
   "expectedEndpointEvents": [
     "LIST DataPipeline",
     "CREATE DataPipeline 'PipelineWithUnsupportedActivity' => $0"
-  ]
+  ],
+
+  "expectedWhatIfResponse": {
+    "state": "Succeeded",
+    "alerts": [
+      {
+        "severity": "Warning",
+        "details": "Cannot upgrade the ScheduleTrigger 'trigger1'; Fabric Upgrade does not yet support upgrading Triggers"
+      }
+    ]
+  }
 
 }

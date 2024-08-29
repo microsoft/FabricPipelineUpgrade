@@ -77,7 +77,7 @@ CmdletsToExport = @(
     "ConvertTo-FabricResources",
     "Import-FabricResolutions",
     "Export-FabricResources",
-    "Select-PermanentAlerts"
+    "Select-WhatIf"
 )
 
 # Variables to export from this module
