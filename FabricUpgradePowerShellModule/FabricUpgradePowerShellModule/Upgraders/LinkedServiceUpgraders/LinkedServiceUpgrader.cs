@@ -18,6 +18,7 @@ namespace FabricUpgradePowerShellModule.Upgraders.LinkedServiceUpgraders
         {
             public const string AzureBlobStorage = "AzureBlobStorage";
             public const string AzureSqlDatabase = "AzureSqlDatabase";
+            public const string AzureBlobFS = "AzureBlobFS";
         }
 
         protected const string AdfLinkedServiceTypePath = "properties.type";
@@ -25,6 +26,7 @@ namespace FabricUpgradePowerShellModule.Upgraders.LinkedServiceUpgraders
         protected const string AdfConnectionStringPath = "properties.typeProperties.connectionString";
         protected const string AdfStorageServiceEndpointPath = "properties.typeProperties.serviceEndpoint";
         protected const string AdfSasUriPath = "properties.typeProperties.sasUri";
+        protected const string AdfUrlPath = "properties.typeProperties.url";
 
         private readonly List<string> requiredAdfProperties = new List<string>
         {
@@ -63,6 +65,7 @@ namespace FabricUpgradePowerShellModule.Upgraders.LinkedServiceUpgraders
             return linkedServiceType switch
             {
                 LinkedServiceTypes.AzureBlobStorage => new AzureBlobStorageLinkedServiceUpgrader(linkedServiceToken, machine),
+                LinkedServiceTypes.AzureBlobFS => new AzureDataLakeStorageGen2LinkedServiceUpgrader(linkedServiceToken, machine),
                 LinkedServiceTypes.AzureSqlDatabase => new AzureSqlDatabaseLinkedServiceUpgrader(linkedServiceToken, machine),
                 _ => new UnsupportedLinkedServiceUpgrader(linkedServiceToken, machine),
             };

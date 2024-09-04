@@ -1,0 +1,121 @@
+﻿{
+  "adfSupportFile": "PipelineWithCopy_JsonToJson_SAMI_ADLS2_support_live.zip",
+
+  "resolutions": [
+    {
+      "type": "LinkedServiceToConnectionId",
+      "key": "adls2sami",
+      "value": "9ab18ea0-9fd3-4581-90b0-67807c362aee"
+    }
+  ],
+
+  "expectedResponse": {
+    "state": "Succeeded",
+    "alerts": [],
+    "result": {
+      "exportedFabricResources": {
+        "adls2sami": {
+          "id": "9ab18ea0-9fd3-4581-90b0-67807c362aee"
+        },
+        "PipelineWithCopy_JsonToJson_SAMI_ADLS2": {
+          "type": "DataPipeline",
+          "displayName": "PipelineWithCopy_JsonToJson_SAMI_ADLS2",
+          "description": null,
+          "workspaceId": "",
+          "id": 0
+        }
+      }
+    }
+  },
+
+  "expectedItems": [
+    {
+      "item": {
+        "type": "DataPipeline",
+        "workspaceId": "",
+        "id": 0,
+        "displayName": "PipelineWithCopy_JsonToJson_SAMI_ADLS2",
+        "description": null
+      },
+      "definition": {
+        "name": "PipelineWithCopy_JsonToJson_SAMI_ADLS2",
+        "properties": {
+          "activities": [
+            {
+              "name": "Copy data1",
+              "type": "Copy",
+              "dependsOn": [],
+              "description": null,
+              "userProperties": [],
+              "policy": {
+                "timeout": "0.12:00:00",
+                "retry": 0,
+                "retryIntervalInSeconds": 30,
+                "secureOutput": false,
+                "secureInput": false
+              },
+              "typeProperties": {
+                "source": {
+                  "type": "JsonSource",
+                  "storeSettings": {
+                    "type": "AzureBlobFSReadSettings",
+                    "recursive": true,
+                    "wildcardFolderPath": "*",
+                    "wildcardFileName": "*.json",
+                    "enablePartitionDiscovery": false
+                  },
+                  "formatSettings": {
+                    "type": "JsonReadSettings"
+                  },
+                  "datasetSettings": {
+                    "annotations": [],
+                    "type": "Json",
+                    "typeProperties": {
+                      "location": {
+                        "type": "AzureBlobFSLocation",
+                        "fileSystem": "testsourcecontainer"
+                      }
+                    },
+                    "schema": {},
+                    "externalReferences": {
+                      "connection": "9ab18ea0-9fd3-4581-90b0-67807c362aee"
+                    }
+                  }
+                },
+                "sink": {
+                  "type": "JsonSink",
+                  "storeSettings": {
+                    "type": "AzureBlobFSWriteSettings"
+                  },
+                  "formatSettings": {
+                    "type": "JsonWriteSettings"
+                  },
+                  "datasetSettings": {
+                    "annotations": [],
+                    "type": "Json",
+                    "typeProperties": {
+                      "location": {
+                        "type": "AzureBlobFSLocation",
+                        "fileSystem": "newsink"
+                      }
+                    },
+                    "schema": {},
+                    "externalReferences": {
+                      "connection": "9ab18ea0-9fd3-4581-90b0-67807c362aee"
+                    }
+                  }
+                },
+                "enableStaging": false
+              }
+            }
+          ]
+        },
+        "annotations": []
+      }
+    }
+  ],
+  "expectedEndpointEvents": [
+    "LIST DataPipeline",
+    "CREATE DataPipeline 'PipelineWithCopy_JsonToJson_SAMI_ADLS2' => $0"
+  ]
+}
