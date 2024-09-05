@@ -30,6 +30,8 @@ namespace FabricUpgradePowerShellModule.Upgraders.LinkedServiceUpgraders
         {
         }
 
+        private const string AdfUrlPath = "properties.typeProperties.url";
+
         /// <inheritdoc/>
         public override void Compile(AlertCollector alerts)
         {
@@ -40,7 +42,7 @@ namespace FabricUpgradePowerShellModule.Upgraders.LinkedServiceUpgraders
             JToken accountUrl = this.AdfResourceToken.SelectToken(AdfUrlPath);
             if (accountUrl == null)
             {
-                alerts.AddPermanentError("$Cannot upgrade LinkedService '{this.Path}' because its Url is missing.");
+                alerts.AddPermanentError($"Cannot upgrade LinkedService '{this.Path}' because its Url is missing.");
             }
             this.connectionSettings = new Dictionary<string, JToken> { };
             this.connectionSettings[AccountUrlKey] = accountUrl;
