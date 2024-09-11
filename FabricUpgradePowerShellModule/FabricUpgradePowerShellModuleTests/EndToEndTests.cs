@@ -56,6 +56,7 @@ namespace FabricUpgradePowerShellModuleTests
         [DataRow("E2ePipelineWithCopy_JsonToJson_Params_GlobalConfig")]
 
         [DataRow("E2ePipelineWithCopy_JsonToJson_SAMI_ADLS2_support_live")]
+        [DataRow("E2ePipelineWithCopy_JsonToJson_SASURL_ADLS2_support_live")]
 
         [DataRow("E2ePipelineWithCopy_IntegerDatasetTypeProperty")]
 

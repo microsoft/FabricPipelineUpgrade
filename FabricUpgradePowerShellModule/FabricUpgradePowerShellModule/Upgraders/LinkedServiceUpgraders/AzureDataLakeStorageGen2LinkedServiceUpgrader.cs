@@ -42,6 +42,10 @@ namespace FabricUpgradePowerShellModule.Upgraders.LinkedServiceUpgraders
             JToken accountUrl = this.AdfResourceToken.SelectToken(AdfUrlPath);
             if (accountUrl == null)
             {
+                accountUrl = this.AdfResourceToken.SelectToken(AdfSasUriPath);
+            }
+            if (accountUrl == null)
+            {
                 alerts.AddPermanentError($"Cannot upgrade LinkedService '{this.Path}' because its Url is missing.");
             }
             this.connectionSettings = new Dictionary<string, JToken> { };
