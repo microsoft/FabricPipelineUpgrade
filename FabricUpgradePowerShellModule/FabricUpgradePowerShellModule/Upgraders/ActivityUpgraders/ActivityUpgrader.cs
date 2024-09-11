@@ -19,6 +19,7 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
             public const string Copy = "Copy";
             public const string ExecutePipeline = "ExecutePipeline";
             public const string If = "IfCondition";
+            public const string SetVariable = "SetVariable";
             public const string Wait = "Wait";
             public const string Web = "WebActivity";
 
@@ -66,6 +67,7 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
                 ActivityTypes.If => new IfConditionActivityUpgrader(parentPath, adfActivityToken, machine),
                 ActivityTypes.Wait => new WaitActivityUpgrader(parentPath, adfActivityToken, machine),
                 ActivityTypes.Web => new WebActivityUpgrader(parentPath, adfActivityToken, machine),
+                ActivityTypes.SetVariable => new SetVariableActivityUpgrader(parentPath, adfActivityToken, machine),
                 _ => new UnsupportedActivityUpgrader(parentPath, adfActivityToken, machine),
             };
         }
