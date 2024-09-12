@@ -95,7 +95,6 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
 
             PropertyCopier copier = new PropertyCopier(this.Path, this.AdfResourceToken, fabricActivityObject, alerts);
             copier.Copy("description");
-
             copier.Copy(adfPolicyPath);
             copier.Copy(adfVariableNamePath);
 
@@ -109,11 +108,7 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
             {
                 copier.Copy(adfValueValuePath, fabricValuePath);
             }
-
             return Symbol.ReadySymbol(fabricActivityObject);
         }
-
-
-
     }
 }
