@@ -18,6 +18,7 @@ namespace FabricUpgradePowerShellModule.Upgraders.DatasetUpgraders
             public const string AzureSqlTable = "AzureSqlTable";
             public const string Json = "Json";
             public const string Binary = "Binary";
+            public const string DelimitedText = "DelimitedText";
         }
 
         protected const string AdfDatasetTypePath = "properties.type";
@@ -70,6 +71,7 @@ namespace FabricUpgradePowerShellModule.Upgraders.DatasetUpgraders
                 DatasetTypes.AzureSqlTable => new AzureSqlTableDatasetUpgrader(adfDatasetToken, machine),
                 DatasetTypes.Binary => new BinaryDatasetUpgrader(adfDatasetToken, machine),
                 DatasetTypes.Json => new JsonDatasetUpgrader(adfDatasetToken, machine),
+                DatasetTypes.DelimitedText => new DelimitedTextDatasetUpgrader(adfDatasetToken, machine),
                 _ => new UnsupportedDatasetUpgrader(adfDatasetToken, machine),
             };
         }

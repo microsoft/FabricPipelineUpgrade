@@ -1,0 +1,140 @@
+﻿{
+  "adfSupportFile": "PipelineWithCopy_DelimitedText_support_live.zip",
+
+  "resolutions": [
+    {
+      "type": "LinkedServiceToConnectionId",
+      "key": "shghatgeadls2sp",
+      "value": "eac98c6d-be48-4741-a98a-437179f2cb6b"
+    }
+  ],
+
+  "expectedResponse": {
+    "state": "Succeeded",
+    "alerts": [],
+    "result": {
+      "exportedFabricResources": {
+        "shghatgeadls2sp": {
+          "id": "eac98c6d-be48-4741-a98a-437179f2cb6b"
+        },
+        "PipelineWithCopy_DelimitedText": {
+          "type": "DataPipeline",
+          "displayName": "PipelineWithCopy_DelimitedText",
+          "description": null,
+          "workspaceId": "",
+          "id": 0
+        }
+      }
+    }
+  },
+
+  "expectedItems": [
+    {
+      "item": {
+        "type": "DataPipeline",
+        "workspaceId": "",
+        "id": 0,
+        "displayName": "PipelineWithCopy_DelimitedText",
+        "description": null
+      },
+      "definition": {
+        "name": "PipelineWithCopy_DelimitedText",
+        "properties": {
+          "activities": [
+            {
+              "name": "Copy data1",
+              "type": "Copy",
+              "dependsOn": [],
+              "userProperties": [],
+              "description": null,
+              "policy": {
+                "timeout": "0.12:00:00",
+                "retry": 0,
+                "retryIntervalInSeconds": 30,
+                "secureOutput": false,
+                "secureInput": false
+              },
+              "typeProperties": {
+                "source": {
+                  "type": "DelimitedTextSource",
+                  "storeSettings": {
+                    "type": "AzureBlobFSReadSettings",
+                    "recursive": true,
+                    "enablePartitionDiscovery": false
+                  },
+                  "formatSettings": {
+                    "type": "DelimitedTextReadSettings"
+                  },
+                  "datasetSettings": {
+                    "annotations": [],
+                    "type": "DelimitedText",
+                    "typeProperties": {
+                      "location": {
+                        "type": "AzureBlobFSLocation",
+                        "fileName": "DimDate.csv",
+                        "fileSystem": "testsourcecontainer"
+                      },
+                      "columnDelimiter": ",",
+                      "escapeChar": "\\",
+                      "firstRowAsHeader": true,
+                      "quoteChar": "\""
+                    },
+                    "schema": [],
+                    "externalReferences": {
+                      "connection": "eac98c6d-be48-4741-a98a-437179f2cb6b"
+                    }
+                  }
+                },
+                "sink": {
+                  "type": "DelimitedTextSink",
+                  "storeSettings": {
+                    "type": "AzureBlobFSWriteSettings"
+                  },
+                  "formatSettings": {
+                    "type": "DelimitedTextWriteSettings",
+                    "quoteAllText": true,
+                    "fileExtension": ".txt"
+                  },
+                  "datasetSettings": {
+                    "annotations": [],
+                    "type": "DelimitedText",
+                    "typeProperties": {
+                      "location": {
+                        "type": "AzureBlobFSLocation",
+                        "fileSystem": "aaa"
+                      },
+                      "columnDelimiter": ",",
+                      "escapeChar": "\\",
+                      "firstRowAsHeader": true,
+                      "quoteChar": "\""
+                    },
+                    "schema": [],
+                    "externalReferences": {
+                      "connection": "eac98c6d-be48-4741-a98a-437179f2cb6b"
+                    }
+                  }
+                },
+                "enableStaging": false,
+                "translator": {
+                  "type": "TabularTranslator",
+                  "typeConversion": true,
+                  "typeConversionSettings": {
+                    "allowDataTruncation": true,
+                    "treatBooleanAsNumber": false
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "annotations": []
+      }
+    }
+  ],
+
+  "expectedEndpointEvents": [
+    "LIST DataPipeline",
+    "CREATE DataPipeline 'PipelineWithCopy_DelimitedText' => $0"
+  ]
+
+}
