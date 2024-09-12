@@ -1,0 +1,70 @@
+﻿{
+  "adfSupportFile": "PipelineWithSetVariable_ReturnValue_support_live.zip",
+
+  "expectedResponse": {
+    "state": "Succeeded",
+    "alerts": [],
+    "result": {
+      "exportedFabricResources": {
+        "PipelineWithSetVariable_ReturnValue": {
+          "type": "DataPipeline",
+          "workspaceId": "",
+          "id": 0,
+          "displayName": "PipelineWithSetVariable_ReturnValue",
+          "description": null
+        }
+      }
+    }
+  },
+
+  "expectedItems": [
+    {
+      "item": {
+        "type": "DataPipeline",
+        "workspaceId": "",
+        "id": 0,
+        "displayName": "PipelineWithSetVariable_ReturnValue",
+        "description": null
+      },
+      "definition": {
+        "name": "PipelineWithSetVariable_ReturnValue",
+        "properties": {
+          "activities": [
+            {
+              "name": "Set variable1",
+              "type": "SetVariable",
+              "dependsOn": [],
+              "userProperties": [],
+              "description": null,
+              "policy": {
+                "secureOutput": false,
+                "secureInput": false
+              },
+              "typeProperties": {
+                "variableName": "pipelineReturnValue",
+                "value": [
+                  {
+                    "key": "date",
+                    "value": {
+                      "type": "Expression",
+                      "content": "@concat('Test_', formatDateTime(utcNow(), 'yyyy-dd-MM'), '.json')"
+                    }
+                  }
+                ],
+                "setSystemVariable": true
+              }
+            }
+          ]
+        },
+        "annotations": []
+      }
+    }
+
+  ],
+
+  "expectedEndpointEvents": [
+    "LIST DataPipeline",
+    "CREATE DataPipeline 'PipelineWithSetVariable_ReturnValue' => $0"
+  ]
+
+}

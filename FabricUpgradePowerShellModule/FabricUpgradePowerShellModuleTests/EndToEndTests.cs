@@ -82,6 +82,9 @@ namespace FabricUpgradePowerShellModuleTests
         [DataRow("E2eEmptyPipeline_DisplayNameAlreadyInUse")]
         [DataRow("E2ePipelineWithExecutePipeline_ReserveFirst")]
         [DataRow("E2ePipelineWithExecutePipeline_ReserveSecond")]
+
+        [DataRow("E2ePipelineWithSetVariable")]
+        [DataRow("E2ePipelineWithSetVariable_ReturnValue")]
         public async Task EndToEndUpgradePipeline_TestAsync(
             string testConfigFilename)
         {
