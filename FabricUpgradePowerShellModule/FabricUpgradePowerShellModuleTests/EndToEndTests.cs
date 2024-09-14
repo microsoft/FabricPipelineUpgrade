@@ -67,6 +67,7 @@ namespace FabricUpgradePowerShellModuleTests
         [DataRow("E2ePipelineWithCopy_SqlToSql_ExpressionConnectionString")]
         [DataRow("E2ePipelineWithCopy_SqlToSql_ConnectionStringLacksInitialCatalog")]
         [DataRow("E2ePipelineWithCopy_SqlToSql_ExpressionInitialCatalog")]
+        [DataRow("E2ePipelineWithCopy_AzureSql_SAMI")]
 
         [DataRow("E2ePipelineWithCopy_SqlToSql_DefaultLinkedServiceParams")]
         [DataRow("E2ePipelineWithCopy_SqlToSql_DatasetConstToLinkedServiceParams")]
