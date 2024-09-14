@@ -50,6 +50,20 @@ namespace FabricUpgradePowerShellModule.Upgraders.LinkedServiceUpgraders
             this.CheckForExpressionInProperty(ServerNamePath, alerts);
             this.CheckForExpressionInProperty(UserNamePath, alerts);
             this.CheckForExpressionInProperty(PasswordPath, alerts);
+
+        }
+
+        private bool IsSupportedAuthenticationType(AlertCollector alerts)
+        {
+            JToken authTye = this.AdfResourceToken.SelectToken("properties.typeProperties.authenticationType");
+            // Fabric currently doesn't support SAMI/UAMI for authentication.
+            if (authTye != null && (authTye.Type == JTokenType.String) && authTye.ToString().Equals("UserAssignedManagedIdentity") ||
+                authTye.ToString().Equals("SystemAssignedManagedIdentity"))
+            {
+                alerts.AddPermanentError($"Cannot upgrade LinkedService '{this.Path}' because authentication with System Assigned Managed Identity or User Assigned Managed Identity is not supported.");
+                return false;
+            }
+            return true;
         }
 
         /// <inheritdoc/>

@@ -31,11 +31,17 @@ namespace FabricUpgradePowerShellModule.Upgraders.LinkedServiceUpgraders
         }
 
         private const string AdfUrlPath = "properties.typeProperties.url";
+        private const string AdfEncryptedCredentialPath = "properties.typeProperties.encryptedCredential";
 
         /// <inheritdoc/>
         public override void Compile(AlertCollector alerts)
         {
             base.Compile(alerts);
+
+            if (!this.IsSupportedAuthenticationType(alerts))
+            {
+                return;
+            }
 
             this.CheckRequiredAdfProperties(this.requiredAdfProperties, alerts);
 
@@ -50,6 +56,20 @@ namespace FabricUpgradePowerShellModule.Upgraders.LinkedServiceUpgraders
             }
             this.connectionSettings = new Dictionary<string, JToken> { };
             this.connectionSettings[AccountUrlKey] = accountUrl;
+        }
+
+        private bool IsSupportedAuthenticationType(AlertCollector alerts)
+        {
+            JToken encryptedCreds = this.AdfResourceToken.SelectToken(AdfEncryptedCredentialPath);
+            
+            // SAS, ServicePrinciple, AccountKey all have encryptedCredentials. SAMI and UAMI do not have it populated.
+            // Fabric currently doesn't support SAMI/UAMI for authentication.
+            if (encryptedCreds == null)
+            {
+                alerts.AddPermanentError($"Cannot upgrade LinkedService '{this.Path}' because authentication with System Assigned Managed Identity or User Assigned Managed Identity is not supported.");
+                return false;
+            }
+            return true;
         }
 
         /// <inheritdoc/>
