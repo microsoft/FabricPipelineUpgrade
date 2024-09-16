@@ -1,0 +1,66 @@
+﻿{
+  "adfSupportFile": "PipelineWithSetVariable_support_live.zip",
+
+  "expectedResponse": {
+    "state": "Succeeded",
+    "alerts": [],
+    "result": {
+      "exportedFabricResources": {
+        "PipelineWithSetVariable": {
+          "type": "DataPipeline",
+          "workspaceId": "",
+          "id": 0,
+          "displayName": "PipelineWithSetVariable",
+          "description": null
+        }
+      }
+    }
+  },
+
+  "expectedItems": [
+    {
+      "item": {
+        "type": "DataPipeline",
+        "workspaceId": "",
+        "id": 0,
+        "displayName": "PipelineWithSetVariable",
+        "description": null
+      },
+      "definition": {
+        "name": "PipelineWithSetVariable",
+        "properties": {
+          "activities": [
+            {
+              "name": "Set variable1",
+              "type": "SetVariable",
+              "dependsOn": [],
+              "userProperties": [],
+              "description": null,
+              "policy": {
+                "secureOutput": false,
+                "secureInput": false
+              },
+              "typeProperties": {
+                "variableName": "date",
+                "value": "@concat('Test_', formatDateTime(utcNow(), 'yyyy-dd-MM'), '.json')"
+              }
+            }
+          ],
+          "variables": {
+            "date": {
+              "type": "String"
+            }
+          }
+        },
+        "annotations": []
+      }
+    }
+
+  ],
+
+  "expectedEndpointEvents": [
+    "LIST DataPipeline",
+    "CREATE DataPipeline 'PipelineWithSetVariable' => $0"
+  ]
+
+}
