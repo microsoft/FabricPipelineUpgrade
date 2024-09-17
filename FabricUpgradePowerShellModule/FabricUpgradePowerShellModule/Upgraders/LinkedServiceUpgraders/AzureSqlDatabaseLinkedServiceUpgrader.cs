@@ -30,6 +30,11 @@ namespace FabricUpgradePowerShellModule.Upgraders.LinkedServiceUpgraders
             DatabaseNamePath,
         };
 
+        private List<String> SupportedAuthenticationTypes = new List<string> {
+            "SQL",
+            "ServicePrincipal",
+        };
+
 
         public AzureSqlDatabaseLinkedServiceUpgrader(
             JToken adfLinkedServiceToken,
@@ -61,10 +66,9 @@ namespace FabricUpgradePowerShellModule.Upgraders.LinkedServiceUpgraders
         {
             JToken authType = this.AdfResourceToken.SelectToken("properties.typeProperties.authenticationType");
             // Fabric currently doesn't support SAMI/UAMI for authentication.
-            if (authType != null && (authType.Type == JTokenType.String) && (authType.ToString().Equals("UserAssignedManagedIdentity") ||
-                authType.ToString().Equals("SystemAssignedManagedIdentity")))
+            if (authType != null && (authType.Type == JTokenType.String) && !SupportedAuthenticationTypes.Contains(authType.ToString()))
             {
-                alerts.AddPermanentError($"Cannot upgrade LinkedService '{this.Path}' because authentication with System Assigned Managed Identity or User Assigned Managed Identity is not supported.");
+                alerts.AddPermanentError($"Cannot upgrade LinkedService '{this.Path}' because authentication with '{authType.ToString()}' is not supported.");
                 return false;
             }
             return true;
