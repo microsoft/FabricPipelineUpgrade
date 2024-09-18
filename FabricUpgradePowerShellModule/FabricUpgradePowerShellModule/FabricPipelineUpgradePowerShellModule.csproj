@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="ToPublish\FabricPipelineUpgrade.dll" />
+    <None Remove="ToPublish\FabricPipelineUpgrade\FabricPipelineUpgrade.dll" />
   </ItemGroup>
 
   <ItemGroup>
@@ -16,11 +16,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="ToPublish\" />
+    <Folder Include="ToPublish\FabricPipelineUpgrade" />
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="copy /y $(TargetPath) $(ProjectDir)ToPublish\FabricPipelineUpgrade.dll" />
+    <Exec Command="copy /y $(TargetPath) $(ProjectDir)ToPublish\FabricPipelineUpgrade\FabricPipelineUpgrade.dll" />
   </Target>
 
 </Project>
