@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.9.34902.65
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FabricUpgradePowerShellModule", "FabricUpgradePowerShellModule.csproj", "{A14FF561-43EF-4570-9AA3-47762CC5D648}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FabricPipelineUpgradePowerShellModule", "FabricPipelineUpgradePowerShellModule.csproj", "{A14FF561-43EF-4570-9AA3-47762CC5D648}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FabricUpgradePowerShellModuleTests", "..\FabricUpgradePowerShellModuleTests\FabricUpgradePowerShellModuleTests.csproj", "{A81ED148-8D0B-4583-9050-2BF28A921A44}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FabricPipelineUpgradePowerShellModuleTests", "..\FabricUpgradePowerShellModuleTests\FabricPipelineUpgradePowerShellModuleTests.csproj", "{A81ED148-8D0B-4583-9050-2BF28A921A44}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

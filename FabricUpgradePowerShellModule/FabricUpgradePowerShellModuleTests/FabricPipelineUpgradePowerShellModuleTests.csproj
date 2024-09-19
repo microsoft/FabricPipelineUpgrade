@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\FabricUpgradePowerShellModule\FabricUpgradePowerShellModule.csproj" />
+    <ProjectReference Include="..\FabricUpgradePowerShellModule\FabricPipelineUpgradePowerShellModule.csproj" />
   </ItemGroup>
 
   <ItemGroup>
