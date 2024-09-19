@@ -1,1 +1,1 @@
-Please read the Wiki for more information: https://github.com/microsoft/FabricUpgrade/wiki
+Please read the Wiki for more information: https://github.com/microsoft/FabricPipelineUpgrade/wiki
