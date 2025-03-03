@@ -6,6 +6,8 @@ using FabricUpgradePowerShellModule.Models;
 using FabricUpgradePowerShellModule.UpgradeMachines;
 using FabricUpgradePowerShellModule.Utilities;
 using Newtonsoft.Json.Linq;
+using System;
+using System.Collections.Generic;
 
 namespace FabricUpgradePowerShellModule.Upgraders.LinkedServiceUpgraders
 {
@@ -19,6 +21,7 @@ namespace FabricUpgradePowerShellModule.Upgraders.LinkedServiceUpgraders
             public const string AzureBlobStorage = "AzureBlobStorage";
             public const string AzureSqlDatabase = "AzureSqlDatabase";
             public const string AzureBlobFS = "AzureBlobFS";
+            public const string AzureFunction = "AzureFunction";
         }
 
         protected const string AdfLinkedServiceTypePath = "properties.type";
@@ -66,6 +69,7 @@ namespace FabricUpgradePowerShellModule.Upgraders.LinkedServiceUpgraders
                 LinkedServiceTypes.AzureBlobStorage => new AzureBlobStorageLinkedServiceUpgrader(linkedServiceToken, machine),
                 LinkedServiceTypes.AzureBlobFS => new AzureDataLakeStorageGen2LinkedServiceUpgrader(linkedServiceToken, machine),
                 LinkedServiceTypes.AzureSqlDatabase => new AzureSqlDatabaseLinkedServiceUpgrader(linkedServiceToken, machine),
+                LinkedServiceTypes.AzureFunction => new AzureFunctionLinkedServiceUpgrader(linkedServiceToken, machine),
                 _ => new UnsupportedLinkedServiceUpgrader(linkedServiceToken, machine),
             };
         }

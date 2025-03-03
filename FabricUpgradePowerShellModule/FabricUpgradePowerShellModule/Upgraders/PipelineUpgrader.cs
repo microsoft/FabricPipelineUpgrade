@@ -97,6 +97,26 @@ namespace FabricUpgradePowerShellModule.Upgraders
 
                 this.AddActivities(pipeline, alerts);
 
+                // --- Dependency Update Section Start ---
+                // Convert the Fabric pipeline to a JObject.
+                JObject pipelineJson = pipeline.ToJObject();
+
+                // Build a mapping dictionary for activity names.
+                // Here we assume the Fabric activity "name" is the same as the original ADF activity name.
+                Dictionary<string, string> activityNameMapping = new Dictionary<string, string>();
+                foreach (JObject activity in pipeline.Properties.Activities)
+                {
+                    string actName = activity.Value<string>("name");
+                    if (!string.IsNullOrEmpty(actName))
+                    {
+                        activityNameMapping[actName] = actName;
+                    }
+                }
+
+                // Call the PipelineDependencyUpdater to update the "dependsOn" properties.
+                PipelineDependencyUpdater.UpdateActivityDependencies(pipelineJson, activityNameMapping);
+                // --- Dependency Update Section End ---
+
                 exportInstruction.Export = pipeline.ToJObject();
 
                 return Symbol.ReadySymbol(exportInstruction.ToJObject());

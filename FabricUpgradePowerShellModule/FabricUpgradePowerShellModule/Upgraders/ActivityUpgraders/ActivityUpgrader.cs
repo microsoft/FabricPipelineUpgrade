@@ -2,10 +2,11 @@
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-using FabricUpgradePowerShellModule.UpgradeMachines;
-using FabricUpgradePowerShellModule.Utilities;
+using System.Collections.Generic;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using FabricUpgradePowerShellModule.UpgradeMachines;
+using FabricUpgradePowerShellModule.Utilities;
 
 namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
 {
@@ -22,9 +23,12 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
             public const string SetVariable = "SetVariable";
             public const string Wait = "Wait";
             public const string Web = "WebActivity";
-
-            // The ADF ExecutePipeline becomes a Fabric InvokePipeline.
             public const string InvokePipeline = "InvokePipeline";
+            public const string SqlStoredProcedure = "SqlServerStoredProcedure";
+            public const string AzureFunction = "AzureFunctionActivity";
+            public const string ForEach = "ForEach";
+            public const string Lookup = "Lookup";
+            public const string Switch = "Switch";
         }
 
         protected ActivityUpgrader(
@@ -48,12 +52,8 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
         protected string ActivityType { get; set; }
 
         /// <summary>
-        /// A "factory" function that creates the appropriate Upgrader from the ADF Activity's Type.
+        /// A factory method to create an appropriate Activity Upgrader.
         /// </summary>
-        /// <param name="parentPath">The 'path' to the parent object.</param>
-        /// <param name="adfActivityToken">The JObject that describes the ADF Activity.</param>
-        /// <param name="machine">The FabricUpgradeMachine that provides utilities to Upgraders.</param>
-        /// <returns>A new Upgrader for that Activity type.</returns>
         public static ActivityUpgrader CreateActivityUpgrader(
             string parentPath,
             JToken adfActivityToken,
@@ -68,6 +68,11 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
                 ActivityTypes.Wait => new WaitActivityUpgrader(parentPath, adfActivityToken, machine),
                 ActivityTypes.Web => new WebActivityUpgrader(parentPath, adfActivityToken, machine),
                 ActivityTypes.SetVariable => new SetVariableActivityUpgrader(parentPath, adfActivityToken, machine),
+                ActivityTypes.SqlStoredProcedure => new StoredProcedureActivityUpgrader(parentPath, adfActivityToken, machine),
+                ActivityTypes.AzureFunction => new AzureFunctionActivityUpgrader(parentPath, adfActivityToken, machine),
+                ActivityTypes.ForEach => new ForEachActivityUpgrader(parentPath, adfActivityToken, machine),
+                ActivityTypes.Lookup => new LookupActivityUpgrader(parentPath, adfActivityToken, machine),
+                ActivityTypes.Switch => new SwitchActivityUpgrader(parentPath, adfActivityToken, machine),
                 _ => new UnsupportedActivityUpgrader(parentPath, adfActivityToken, machine),
             };
         }
@@ -86,7 +91,7 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
             base.PreSort(allUpgraders, alerts);
         }
 
-        // <inheritdoc/>
+        /// <inheritdoc/>
         public override Symbol EvaluateSymbol(
             string symbolName,
             Dictionary<string, JToken> parameterAssignments,
@@ -94,27 +99,17 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
         {
             if (symbolName == Symbol.CommonNames.Activity)
             {
-                // Each individual Activity Upgrader requests this Symbol
-                // in order to start building its particular "activity" Symbol.
-
-                return this.BuildCommonActivitySymbol(alerts);
+                // Use our helper method to build the common activity symbol.
+                return this.GetCommonActivitySymbol(alerts);
             }
-
             return base.EvaluateSymbol(symbolName, parameterAssignments, alerts);
         }
 
         /// <summary>
-        /// Create a Symbol whose Value is a JObject that contains all of the 
-        /// common activity properties.
+        /// Helper method that builds a common activity symbol.
         /// </summary>
-        /// <param name="alerts">Add any generated alerts to this collector.</param>
-        /// <returns></returns>
-        private Symbol BuildCommonActivitySymbol(
-            AlertCollector alerts)
+        protected Symbol GetCommonActivitySymbol(AlertCollector alerts)
         {
-            // Create a Symbol whose Value is a JObject that contains all of the 
-            // common activity properties.
-
             FabricBaseActivityModel fabricModel = new FabricBaseActivityModel()
             {
                 Name = this.Name,
@@ -130,41 +125,28 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
         }
 
         /// <summary>
-        /// Build the ExportResolves Symbol whose value will be included in this Activity's Pipeline's ExportResolveSteps.
+        /// Build the Activity Symbol whose value will be included in the Pipeline.
+        /// Each Activity should override this.
         /// </summary>
-        /// <remarks>
-        /// Before this Activity's Pipeline can be exported, we need to populate the IDs of 
-        /// this Activities dependencies (Connections used by this Activity's Datasets, or
-        /// other Pipelines).
-        /// Collect these dependencies now so that the Pipeline can fill out its 'resolve' field.
-        /// </remarks>
-        /// <param name="parameterAssignments">The parameters from the caller.</param>
-        /// <param name="alerts">Add any generated alerts to this collector.</param>
-        /// <returns>The ExportResolveSteps Symbol whose value is added to the Pipeline's ExportResolveSteps.</returns>
-        protected virtual Symbol BuildExportResolveStepsSymbol(
-            Dictionary<string, JToken> parameterAssignments,
-            AlertCollector alerts)
-        {
-            // For Activities with no ExportResolves, return null.
-            return Symbol.ReadySymbol(null);
-        }
-
-        /// <summary>
-        /// Build the Activity Symbol whose value will be included in this Activity's Pipeline.
-        /// </summary>
-        /// <param name="parameterAssignments">The parameters from the caller.</param>
-        /// <param name="alerts">Add any generated alerts to this collector.</param>
-        /// <returns>The Activity Symbol whose value is added to the Pipeline's Activities.</returns>
         protected virtual Symbol BuildActivitySymbol(
             Dictionary<string, JToken> parameterAssignments,
             AlertCollector alerts)
         {
-            // Each Activity should override this.
             return Symbol.ReadySymbol(null);
         }
 
         /// <summary>
-        /// The ADF Model for the common properties of all ADF Activities.
+        /// Build the ExportResolves Symbol.
+        /// </summary>
+        protected virtual Symbol BuildExportResolveStepsSymbol(
+            Dictionary<string, JToken> parameterAssignments,
+            AlertCollector alerts)
+        {
+            return Symbol.ReadySymbol(null);
+        }
+
+        /// <summary>
+        /// The ADF model for common activity properties.
         /// </summary>
         protected class AdfBaseActivityModel
         {
@@ -186,7 +168,6 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
             [JsonProperty(PropertyName = "onInactiveMarkAs")]
             public string OnInactiveMarkAs { get; set; }
 
-            // This does not appear to be used in Fabric, but we can include it in the activity.
             [JsonProperty(PropertyName = "userProperties")]
             public List<UserProperty> UserProperties { get; set; } = new List<UserProperty>();
 
@@ -197,7 +178,7 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
         }
 
         /// <summary>
-        /// The Fabric Model for the common properties of all Fabric Activities.
+        /// The Fabric model for common activity properties.
         /// </summary>
         protected class FabricBaseActivityModel
         {
@@ -219,7 +200,6 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
             [JsonProperty(PropertyName = "onInactiveMarkAs")]
             public string OnInactiveMarkAs { get; set; }
 
-            // This does not appear to be used in Fabric, but we can include it in the activity.
             [JsonProperty(PropertyName = "userProperties")]
             public List<UserProperty> UserProperties { get; set; } = new List<UserProperty>();
 
@@ -246,6 +226,5 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
             [JsonProperty(PropertyName = "value")]
             public JToken Value { get; set; }
         }
-
     }
 }

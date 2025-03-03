@@ -32,5 +32,8 @@ namespace FabricUpgradePowerShellModule.Utilities
 
         // An ADF Trigger (not currently supported)
         Trigger = 6,
+
+        //A Fabric SQL Stored Procedure resource
+        StoredProcedure = 7,
     }
 }
