@@ -119,6 +119,9 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
         protected Symbol GetCommonActivitySymbol(
             AlertCollector alerts)
         {
+            // Create a Symbol whose Value is a JObject that contains all of the 	
+            // common activity properties.	
+
             FabricBaseActivityModel fabricModel = new FabricBaseActivityModel()
             {
                 Name = this.Name,
