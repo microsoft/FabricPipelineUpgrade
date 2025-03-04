@@ -69,7 +69,7 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
         protected override Symbol BuildActivitySymbol(Dictionary<string, JToken> parameterAssignments, AlertCollector alerts)
         {
             // Use the helper method from the base class to get the common activity JSON.
-            Symbol baseSymbol = this.GetCommonActivitySymbol(alerts);
+            Symbol baseSymbol = this.BuildCommonActivitySymbol(alerts);
             JObject fabricActivity = baseSymbol?.Value as JObject ?? new JObject();
 
             // Explicitly copy the dependency information from the original ADF activity.

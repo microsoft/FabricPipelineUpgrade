@@ -119,7 +119,7 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
         /// </summary>
         /// <param name="alerts">Add any generated alerts to this collector.</param>
         /// <returns></returns>
-        private Symbol BuildCommonActivitySymbol(
+        protected Symbol BuildCommonActivitySymbol(
             AlertCollector alerts)
         {
 
