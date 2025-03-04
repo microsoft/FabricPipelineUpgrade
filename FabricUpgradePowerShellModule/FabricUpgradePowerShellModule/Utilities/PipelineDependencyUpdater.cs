@@ -17,7 +17,9 @@ namespace FabricUpgradePowerShellModule.Utilities
         /// </summary>
         /// <param name="pipeline">The pipeline JSON as a JObject.</param>
         /// <param name="nameMapping">A dictionary mapping original ADF activity names to Fabric activity names.</param>
-        public static void UpdateActivityDependencies(JObject pipeline, Dictionary<string, string> nameMapping)
+        public static void UpdateActivityDependencies(
+            JObject pipeline, 
+            Dictionary<string, string> nameMapping)
         {
             // Get the array of activities from the pipeline.
             var activities = pipeline.SelectToken("properties.activities") as JArray;

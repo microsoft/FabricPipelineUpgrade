@@ -84,7 +84,8 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
         }
 
         // <inheritdoc/>
-        public override void Compile(AlertCollector alerts)
+        public override void Compile(
+            AlertCollector alerts)
         {
             base.Compile(alerts);
         }
