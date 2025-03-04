@@ -108,7 +108,7 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
             {
                 // Each individual Activity Upgrader requests this Symbol
                 // in order to start building its particular "activity" Symbol.
-                return this.GetCommonActivitySymbol(alerts);
+                return this.BuildCommonActivitySymbol(alerts);
             }
             return base.EvaluateSymbol(symbolName, parameterAssignments, alerts);
         }
@@ -119,11 +119,9 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
         /// </summary>
         /// <param name="alerts">Add any generated alerts to this collector.</param>
         /// <returns></returns>
-        protected Symbol GetCommonActivitySymbol(
+        private Symbol BuildCommonActivitySymbol(
             AlertCollector alerts)
         {
-            // Create a Symbol whose Value is a JObject that contains all of the 	
-            // common activity properties.	
 
             FabricBaseActivityModel fabricModel = new FabricBaseActivityModel()
             {
