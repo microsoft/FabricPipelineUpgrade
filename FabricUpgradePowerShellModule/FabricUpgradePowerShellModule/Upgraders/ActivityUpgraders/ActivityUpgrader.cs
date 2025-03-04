@@ -23,6 +23,8 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
             public const string SetVariable = "SetVariable";
             public const string Wait = "Wait";
             public const string Web = "WebActivity";
+
+            // The ADF ExecutePipeline becomes a Fabric InvokePipeline.
             public const string InvokePipeline = "InvokePipeline";
             public const string SqlStoredProcedure = "SqlServerStoredProcedure";
             public const string AzureFunction = "AzureFunctionActivity";
