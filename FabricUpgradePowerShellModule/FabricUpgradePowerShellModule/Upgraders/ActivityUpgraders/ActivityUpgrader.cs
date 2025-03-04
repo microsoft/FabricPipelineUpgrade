@@ -1,4 +1,4 @@
-﻿// <copyright file="ActivityUpgrader.cs" company="Microsoft">
+// <copyright file="ActivityUpgrader.cs" company="Microsoft">
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
@@ -52,8 +52,12 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
         protected string ActivityType { get; set; }
 
         /// <summary>
-        /// A factory method to create an appropriate Activity Upgrader.
+        /// A "factory" function that creates the appropriate Upgrader from the ADF Activity's Type.
         /// </summary>
+        /// <param name="parentPath">The 'path' to the parent object.</param>
+        /// <param name="adfActivityToken">The JObject that describes the ADF Activity.</param>
+        /// <param name="machine">The FabricUpgradeMachine that provides utilities to Upgraders.</param>
+        /// <returns>A new Upgrader for that Activity type.</returns>
         public static ActivityUpgrader CreateActivityUpgrader(
             string parentPath,
             JToken adfActivityToken,
@@ -99,16 +103,21 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
         {
             if (symbolName == Symbol.CommonNames.Activity)
             {
-                // Use our helper method to build the common activity symbol.
+                // Each individual Activity Upgrader requests this Symbol
+                // in order to start building its particular "activity" Symbol.
                 return this.GetCommonActivitySymbol(alerts);
             }
             return base.EvaluateSymbol(symbolName, parameterAssignments, alerts);
         }
 
         /// <summary>
-        /// Helper method that builds a common activity symbol.
+        /// Create a Symbol whose Value is a JObject that contains all of the
+        /// common activity properties.
         /// </summary>
-        protected Symbol GetCommonActivitySymbol(AlertCollector alerts)
+        /// <param name="alerts">Add any generated alerts to this collector.</param>
+        /// <returns></returns>
+        protected Symbol GetCommonActivitySymbol(
+            AlertCollector alerts)
         {
             FabricBaseActivityModel fabricModel = new FabricBaseActivityModel()
             {
@@ -125,19 +134,31 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
         }
 
         /// <summary>
-        /// Build the Activity Symbol whose value will be included in the Pipeline.
-        /// Each Activity should override this.
+        /// Build the ExportResolves Symbol whose value will be included in this Activity's Pipeline's ExportResolveSteps.
         /// </summary>
+        /// <remarks>
+        /// Before this Activity's Pipeline can be exported, we need to populate the IDs of 
+        /// this Activities dependencies (Connections used by this Activity's Datasets, or
+        /// other Pipelines).
+        /// Collect these dependencies now so that the Pipeline can fill out its 'resolve' field.
+        /// </remarks>
+        /// <param name="parameterAssignments">The parameters from the caller.</param>
+        /// <param name="alerts">Add any generated alerts to this collector.</param>
+        /// <returns>The ExportResolveSteps Symbol whose value is added to the Pipeline's ExportResolveSteps.</returns>
         protected virtual Symbol BuildActivitySymbol(
             Dictionary<string, JToken> parameterAssignments,
             AlertCollector alerts)
         {
+            // For Activities with no ExportResolves, return null.
             return Symbol.ReadySymbol(null);
         }
 
         /// <summary>
-        /// Build the ExportResolves Symbol.
+        /// Build the Activity Symbol whose value will be included in this Activity's Pipeline.
         /// </summary>
+        /// <param name="parameterAssignments">The parameters from the caller.</param>
+        /// <param name="alerts">Add any generated alerts to this collector.</param>
+        /// <returns>The Activity Symbol whose value is added to the Pipeline's Activities.</returns>
         protected virtual Symbol BuildExportResolveStepsSymbol(
             Dictionary<string, JToken> parameterAssignments,
             AlertCollector alerts)
