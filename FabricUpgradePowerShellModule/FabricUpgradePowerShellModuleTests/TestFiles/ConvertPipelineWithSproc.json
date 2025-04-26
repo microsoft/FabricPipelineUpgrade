@@ -1,0 +1,62 @@
+﻿{
+  "adfSupportFile": "PipelineWithSproc_support_live.zip",
+
+  "expectedResponse": {
+    "state": "Succeeded",
+    "alerts": [],
+    "result": {
+      "exportableFabricResources": [
+        {
+          "resourceType": "DataPipeline",
+          "resourceName": "PipelineWithSproc",
+          "resolve": [],
+          "export": {
+            "name": "PipelineWithSproc",
+            "properties": {
+              "activities": [
+                {
+                  "name": "Stored procedure1",
+                  "dependsOn": [],
+                  "description": "",
+                  "type": "SqlServerStoredProcedure",
+                  "typeProperties": {
+                    "operationType": "SqlServerStoredProcedure",
+                    "storedProcedureName": "dbo.sp_mysproc"
+                  },
+                  "linkedService": {}
+                }
+              ]
+            },
+            "annotations": []
+          }
+        },
+        {
+          "resourceType": "Connection",
+          "resourceName": "lsAzureDB",
+          "resolve": [
+            {
+              "type": "LinkedServiceToConnectionId",
+              "key": "lsAzureDB",
+              "targetPath": "id",
+              "hint": {
+                "linkedServiceName": "lsAzureDB",
+                "connectionType": "AzureSqlDatabase",
+                "datasource": "jlsdkjfdf.database.windows.net",
+                "template": {
+                  "type": "LinkedServiceToConnectionId",
+                  "key": "lsAzureDB",
+                  "value": "<Fabric Connection ID>"
+                }
+              }
+            }
+          ],
+          "export": {
+            "id": "00000000-0000-0000-0000-000000000000"
+          }
+        }
+      ]
+    },
+    "resolutions": []
+  }
+
+}

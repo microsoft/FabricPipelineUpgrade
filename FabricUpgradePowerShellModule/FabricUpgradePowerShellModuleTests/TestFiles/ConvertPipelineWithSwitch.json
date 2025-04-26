@@ -1,0 +1,68 @@
+﻿{
+  "adfSupportFile": "PipelineWithSwitch_support_live.zip",
+
+  "expectedResponse": {
+    "state": "Succeeded",
+    "alerts": [],
+    "result": {
+      "exportableFabricResources": [
+        {
+          "resourceType": "DataPipeline",
+          "resourceName": "PipelineWithSwitch",
+          "resolve": [],
+          "export": {
+            "name": "PipelineWithSwitch",
+            "properties": {
+              "activities": [
+                {
+                  "name": "Switch1",
+                  "type": "Switch",
+                  "dependsOn": [],
+                  "userProperties": [],
+                  "typeProperties": {
+                    "on": {
+                      "value": "@string(99)",
+                      "type": "Expression"
+                    },
+                    "cases": [
+                      {
+                        "value": "99",
+                        "activities": [
+                          {
+                            "name": "Wait2",
+                            "type": "Wait",
+                            "dependsOn": [],
+                            "userProperties": [],
+                            "description": null,
+                            "typeProperties": {
+                              "waitTimeInSeconds": 1
+                            }
+                          }
+                        ]
+                      }
+                    ],
+                    "defaultActivities": [
+                      {
+                        "name": "Wait1",
+                        "type": "Wait",
+                        "dependsOn": [],
+                        "userProperties": [],
+                        "description": null,
+                        "typeProperties": {
+                          "waitTimeInSeconds": 1
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            "annotations": []
+          }
+        }
+      ]
+    },
+    "resolutions": []
+  }
+
+}
