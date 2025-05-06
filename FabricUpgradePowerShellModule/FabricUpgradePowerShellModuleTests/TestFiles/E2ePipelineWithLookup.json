@@ -1,0 +1,85 @@
+﻿{
+  "adfSupportFile": "PipelineWithLookup_support_live.zip",
+
+  "resolutions": [
+    {
+      "type": "LinkedServiceToConnectionId",
+      "key": "lsAzureDB",
+      "value": "0a83f9fe-a58e-4a23-a5a3-c14755571b0b"
+    }
+  ],
+
+  "expectedResponse": {
+    "state": "Succeeded",
+    "alerts": [],
+    "result": {
+      "exportedFabricResources": {
+        "PipelineWithLookup": {
+          "type": "DataPipeline",
+          "displayName": "PipelineWithLookup",
+          "description": null,
+          "workspaceId": "",
+          "id": 0
+        },
+        "lsAzureDB": {
+          "id": "0a83f9fe-a58e-4a23-a5a3-c14755571b0b"
+        }
+      }
+    }
+  },
+
+  "expectedItems": [
+    {
+      "item": {
+        "workspaceId": "",
+        "id": 0,
+        "type": "DataPipeline",
+        "displayName": "PipelineWithLookup",
+        "description": null
+      },
+      "definition": {
+        "name": "PipelineWithLookup",
+        "properties": {
+          "activities": [
+            {
+              "name": "Lookup1",
+              "type": "Lookup",
+              "dependsOn": [],
+              "userProperties": [],
+              "description": null,
+              "typeProperties": {
+                "source": {
+                  "type": "AzureSqlSource",
+                  "sqlReaderQuery": "select * from sys.objects",
+                  "queryTimeout": "02:00:00",
+                  "partitionOption": "None"
+                },
+                "firstRowOnly": null,
+                "datasetId": "AzureSQLDB_NoneDataset",
+                "dataset": {
+                  "annotations": [],
+                  "type": "AzureSqlTable",
+                  "externalReferences": {
+                    "connection": "00000000-0000-0000-0000-000000000000"
+                  },
+                  "typeProperties": {
+                    "database": "testdb"
+                  },
+                  "schema": []
+                },
+                "operationType": "Lookup"
+              }
+            }
+          ]
+        },
+        "annotations": []
+      }
+    }
+  ],
+
+  "expectedEndpointEvents": [
+    "LIST DataPipeline",
+    "CREATE DataPipeline 'PipelineWithLookup' => $0"
+  ]
+
+}

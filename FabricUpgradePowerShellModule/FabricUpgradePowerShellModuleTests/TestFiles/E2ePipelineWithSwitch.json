@@ -1,0 +1,89 @@
+﻿{
+  "adfSupportFile": "PipelineWithSwitch_support_live.zip",
+
+  "resolutions": [
+  ],
+
+  "expectedResponse": {
+    "state": "Succeeded",
+    "alerts": [],
+    "result": {
+      "exportedFabricResources": {
+        "PipelineWithSwitch": {
+          "type": "DataPipeline",
+          "displayName": "PipelineWithSwitch",
+          "description": null,
+          "workspaceId": "",
+          "id": 0
+        }
+      }
+    }
+  },
+
+  "expectedItems": [
+    {
+      "item": {
+        "workspaceId": "",
+        "id": 0,
+        "type": "DataPipeline",
+        "displayName": "PipelineWithSwitch",
+        "description": null
+      },
+      "definition": {
+        "name": "PipelineWithSwitch",
+        "properties": {
+          "activities": [
+            {
+              "name": "Switch1",
+              "type": "Switch",
+              "dependsOn": [],
+              "userProperties": [],
+              "typeProperties": {
+                "on": {
+                  "value": "@string(99)",
+                  "type": "Expression"
+                },
+                "cases": [
+                  {
+                    "value": "99",
+                    "activities": [
+                      {
+                        "name": "Wait2",
+                        "type": "Wait",
+                        "dependsOn": [],
+                        "userProperties": [],
+                        "description": null,
+                        "typeProperties": {
+                          "waitTimeInSeconds": 1
+                        }
+                      }
+                    ]
+                  }
+                ],
+                "defaultActivities": [
+                  {
+                    "name": "Wait1",
+                    "type": "Wait",
+                    "dependsOn": [],
+                    "userProperties": [],
+                    "description": null,
+                    "typeProperties": {
+                      "waitTimeInSeconds": 1
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "annotations": []
+      }
+    }
+  ],
+
+  "expectedEndpointEvents": [
+    "LIST DataPipeline",
+    "CREATE DataPipeline 'PipelineWithSwitch' => $0"
+  ]
+
+}

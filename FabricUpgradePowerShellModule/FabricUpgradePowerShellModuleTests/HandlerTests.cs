@@ -65,6 +65,12 @@ namespace FabricUpgradePowerShellModuleTests
         [DataRow("ConvertPipelineWithCopy_JsonToJson")]
         [DataRow("ConvertPipelineWithCopy_StagingAndLogging")]
         [DataRow("ConvertPipelineWithCopy_SqlToSql")]
+
+        [DataRow("ConvertPipelineWithAzureFunction")]
+        [DataRow("ConvertPipelineWithSproc")]
+        [DataRow("ConvertPipelineWithLookup")]
+        [DataRow("ConvertPipelineWithSwitch")]
+        [DataRow("ConvertPipelineWithForeach")]
         public void ConvertToFabricPipeline_Test(
             string testConfigFilename,
             string workspaceId = null) // we can set ws in param or in progress.

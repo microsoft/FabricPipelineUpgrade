@@ -1,0 +1,94 @@
+﻿{
+  "adfSupportFile": "PipelineWithAzureFunction_support_live.zip",
+
+  "resolutions": [
+    {
+      "type": "LinkedServiceToConnectionId",
+      "key": "AzureFunction1",
+      "value": "9363f9fe-a58e-4a23-a5a3-c14755571b99"
+    }
+  ],
+
+  "guidSubstitutions": [
+    {
+      "comment": "Set the workspaceId of the ExecutePipeline activity to the workspaceId (-1 means 'workspaceId').",
+      "path": "[0].definition.properties.activities[0].typeProperties.workspaceId",
+      "guidIndex": -1
+    }
+  ],
+
+  "expectedWhatIfResponse": {
+    "alerts": [
+      {
+        "severity": "Warning",
+        "details": "LinkedService 'AzureFunction1' is using anonymous access as authenticationKey is missing."
+      }
+    ]
+  },
+
+  "expectedResponse": {
+    "state": "Succeeded",
+    "alerts": [
+      {
+        "severity": "Warning",
+        "details": "LinkedService 'AzureFunction1' is using anonymous access as authenticationKey is missing."
+      }
+    ],
+    "result": {
+      "exportedFabricResources": {
+        "PipelineWithAzureFunction": {
+          "id": 0,
+          "type": "DataPipeline",
+          "displayName": "PipelineWithAzureFunction",
+          "description": null,
+          "workspaceId": ""
+        },
+        "AzureFunction1": {
+          "id": "9363f9fe-a58e-4a23-a5a3-c14755571b99"
+        }
+      }
+    },
+    "resolutions": []
+  },
+
+  "expectedItems": [
+    {
+      "item": {
+        "workspaceId": "",
+        "id": 0,
+        "type": "DataPipeline",
+        "displayName": "PipelineWithAzureFunction",
+        "description": null
+      },
+      "definition": {
+        "name": "PipelineWithAzureFunction",
+        "properties": {
+          "activities": [
+            {
+              "name": "Azure Function1",
+              "type": "AzureFunctionActivity",
+              "dependsOn": [],
+              "userProperties": [],
+              "description": null,
+              "typeProperties": {
+                "parameters": null,
+                "functionName": "function1",
+                "operationType": "InvokeAzureFunction",
+                "functionId": null,
+                "workspaceId": "",
+                "azureFunctionConnection": "anonymous"
+              }
+            }
+          ]
+        },
+        "annotations": []
+      }
+    }
+  ],
+
+  "expectedEndpointEvents": [
+    "LIST DataPipeline",
+    "CREATE DataPipeline 'PipelineWithAzureFunction' => $0"
+  ]
+
+}

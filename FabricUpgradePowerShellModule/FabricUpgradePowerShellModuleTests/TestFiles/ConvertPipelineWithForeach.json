@@ -1,0 +1,87 @@
+﻿{
+  "adfSupportFile": "PipelineWithForeach_support_live.zip",
+
+  "expectedResponse": {
+    "state": "Succeeded",
+    "alerts": [],
+    "result": {
+      "exportableFabricResources": [
+        {
+          "resourceType": "DataPipeline",
+          "resourceName": "PipelineWithForeach",
+          "resolve": [],
+          "export": {
+            "name": "PipelineWithForeach",
+            "properties": {
+              "activities": [
+                {
+                  "name": "ForEach1",
+                  "type": "ForEach",
+                  "dependsOn": [],
+                  "userProperties": [],
+                  "description": null,
+                  "typeProperties": {
+                    "items": {
+                      "value": "@variables('vArray')",
+                      "type": "Expression"
+                    },
+                    "isSequential": false,
+                    "activities": [
+                      {
+                        "name": "Wait1",
+                        "type": "Wait",
+                        "dependsOn": [],
+                        "userProperties": [],
+                        "description": null,
+                        "typeProperties": {
+                          "waitTimeInSeconds": 1
+                        }
+                      }
+                    ]
+                  }
+                },
+                {
+                  "name": "ForEach2",
+                  "type": "ForEach",
+                  "dependsOn": [],
+                  "userProperties": [],
+                  "description": null,
+                  "typeProperties": {
+                    "items": {
+                      "value": "@variables('vArray')",
+                      "type": "Expression"
+                    },
+                    "isSequential": true,
+                    "activities": [
+                      {
+                        "name": "Wait1_copy1",
+                        "type": "Wait",
+                        "dependsOn": [],
+                        "userProperties": [],
+                        "description": null,
+                        "typeProperties": {
+                          "waitTimeInSeconds": 1
+                        }
+                      }
+                    ]
+                  }
+                }
+              ],
+              "variables": {
+                "vArray": {
+                  "type": "Array",
+                  "defaultValue": [
+                    "1",
+                    "2"
+                  ]
+                }
+              }
+            },
+            "annotations": []
+          }
+        }
+      ]
+    },
+    "resolutions": []
+  }
+}

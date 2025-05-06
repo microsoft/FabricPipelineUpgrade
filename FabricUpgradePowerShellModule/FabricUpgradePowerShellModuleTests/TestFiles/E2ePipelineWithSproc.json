@@ -1,0 +1,67 @@
+﻿{
+  "adfSupportFile": "PipelineWithSproc_support_live.zip",
+
+  "resolutions": [
+    {
+      "type": "LinkedServiceToConnectionId",
+      "key": "lsAzureDB",
+      "value": "0a83f9fe-a58e-4a23-a5a3-c14755571b0b"
+    }
+  ],
+
+  "expectedResponse": {
+    "state": "Succeeded",
+    "alerts": [],
+    "result": {
+      "exportedFabricResources": {
+        "PipelineWithSproc": {
+          "type": "DataPipeline",
+          "displayName": "PipelineWithSproc",
+          "description": null,
+          "workspaceId": "",
+          "id": 0
+        },
+        "lsAzureDB": {
+          "id": "0a83f9fe-a58e-4a23-a5a3-c14755571b0b"
+        }
+      }
+    }
+  },
+
+  "expectedItems": [
+    {
+      "item": {
+        "workspaceId": "",
+        "id": 0,
+        "type": "DataPipeline",
+        "displayName": "PipelineWithSproc",
+        "description": null
+      },
+      "definition": {
+        "name": "PipelineWithSproc",
+        "properties": {
+          "activities": [
+            {
+              "name": "Stored procedure1",
+              "dependsOn": [],
+              "description": "",
+              "type": "SqlServerStoredProcedure",
+              "typeProperties": {
+                "operationType": "SqlServerStoredProcedure",
+                "storedProcedureName": "dbo.sp_mysproc"
+              },
+              "linkedService": {}
+            }
+          ]
+        },
+        "annotations": []
+      }
+    }
+  ],
+
+  "expectedEndpointEvents": [
+    "LIST DataPipeline",
+    "CREATE DataPipeline 'PipelineWithSproc' => $0"
+  ]
+
+}
