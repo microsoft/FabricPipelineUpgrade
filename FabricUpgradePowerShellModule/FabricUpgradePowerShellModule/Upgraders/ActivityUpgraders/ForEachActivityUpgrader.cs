@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿// <copyright file="ForEachActivityUpgrader.cs" company="Microsoft">
+// Copyright (c) Microsoft. All rights reserved.
+// </copyright>
+
 using Newtonsoft.Json.Linq;
 using FabricUpgradePowerShellModule.Models;
 using FabricUpgradePowerShellModule.UpgradeMachines;

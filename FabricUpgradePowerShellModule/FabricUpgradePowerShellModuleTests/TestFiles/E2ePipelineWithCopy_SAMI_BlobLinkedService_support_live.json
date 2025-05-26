@@ -19,7 +19,7 @@
     "alerts": [
       {
         "severity": "Permanent",
-        "details": "Cannot upgrade LinkedService 'LinkedService shghatgeblobsmi' because only authentication with Account Key is supported for Azure Blob Storage LinkedService upgrade."
+        "details": "Cannot upgrade LinkedService 'shghatgeblobsmi' because only authentication with Account Key is supported for Azure Blob Storage LinkedService upgrade."
       }
     ],
     "result": {},
@@ -31,7 +31,7 @@
     "alerts": [
       {
         "severity": "Permanent",
-        "details": "Cannot upgrade LinkedService 'LinkedService shghatgeblobsmi' because only authentication with Account Key is supported for Azure Blob Storage LinkedService upgrade."
+        "details": "Cannot upgrade LinkedService 'shghatgeblobsmi' because only authentication with Account Key is supported for Azure Blob Storage LinkedService upgrade."
       }
     ],
     "result": {},

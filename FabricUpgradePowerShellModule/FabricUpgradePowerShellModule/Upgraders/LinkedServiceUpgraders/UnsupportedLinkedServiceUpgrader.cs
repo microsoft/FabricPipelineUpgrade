@@ -27,7 +27,7 @@ namespace FabricUpgradePowerShellModule.Upgraders.LinkedServiceUpgraders
             base.Compile(alerts);
 
             // Here, we add an Alert that will prevent the Upgrader from continuing.
-            alerts.AddUnsupportedResourceAlert($"Cannot upgrade LinkedService '{this.Name}' because its Type is '{this.LinkedServiceType}'");
+            alerts.AddUnsupportedResourceAlert($"Cannot upgrade LinkedService '{this.Name}' because its Type is '{this.LinkedServiceType}'.");
         }
     }
 }

@@ -45,7 +45,7 @@ namespace FabricUpgradePowerShellModule.Upgraders.DatasetUpgraders
             this.DatasetType = this.AdfModel.Properties.DatasetType;
             this.Name = AdfModel.Name;
             this.UpgraderType = FabricUpgradeResourceTypes.Dataset;
-            this.Path = "Dataset " + this.Name;
+            this.Path = $"Dataset '{this.Name}'";
         }
 
         protected AdfDatasetModel AdfModel { get; set; }

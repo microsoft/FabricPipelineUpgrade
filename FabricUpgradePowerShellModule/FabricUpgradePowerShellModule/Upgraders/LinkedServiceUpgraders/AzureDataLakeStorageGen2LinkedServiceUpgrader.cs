@@ -46,7 +46,7 @@ namespace FabricUpgradePowerShellModule.Upgraders.LinkedServiceUpgraders
             }
             if (accountUrl == null)
             {
-                alerts.AddPermanentError($"Cannot upgrade LinkedService '{this.Path}' because its Url is missing.");
+                alerts.AddPermanentError($"Cannot upgrade {this.Path} because its Url is missing.");
             }
             this.connectionSettings = new Dictionary<string, JToken> { };
             this.connectionSettings[AccountUrlKey] = accountUrl;

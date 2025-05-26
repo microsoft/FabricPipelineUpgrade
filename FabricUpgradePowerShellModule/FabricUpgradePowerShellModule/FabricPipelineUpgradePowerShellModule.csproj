@@ -16,6 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="TestResults\" />
     <Folder Include="ToPublish\Microsoft.FabricPipelineUpgrade" />
   </ItemGroup>
 

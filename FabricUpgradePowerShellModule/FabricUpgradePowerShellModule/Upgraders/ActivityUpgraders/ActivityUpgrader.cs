@@ -2,7 +2,6 @@
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-using System.Collections.Generic;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using FabricUpgradePowerShellModule.UpgradeMachines;
@@ -110,6 +109,7 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
                 // in order to start building its particular "activity" Symbol.
                 return this.BuildCommonActivitySymbol(alerts);
             }
+
             return base.EvaluateSymbol(symbolName, parameterAssignments, alerts);
         }
 
@@ -225,6 +225,7 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
             [JsonProperty(PropertyName = "onInactiveMarkAs")]
             public string OnInactiveMarkAs { get; set; }
 
+            // This does not appear to be used in Fabric, but we can include it in the activity.
             [JsonProperty(PropertyName = "userProperties")]
             public List<UserProperty> UserProperties { get; set; } = new List<UserProperty>();
 

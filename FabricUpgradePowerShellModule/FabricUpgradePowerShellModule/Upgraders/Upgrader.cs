@@ -179,7 +179,7 @@ namespace FabricUpgradePowerShellModule.Upgraders
             }
             else
             {
-                alerts.AddPermanentError($"'{this.Path}' references {upgraderType} '{upgraderName}', but UpgradePackage does not include {upgraderType} '{upgraderName}'.");
+                alerts.AddPermanentError($"{this.Path} references {upgraderType} '{upgraderName}', but UpgradePackage does not include {upgraderType} '{upgraderName}'.");
             }
 
             return matchingUpgrader;

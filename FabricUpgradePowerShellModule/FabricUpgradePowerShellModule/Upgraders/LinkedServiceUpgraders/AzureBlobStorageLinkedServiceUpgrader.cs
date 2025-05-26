@@ -47,12 +47,12 @@ namespace FabricUpgradePowerShellModule.Upgraders.LinkedServiceUpgraders
 
             if (connectionStringToken == null)
             {
-                alerts.AddPermanentError($"Cannot upgrade LinkedService '{this.Path}' because its ConnectionString is missing.");
+                alerts.AddPermanentError($"Cannot upgrade {this.Path} because its ConnectionString is missing.");
                 return;
             }
             else if (connectionStringToken.Type != JTokenType.String)
             {
-                alerts.AddPermanentError($"Cannot upgrade LinkedService '{this.Path}' because its ConnectionString is not a string.");
+                alerts.AddPermanentError($"Cannot upgrade {this.Path} because its ConnectionString is not a string.");
                 return;
             }
             else
@@ -97,7 +97,7 @@ namespace FabricUpgradePowerShellModule.Upgraders.LinkedServiceUpgraders
             JToken sasUri = this.AdfResourceToken.SelectToken(AdfSasUriPath);
             if (storageServiceEndpoint != null || sasUri != null)
             {
-                alerts.AddPermanentError($"Cannot upgrade LinkedService '{this.Path}' because only authentication with Account Key is supported for Azure Blob Storage LinkedService upgrade.");
+                alerts.AddPermanentError($"Cannot upgrade {this.Path} because only authentication with Account Key is supported for Azure Blob Storage LinkedService upgrade.");
                 return false;
             }
             return true;

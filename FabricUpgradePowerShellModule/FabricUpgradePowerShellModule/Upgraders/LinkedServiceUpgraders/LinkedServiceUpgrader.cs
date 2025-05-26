@@ -6,8 +6,6 @@ using FabricUpgradePowerShellModule.Models;
 using FabricUpgradePowerShellModule.UpgradeMachines;
 using FabricUpgradePowerShellModule.Utilities;
 using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
 
 namespace FabricUpgradePowerShellModule.Upgraders.LinkedServiceUpgraders
 {
@@ -42,7 +40,7 @@ namespace FabricUpgradePowerShellModule.Upgraders.LinkedServiceUpgraders
             this.Name = adfToken.SelectToken("name")?.ToString();
             this.UpgraderType = FabricUpgradeResourceTypes.LinkedService;
             this.LinkedServiceType = adfToken.SelectToken(AdfLinkedServiceTypePath)?.ToString();
-            this.Path = "LinkedService " + this.Name;
+            this.Path = $"LinkedService '{this.Name}'";
         }
 
         protected string LinkedServiceType { get; set; }

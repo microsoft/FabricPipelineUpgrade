@@ -1,0 +1,37 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<RunSettings>
+  <DataCollectionRunSettings>
+    <DataCollectors>
+      <DataCollector friendlyName="Code Coverage" uri="datacollector://Microsoft/CodeCoverage/2.0" assemblyQualifiedName="Microsoft.VisualStudio.Coverage.DynamicCoverageDataCollector, Microsoft.VisualStudio.TraceCollector, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+        <Configuration>
+          <CodeCoverage>
+            <ModulePaths>
+              <Exclude>
+                <!-- Exclude test code from coverage metrics -->
+                <ModulePath>.*fabricpipelineupgradepowershellmoduletests.dll</ModulePath>
+                <ModulePath>.*moq.dll</ModulePath>
+                <!-- Exclude external modules from coverage metrics -->
+                <ModulePath>.*microsoft.caching.redis.dll</ModulePath>
+                <ModulePath>.*pipelines.sockets.unofficial.dll</ModulePath>
+                <ModulePath>.*microsoft.owin.security.dll</ModulePath>
+                <ModulePath>.*microsoft.owin.dll</ModulePath>
+                <ModulePath>.*microsoft.owin.host.httplistener.dll</ModulePath>
+                <ModulePath>.*microsoft.owin.hosting.dll</ModulePath>
+                <ModulePath>.*microsoft.owin.testing.dll</ModulePath>
+              </Exclude>
+            </ModulePaths>
+            <Functions>
+              <Exclude>
+              </Exclude>
+            </Functions>
+            <Sources>
+			  <Exclude>
+                <Source>.TemplateConnectionStringLinkedServiceUpgrader.cs</Source>
+              </Exclude>
+            </Sources>			  
+		  </CodeCoverage>
+        </Configuration>
+      </DataCollector>
+    </DataCollectors>
+  </DataCollectionRunSettings>
+</RunSettings>

@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿// <copyright file="SwitchActivityUpgrader.cs" company="Microsoft">
+// Copyright (c) Microsoft. All rights reserved.
+// </copyright>
+
 using Newtonsoft.Json.Linq;
-using FabricUpgradePowerShellModule.Models;
 using FabricUpgradePowerShellModule.UpgradeMachines;
 using FabricUpgradePowerShellModule.Utilities;
 
@@ -18,8 +20,8 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
         private const string AdfCasesPath = "typeProperties.cases";
         private const string AdfDefaultActivitiesPath = "typeProperties.defaultActivities";
 
-        private readonly List<SwitchCaseUpgrader> _caseUpgraders = new List<SwitchCaseUpgrader>();
-        private readonly List<Upgrader> _defaultActivityUpgraders = new List<Upgrader>();
+        private readonly List<SwitchCaseUpgrader> caseUpgraders = new List<SwitchCaseUpgrader>();
+        private readonly List<Upgrader> defaultActivityUpgraders = new List<Upgrader>();
 
         public SwitchActivityUpgrader(string parentPath, JToken activityToken, IFabricUpgradeMachine machine)
             : base("Switch", parentPath, activityToken, machine)
@@ -40,7 +42,7 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
             {
                 var scu = new SwitchCaseUpgrader(this.Path, caseToken, this.Machine);
                 scu.Compile(alerts);
-                _caseUpgraders.Add(scu);
+                this.caseUpgraders.Add(scu);
             }
 
             // Process defaultActivities.
@@ -50,7 +52,7 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
             {
                 Upgrader u = ActivityUpgrader.CreateActivityUpgrader(this.Name, act, this.Machine);
                 u.Compile(alerts);
-                _defaultActivityUpgraders.Add(u);
+                this.defaultActivityUpgraders.Add(u);
             }
         }
 
@@ -61,12 +63,14 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
             return base.EvaluateSymbol(symbolName, parameterAssignments, alerts);
         }
 
-        private Symbol BuildActivitySymbol(Dictionary<string, JToken> parameterAssignments, AlertCollector alerts)
+        protected override Symbol BuildActivitySymbol(Dictionary<string, JToken> parameterAssignments, AlertCollector alerts)
         {
             // Get the base Fabric activity JSON.
             Symbol baseSymbol = base.EvaluateSymbol(Symbol.CommonNames.Activity, parameterAssignments, alerts);
             if (baseSymbol.State != Symbol.SymbolState.Ready)
+            {
                 return baseSymbol;
+            }
 
             JObject fabricActivity = baseSymbol.Value as JObject ?? new JObject();
 
@@ -90,7 +94,7 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
 
             // Build new cases array.
             JArray newCases = new JArray();
-            foreach (var scu in _caseUpgraders)
+            foreach (var scu in this.caseUpgraders)
             {
                 Symbol caseSymbol = scu.EvaluateSymbol(Symbol.CommonNames.Activity, parameterAssignments, alerts);
                 if (caseSymbol.State == Symbol.SymbolState.Ready && caseSymbol.Value != null)
@@ -100,7 +104,7 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
 
             // Build new defaultActivities array.
             JArray newDefaults = new JArray();
-            foreach (var ua in _defaultActivityUpgraders)
+            foreach (var ua in this.defaultActivityUpgraders)
             {
                 Symbol defSymbol = ua.EvaluateSymbol(Symbol.CommonNames.Activity, parameterAssignments, alerts);
                 if (defSymbol.State == Symbol.SymbolState.Ready && defSymbol.Value != null)
@@ -139,7 +143,7 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
         private const string AdfCaseValuePath = "value";
         private const string AdfCaseActivitiesPath = "activities";
 
-        private readonly List<Upgrader> _activityUpgraders = new List<Upgrader>();
+        private readonly List<Upgrader> activityUpgraders = new List<Upgrader>();
 
         public SwitchCaseUpgrader(string parentPath, JToken caseToken, IFabricUpgradeMachine machine)
             : base(caseToken, machine)
@@ -162,7 +166,7 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
             {
                 Upgrader u = ActivityUpgrader.CreateActivityUpgrader(this.Path, act, this.Machine);
                 u.Compile(alerts);
-                _activityUpgraders.Add(u);
+                this.activityUpgraders.Add(u);
             }
         }
 
@@ -182,7 +186,7 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
 
             // Build the activities array.
             JArray newActs = new JArray();
-            foreach (var u in _activityUpgraders)
+            foreach (var u in this.activityUpgraders)
             {
                 Symbol s = u.EvaluateSymbol(Symbol.CommonNames.Activity, parameterAssignments, alerts);
                 if (s.State == Symbol.SymbolState.Ready && s.Value != null)

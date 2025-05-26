@@ -26,7 +26,7 @@ namespace FabricUpgradePowerShellModule.Upgraders.DatasetUpgraders
             base.Compile(alerts);
 
             // Here, we add an Alert that will prevent the Upgrader from continuing.
-            alerts.AddUnsupportedResourceAlert($"Cannot upgrade Dataset '{this.Path}' because its Type is '{this.AdfModel.Properties.DatasetType}'.");
+            alerts.AddUnsupportedResourceAlert($"Cannot upgrade Dataset '{this.Name}' because its Type is '{this.AdfModel.Properties.DatasetType}'.");
         }
     }
 }
