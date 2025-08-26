@@ -36,9 +36,103 @@ namespace FabricUpgradePowerShellModule
         }
         private string filename;
 
+
         protected override void ProcessRecord()
         {
-            WriteObject(new FabricUpgradeHandler().ImportAdfSupportFile(this.progress, this.filename).ToString());
+            var result = new FabricUpgradeHandler().ImportAdfSupportFile(
+                this.progress, 
+                this.filename, 
+                true,
+                CancellationToken.None);
+
+            WriteObject(result.ToString());
+        }
+    }
+
+    /// <summary>
+    /// Import ADF resources directly from Azure Data Factory using REST APIs.
+    /// </summary>
+    [Cmdlet(VerbsData.Import, "AdfFactory")]
+    public class ImportAdfFactory : Cmdlet
+    {
+        [Parameter(
+            Position = 0,
+            ValueFromPipeline = true,
+            ValueFromPipelineByPropertyName = true)]
+        [ValidateNotNullOrEmpty]
+        public string Progress
+        {
+            get { return progress; }
+            set { progress = value; }
+        }
+        private string progress;
+
+        [Parameter(Mandatory = true)]
+        public string SubscriptionId
+        {
+            get { return subscriptionId; }
+            set { subscriptionId = value; }
+        }
+        private string subscriptionId;
+
+        [Parameter(Mandatory = true)]
+        public string ResourceGroupName
+        {
+            get { return resourceGroupName; }
+            set { resourceGroupName = value; }
+        }
+        private string resourceGroupName;
+
+        [Parameter(Mandatory = true)]
+        public string FactoryName
+        {
+            get { return factoryName; }
+            set { factoryName = value; }
+        }
+        private string factoryName;
+
+        [Parameter(Mandatory = true)]
+        public string AdfToken
+        {
+            get { return adfToken; }
+            set { adfToken = value; }
+        }
+        private string adfToken;
+
+        [Parameter(Mandatory = false)]
+        public string PipelineName
+        {
+            get { return pipelineName; }
+            set { pipelineName = value; }
+        }
+        private string pipelineName;
+
+        /// <summary>
+        /// Include datasets and linked services that are not used by any pipelines.
+        /// By default, only resources used by pipelines are imported to avoid upgrade failures from unsupported linked service types.
+        /// Set this to $true for factory-level upgrades where you want to include all resources regardless of usage.
+        /// </summary>
+        [Parameter(Mandatory = false, HelpMessage = "Include datasets and linked services that are not used by any pipelines. Useful for factory-level upgrades.")]
+        public SwitchParameter IncludeUnusedResources
+        {
+            get { return includeUnusedResources; }
+            set { includeUnusedResources = value; }
+        }
+        private SwitchParameter includeUnusedResources;
+
+        protected override void ProcessRecord()
+        {
+            var task = new FabricUpgradeHandler().ImportAdfFactoryAsync(
+                this.progress,
+                this.subscriptionId,
+                this.resourceGroupName,
+                this.factoryName,
+                this.adfToken,
+                this.pipelineName,
+                this.includeUnusedResources,
+                CancellationToken.None);
+
+            WriteObject(task.Result.ToString());
         }
     }
 

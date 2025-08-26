@@ -31,7 +31,8 @@ namespace FabricUpgradePowerShellModuleTests
 
             FabricUpgradeProgress actualResponse = new FabricUpgradeHandler().ImportAdfSupportFile(
                 testConfig.Progress?.ToString(),
-                "./TestFiles/AdfSupportFiles/" + testConfig.AdfSupportFile);
+                "./TestFiles/AdfSupportFiles/" + testConfig.AdfSupportFile,
+                true);
 
             JObject actualResponseObject = actualResponse.ToJObject();
 
@@ -79,7 +80,8 @@ namespace FabricUpgradePowerShellModuleTests
 
             FabricUpgradeProgress importResponse = new FabricUpgradeHandler().ImportAdfSupportFile(
                 testConfig.Progress?.ToString(),
-                "./TestFiles/AdfSupportFiles/" + testConfig.AdfSupportFile);
+                "./TestFiles/AdfSupportFiles/" + testConfig.AdfSupportFile,
+                true);
 
             FabricUpgradeProgress actualConvertResponse = new FabricUpgradeHandler().ConvertToFabricResources(importResponse.ToString());
 
