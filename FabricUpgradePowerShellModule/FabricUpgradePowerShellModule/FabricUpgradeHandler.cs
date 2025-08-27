@@ -26,28 +26,100 @@ namespace FabricUpgradePowerShellModule
         public FabricUpgradeHandler() { }
 
         /// <summary>
-        /// Import an ADF Support File.
+        /// Import an ADF Support File (zip file).
         /// </summary>
-        /// <remarks>
-        /// ADF Studio can export a "Support File" that contains a Pipeline and all of the other 
-        /// ADF resources upon which that Pipeline depends (including other Pipelines!).
-        /// </remarks>
         /// <param name="progressString">The progress sent by the client.</param>
         /// <param name="fileName">The name of the ADF support file to import.</param>
+        /// <param name="includeUnusedResources">Whether to include datasets and linked services that are not used by any pipelines.</param>
         /// <returns>A FabricUpgradeProgress that contains the unzipped contents of the ADF Support File.</returns>
         public FabricUpgradeProgress ImportAdfSupportFile(
             string progressString,
-            string fileName)
+            string fileName,
+            bool includeUnusedResources,
+            CancellationToken cancellationToken = default)
         {
             if (!this.CheckProgress(progressString, out FabricUpgradeProgress progress))
             {
                 return progress;
             }
 
-            AdfSupportFileImporter importer = new AdfSupportFileImporter(progress, fileName, this.alerts);
+            Console.WriteLine($"ImportAdfSupportFile: fileName={fileName}, includeUnusedResources={includeUnusedResources}");
 
-            return importer.Import();
+            if (string.IsNullOrEmpty(fileName))
+            {
+                return new FabricUpgradeProgress()
+                {
+                    State = FabricUpgradeProgress.FabricUpgradeState.Failed,
+                }
+                .WithAlert(
+                    new FabricUpgradeAlert()
+                    {
+                        Severity = FabricUpgradeAlert.AlertSeverity.Permanent,
+                        Details = "Filename is required for ADF Support File import.",
+                    });
+            }
+
+            AdfSupportFileImporter fileImporter = new AdfSupportFileImporter(progress, fileName, this.alerts);
+            return fileImporter.Import(includeUnusedResources);
         }
+
+        /// <summary>
+        /// Import ADF resources directly from Azure Data Factory using REST APIs.
+        /// </summary>
+        /// <param name="progressString">The progress sent by the client.</param>
+        /// <param name="subscriptionId">Azure subscription ID for ADF API access.</param>
+        /// <param name="resourceGroupName">Resource group name for ADF API access.</param>
+        /// <param name="factoryName">Data factory name for ADF API access.</param>
+        /// <param name="adfToken">The ADF token used for authentication.</param>
+        /// <param name="pipelineResourceId">Optional specific pipeline resource Id to import.</param>
+        /// <param name="includeUnusedResources">Whether to include datasets and linked services that are not used by any pipelines.</param>
+        /// <returns>A FabricUpgradeProgress that contains the imported ADF resources.</returns>
+        public async Task<FabricUpgradeProgress> ImportAdfFactoryAsync(
+            string progressString,
+            string subscriptionId,
+            string resourceGroupName,
+            string factoryName,
+            string adfToken,
+            string pipelineResourceId,
+            bool includeUnusedResources,
+            CancellationToken cancellationToken = default)
+        {
+            if (!this.CheckProgress(progressString, out FabricUpgradeProgress progress))
+            {
+                return progress;
+            }
+
+            Console.WriteLine($"ImportAdfFactory: factoryName={factoryName}, pipelineResourceId={pipelineResourceId}, includeUnusedResources={includeUnusedResources}");
+
+            if (string.IsNullOrEmpty(subscriptionId) || 
+                string.IsNullOrEmpty(resourceGroupName) || 
+                string.IsNullOrEmpty(factoryName) || 
+                string.IsNullOrEmpty(adfToken))
+            {
+                return new FabricUpgradeProgress()
+                {
+                    State = FabricUpgradeProgress.FabricUpgradeState.Failed,
+                }
+                .WithAlert(
+                    new FabricUpgradeAlert()
+                    {
+                        Severity = FabricUpgradeAlert.AlertSeverity.Permanent,
+                        Details = "SubscriptionId, ResourceGroupName, FactoryName, and AdfToken are all required for ADF API import.",
+                    });
+            }
+
+            AdfApiImporter apiImporter = new AdfApiImporter(
+                progress, 
+                subscriptionId, 
+                resourceGroupName, 
+                factoryName, 
+                adfToken, 
+                pipelineResourceId, 
+                this.alerts);
+
+            return await apiImporter.ImportAsync(includeUnusedResources, cancellationToken).ConfigureAwait(false);
+        }
+
 
         /// <summary>
         /// Accept a Progress that includes the result of Import-AdfSupportFile and
