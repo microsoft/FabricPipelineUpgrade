@@ -33,7 +33,13 @@
         {
           "resourceType": "DataPipeline",
           "resourceName": "PipelineWithLookup",
-          "resolve": [],
+          "resolve": [
+            {
+              "type": "AdfResourceNameToFabricResourceId",
+              "key": "Connection:lsAzureDB",
+              "targetPath": "properties.activities[0].typeProperties.dataset.externalReferences.connection"
+            }
+          ],
           "export": {
             "name": "PipelineWithLookup",
             "properties": {
