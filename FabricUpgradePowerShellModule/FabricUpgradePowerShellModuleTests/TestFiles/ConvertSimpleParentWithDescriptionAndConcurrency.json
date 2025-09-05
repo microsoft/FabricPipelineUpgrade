@@ -1,38 +1,27 @@
-﻿{
-  "progress": {
-    "state": "Succeeded"
-  },
-
-  "adfSupportFile": "PipelineWithExecutePipeline_support_live.zip",
+{
+  "adfSupportFile": "SimpleParentWithDescriptionAndConcurrency_support_live.zip",
 
   "expectedResponse": {
     "state": "Succeeded",
     "alerts": [],
-    "resolutions": [],
-
     "result": {
       "exportableFabricResources": [
         {
-          "resourceName": "WaitPipeline",
           "resourceType": "DataPipeline",
+          "resourceName": "SimpleChild",
           "resolve": [],
           "export": {
-            "name": "WaitPipeline",
+            "name": "SimpleChild",
             "properties": {
               "activities": [
                 {
-                  "name": "Wait10Seconds",
+                  "name": "Wait1",
                   "type": "Wait",
-                  "description": "This activity waits 10 seconds",
                   "dependsOn": [],
-                  "userProperties": [
-                    {
-                      "name": "UserProperty1",
-                      "value": "\"Value1\""
-                    }
-                  ],
+                  "userProperties": [],
+                  "description": null,
                   "typeProperties": {
-                    "waitTimeInSeconds": 10
+                    "waitTimeInSeconds": 1
                   }
                 }
               ]
@@ -41,17 +30,18 @@
           }
         },
         {
-          "resourceName": "ExecutePipelinePipeline",
           "resourceType": "DataPipeline",
+          "resourceName": "SimpleParentWithDescriptionAndConcurrency",
+          "resourceDescription": "Custom description",
           "resolve": [
             {
               "type": "WorkspaceId",
-              "targetPath": "properties.activities[1].typeProperties.workspaceId"
+              "targetPath": "properties.activities[0].typeProperties.workspaceId"
             },
             {
               "type": "CredentialConnectionId",
               "key": "user",
-              "targetPath": "properties.activities[1].externalReferences.connection",
+              "targetPath": "properties.activities[0].externalReferences.connection",
               "hint": {
                 "connectionType": "Fabric Data Pipelines",
                 "datasource": "FabricDataPipelines",
@@ -64,58 +54,42 @@
             },
             {
               "type": "AdfResourceNameToFabricResourceId",
-              "key": "DataPipeline:WaitPipeline",
-              "targetPath": "properties.activities[1].typeProperties.pipelineId"
+              "key": "DataPipeline:SimpleChild",
+              "targetPath": "properties.activities[0].typeProperties.pipelineId"
             }
           ],
           "export": {
-            "name": "ExecutePipelinePipeline",
+            "name": "SimpleParentWithDescriptionAndConcurrency",
             "properties": {
               "activities": [
                 {
-                  "name": "Wait5Seconds",
-                  "type": "Wait",
-                  "description": "This activity waits 5 seconds",
-                  "dependsOn": [],
-                  "userProperties": [],
-                  "typeProperties": {
-                    "waitTimeInSeconds": 5
-                  }
-                },
-                {
-                  "name": "Execute Other Pipeline",
+                  "name": "Execute Pipeline1",
                   "type": "InvokePipeline",
-                  "description": "This activity executes another pipeline",
-                  "dependsOn": [
-                    {
-                      "activity": "Wait5Seconds",
-                      "dependencyConditions": [
-                        "Succeeded"
-                      ]
-                    }
-                  ],
+                  "dependsOn": [],
                   "userProperties": [],
                   "policy": {
                     "secureInput": false
                   },
+                  "description": null,
                   "typeProperties": {
                     "waitOnCompletion": true,
                     "parameters": null,
                     "operationType": "InvokeFabricPipeline",
-                    "workspaceId": "00000000-0000-0000-0000-000000000000",
-                    "pipelineId": "00000000-0000-0000-0000-000000000000"
+                    "pipelineId": "00000000-0000-0000-0000-000000000000",
+                    "workspaceId": "00000000-0000-0000-0000-000000000000"
                   },
                   "externalReferences": {
                     "connection": "00000000-0000-0000-0000-000000000000"
                   }
                 }
-              ]
+              ],
+              "concurrency": 3
             },
             "annotations": []
           }
         }
       ]
-    }
+    },
+    "resolutions": []
   }
-
 }

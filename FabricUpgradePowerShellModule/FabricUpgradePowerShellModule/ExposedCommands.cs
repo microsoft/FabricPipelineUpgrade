@@ -2,11 +2,13 @@
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
+using System;
 using System.Management.Automation;
+using System.Runtime.InteropServices;
+using System.Security;
+using System.Threading;
+using System.Reflection;
 
-// These classes expose the PowerShell commands.
-// The ProcessRecord method of each class immediately calls
-// into the FabricUpgradeHandler.
 namespace FabricUpgradePowerShellModule
 {
     /// <summary>
@@ -20,28 +22,17 @@ namespace FabricUpgradePowerShellModule
             ValueFromPipeline = true,
             ValueFromPipelineByPropertyName = true)]
         [ValidateNotNullOrEmpty]
-        public string Progress
-        {
-            get { return progress; }
-            set { progress = value; }
-        }
-        private string progress;
+        public string Progress { get; set; }
 
         [Alias("sf")]
         [Parameter(Mandatory = true)]
-        public string Filename
-        {
-            get { return filename; }
-            set { filename = value; }
-        }
-        private string filename;
-
+        public string Filename { get; set; }
 
         protected override void ProcessRecord()
         {
             var result = new FabricUpgradeHandler().ImportAdfSupportFile(
-                this.progress, 
-                this.filename, 
+                this.Progress,
+                this.Filename,
                 true,
                 CancellationToken.None);
 
@@ -60,76 +51,42 @@ namespace FabricUpgradePowerShellModule
             ValueFromPipeline = true,
             ValueFromPipelineByPropertyName = true)]
         [ValidateNotNullOrEmpty]
-        public string Progress
-        {
-            get { return progress; }
-            set { progress = value; }
-        }
-        private string progress;
+        public string Progress { get; set; }
 
         [Parameter(Mandatory = true)]
-        public string SubscriptionId
-        {
-            get { return subscriptionId; }
-            set { subscriptionId = value; }
-        }
-        private string subscriptionId;
+        public string SubscriptionId { get; set; }
 
         [Parameter(Mandatory = true)]
-        public string ResourceGroupName
-        {
-            get { return resourceGroupName; }
-            set { resourceGroupName = value; }
-        }
-        private string resourceGroupName;
+        public string ResourceGroupName { get; set; }
 
         [Parameter(Mandatory = true)]
-        public string FactoryName
-        {
-            get { return factoryName; }
-            set { factoryName = value; }
-        }
-        private string factoryName;
+        public string FactoryName { get; set; }
 
-        [Parameter(Mandatory = true)]
-        public string AdfToken
-        {
-            get { return adfToken; }
-            set { adfToken = value; }
-        }
-        private string adfToken;
+        // Accept string, SecureString, or objects like PSSecureAccessToken
+        [Parameter(Mandatory = true, HelpMessage = "ADF access token. Accepts string, SecureString, or object with AccessToken/Token property (e.g. output of Get-AzAccessToken).")]
+        public object AdfToken { get; set; }
 
         [Parameter(Mandatory = false)]
-        public string PipelineName
-        {
-            get { return pipelineName; }
-            set { pipelineName = value; }
-        }
-        private string pipelineName;
+        public string PipelineName { get; set; }
 
         /// <summary>
         /// Include datasets and linked services that are not used by any pipelines.
-        /// By default, only resources used by pipelines are imported to avoid upgrade failures from unsupported linked service types.
-        /// Set this to $true for factory-level upgrades where you want to include all resources regardless of usage.
         /// </summary>
         [Parameter(Mandatory = false, HelpMessage = "Include datasets and linked services that are not used by any pipelines. Useful for factory-level upgrades.")]
-        public SwitchParameter IncludeUnusedResources
-        {
-            get { return includeUnusedResources; }
-            set { includeUnusedResources = value; }
-        }
-        private SwitchParameter includeUnusedResources;
+        public SwitchParameter IncludeUnusedResources { get; set; }
 
         protected override void ProcessRecord()
         {
+            string plainAdfToken = TokenUnwrapper.Unwrap(AdfToken, nameof(AdfToken));
+            
             var task = new FabricUpgradeHandler().ImportAdfFactoryAsync(
-                this.progress,
-                this.subscriptionId,
-                this.resourceGroupName,
-                this.factoryName,
-                this.adfToken,
-                this.pipelineName,
-                this.includeUnusedResources,
+                this.Progress,
+                this.SubscriptionId,
+                this.ResourceGroupName,
+                this.FactoryName,
+                plainAdfToken,
+                this.PipelineName,
+                this.IncludeUnusedResources,
                 CancellationToken.None);
 
             WriteObject(task.Result.ToString());
@@ -151,16 +108,11 @@ namespace FabricUpgradePowerShellModule
             ValueFromPipeline = true,
             ValueFromPipelineByPropertyName = true)]
         [ValidateNotNullOrEmpty]
-        public string Progress
-        {
-            get { return progress; }
-            set { progress = value; }
-        }
-        private string progress;
+        public string Progress { get; set; }
 
         protected override void ProcessRecord()
         {
-            WriteObject(new FabricUpgradeHandler().ConvertToFabricResources(this.progress).ToString());
+            WriteObject(new FabricUpgradeHandler().ConvertToFabricResources(this.Progress).ToString());
         }
     }
 
@@ -178,27 +130,17 @@ namespace FabricUpgradePowerShellModule
             ValueFromPipeline = true,
             ValueFromPipelineByPropertyName = true)]
         [ValidateNotNullOrEmpty]
-        public string Progress
-        {
-            get { return progress; }
-            set { progress = value; }
-        }
-        private string progress;
+        public string Progress { get; set; }
 
         [Alias("rf")]
         [Parameter(Mandatory = false)]
-        public string ResolutionsFilename
-        {
-            get { return resolutionsFilename; }
-            set { resolutionsFilename = value; }
-        }
-        private string resolutionsFilename;
+        public string ResolutionsFilename { get; set; }
 
         protected override void ProcessRecord()
         {
             string result = new FabricUpgradeHandler().ImportFabricResolutions(
-                this.progress,
-                this.resolutionsFilename).ToString();
+                this.Progress,
+                this.ResolutionsFilename).ToString();
 
             WriteObject(result);
         }
@@ -216,47 +158,29 @@ namespace FabricUpgradePowerShellModule
             ValueFromPipeline = true,
             ValueFromPipelineByPropertyName = true)]
         [ValidateNotNullOrEmpty]
-        public string Progress
-        {
-            get { return progress; }
-            set { progress = value; }
-        }
-        private string progress;
+        public string Progress { get; set; }
 
         [Parameter(Mandatory = false)]
-        public string Region
-        {
-            get { return region; }
-            set { this.region = value; }
-        }
-        private string region = "prod";
+        public string Region { get; set; } = "prod";
 
         [Alias("ws")]
         [Parameter(Mandatory = true)]
-        public string Workspace
-        {
-            get { return workspaceId; }
-            set { this.workspaceId = value; }
-        }
-        private string workspaceId;
+        public string Workspace { get; set; }
 
+        // Accept string, SecureString, PSSecureAccessToken, etc.
         [Alias("ft")]
-        [Parameter(Mandatory = true)]
-        public string Token
-        {
-            get { return fabricToken; }
-            set { this.fabricToken = value; }
-        }
-        private string fabricToken;
+        [Parameter(Mandatory = true, HelpMessage = "Fabric user access token. Accepts string, SecureString, or object with AccessToken/Token property (e.g. Get-AzAccessToken).")]
+        public object Token { get; set; }
 
         protected override void ProcessRecord()
         {
             CancellationTokenSource cts = new CancellationTokenSource(TimeSpan.FromSeconds(120));
+            string plainFabricToken = TokenUnwrapper.Unwrap(Token, nameof(Token));
             string result = new FabricUpgradeHandler().ExportFabricResourcesAsync(
-                this.progress,
-                this.region,
-                this.workspaceId,
-                this.fabricToken,
+                this.Progress,
+                this.Region,
+                this.Workspace,
+                plainFabricToken,
                 cts.Token).Result.ToString();
 
             WriteObject(result);
@@ -274,17 +198,93 @@ namespace FabricUpgradePowerShellModule
             ValueFromPipeline = true,
             ValueFromPipelineByPropertyName = true)]
         [ValidateNotNullOrEmpty]
-        public string Progress
-        {
-            get { return progress; }
-            set { progress = value; }
-        }
-        private string progress;
+        public string Progress { get; set; }
 
         protected override void ProcessRecord()
         {
-            string result = new FabricUpgradeHandler().SelectWhatIf(this.progress).ToString();
+            string result = new FabricUpgradeHandler().SelectWhatIf(this.Progress).ToString();
             WriteObject(result);
+        }
+    }
+
+    internal static class TokenUnwrapper
+    {
+        internal static string Unwrap(object supplied, string paramName)
+        {
+            if (supplied == null)
+            {
+                throw new ArgumentNullException(paramName, $"{paramName} cannot be null.");
+            }
+
+            // If a PSObject wrapper was provided, inspect its note properties first.
+            if (supplied is PSObject pso)
+            {
+                // Try well-known property names (case-insensitive)
+                object psValue = TryGetPsObjectProperty(pso, "AccessToken") ??
+                                 TryGetPsObjectProperty(pso, "Token") ??
+                                 TryGetPsObjectProperty(pso, "accessToken") ??
+                                 TryGetPsObjectProperty(pso, "token");
+                if (psValue != null)
+                {
+                    return Unwrap(psValue, paramName); // unwrap recursively
+                }
+
+                // Fall back to unwrapping the BaseObject if different
+                if (pso.BaseObject != null && pso.BaseObject != pso)
+                {
+                    return Unwrap(pso.BaseObject, paramName);
+                }
+            }
+
+            // String directly supplied
+            if (supplied is string s && !string.IsNullOrWhiteSpace(s))
+            {
+                return s;
+            }
+
+            // SecureString supplied
+            if (supplied is SecureString ss)
+            {
+                return SecureStringToString(ss);
+            }
+
+            // Try reflection for common Azure token wrapper types (e.g. PSSecureAccessToken, AccessToken, etc.)
+            var type = supplied.GetType();
+            PropertyInfo? tokenProp = type.GetProperty("AccessToken") ?? type.GetProperty("Token") ?? type.GetProperty("accessToken") ?? type.GetProperty("token");
+            if (tokenProp != null)
+            {
+                object value = tokenProp.GetValue(supplied);
+                if (value != null)
+                {
+                    return Unwrap(value, paramName); // recurse so we handle SecureString, etc.
+                }
+            }
+
+            throw new ArgumentException($"Unsupported token type '{type.FullName}'. Supply a string, SecureString, PSObject with AccessToken/Token property, or an object with an AccessToken/Token string property.");
+        }
+
+        private static object TryGetPsObjectProperty(PSObject pso, string name)
+        {
+            var prop = pso.Properties[name];
+            return prop?.Value;
+        }
+
+        private static string SecureStringToString(SecureString secure)
+        {
+            if (secure == null) return null;
+            IntPtr bstr = IntPtr.Zero;
+            try
+            {
+                bstr = Marshal.SecureStringToBSTR(secure);
+                return Marshal.PtrToStringBSTR(bstr);
+            }
+            finally
+            {
+                if (bstr != IntPtr.Zero)
+                {
+                    Marshal.ZeroFreeBSTR(bstr);
+                }
+            }
         }
     }
 }

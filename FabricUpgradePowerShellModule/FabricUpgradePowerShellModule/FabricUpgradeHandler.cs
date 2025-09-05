@@ -43,8 +43,6 @@ namespace FabricUpgradePowerShellModule
                 return progress;
             }
 
-            Console.WriteLine($"ImportAdfSupportFile: fileName={fileName}, includeUnusedResources={includeUnusedResources}");
-
             if (string.IsNullOrEmpty(fileName))
             {
                 return new FabricUpgradeProgress()
@@ -88,8 +86,6 @@ namespace FabricUpgradePowerShellModule
             {
                 return progress;
             }
-
-            Console.WriteLine($"ImportAdfFactory: factoryName={factoryName}, pipelineResourceId={pipelineResourceId}, includeUnusedResources={includeUnusedResources}");
 
             if (string.IsNullOrEmpty(subscriptionId) || 
                 string.IsNullOrEmpty(resourceGroupName) || 

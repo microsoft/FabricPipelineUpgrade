@@ -72,6 +72,7 @@ namespace FabricUpgradePowerShellModuleTests
         [DataRow("ConvertPipelineWithLookup")]
         [DataRow("ConvertPipelineWithSwitch")]
         [DataRow("ConvertPipelineWithForeach")]
+        [DataRow("ConvertSimpleParentWithDescriptionAndConcurrency")]
         [DataRow("ConvertPipelineWithFail")]
         [DataRow("ConvertPipelineWithWebHook")]
         public void ConvertToFabricPipeline_Test(
@@ -92,6 +93,8 @@ namespace FabricUpgradePowerShellModuleTests
             JObject expectedResponseObject = testConfig.ExpectedResponse;
 
             JObject mismatches = JsonUtils.DeepCompare(expectedResponseObject, actualResponseObject);
+
+            Console.WriteLine(actualConvertResponse.ToString().Replace("\r", "").Replace("\n", ""));
 
             Assert.IsNull(
                     mismatches,

@@ -19,7 +19,7 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
             IFabricUpgradeMachine machine)
             : base(ActivityUpgrader.ActivityTypes.Wait, parentPath, activityToken, machine)
         {
-            // This "stub" activity will be a Wait activity with waitTimeInSeconds = 0.
+            // This "stub" activity will be a Wait activity with waitTimeInSeconds = 1.
         }
 
         /// <inheritdoc/>
@@ -47,7 +47,7 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
             Dictionary<string, JToken> parameterAssignments,
             AlertCollector alerts)
         {
-            // We "pretend" that this Activity is actually a Wait Activity with WaitTimeInSeconds = 0
+            // We "pretend" that this Activity is actually a Wait Activity with WaitTimeInSeconds = 1
             // and a description that contains useful information for the user.
 
             Symbol activitySymbol = base.EvaluateSymbol(Symbol.CommonNames.Activity, parameterAssignments, alerts);
@@ -64,7 +64,7 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
             PropertyCopier copier = new PropertyCopier(this.Path, this.AdfResourceToken, fabricActivityObject, alerts);
 
             copier.Set("description", newDescription);
-            copier.Set("typeProperties.waitTimeInSeconds", 0);
+            copier.Set("typeProperties.waitTimeInSeconds", 1);
 
             // Notify the client that this Activity is unsupported and will be replaced with a supported Activity.
             alerts.AddWarning($"Cannot upgrade Activity '{this.Path}'; please inspect this Activity for more details");

@@ -55,11 +55,15 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
             Dictionary<string, JToken> parameterAssignments,
             AlertCollector alerts)
         {
+            if (symbolName == Symbol.CommonNames.ExportResolveSteps)
+            {
+                return this.BuildExportResolveStepsSymbol(parameterAssignments, alerts);
+            }
             if (symbolName == Symbol.CommonNames.Activity)
             {
                 return BuildActivitySymbol(parameterAssignments, alerts);
             }
-            // Minimal implementation: skip export resolution steps.
+
             return Symbol.ReadySymbol(null);
         }
 
@@ -103,9 +107,8 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
                     datasetSettingsSymbol.State == Symbol.SymbolState.Ready &&
                     datasetSettingsSymbol.Value != null)
                 {
-                    // Instead of using a separate property, write the dataset details
-                    // directly into "typeProperties.dataset" so the dataset is selected.
-                    copier.Set("typeProperties.dataset", datasetSettingsSymbol.Value);
+                    // Write the dataset details into "typeProperties.datasetSettings" for Fabric Lookup activities.
+                    copier.Set("typeProperties.datasetSettings", datasetSettingsSymbol.Value);
                 }
             }
 
@@ -117,11 +120,31 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
         }
 
         /// <summary>
-        /// Minimal implementation: No export resolution steps.
+        /// Build resolve steps so the dataset's externalReferences.connection gets replaced.
         /// </summary>
-        protected override Symbol BuildExportResolveStepsSymbol(Dictionary<string, JToken> parameterAssignments, AlertCollector alerts)
+        protected override Symbol BuildExportResolveStepsSymbol(
+            Dictionary<string, JToken> parameterAssignments,
+            AlertCollector alerts)
         {
-            return Symbol.ReadySymbol(null);
+            List<FabricExportResolveStep> resolves = new List<FabricExportResolveStep>();
+
+            if (this.datasetUpgrader != null)
+            {
+                // Ask the dataset for its resolve steps (which resolve its LinkedService -> Connection resource id).
+                Symbol datasetResolveStepsSymbol = this.datasetUpgrader.EvaluateSymbol(Symbol.CommonNames.ExportResolveSteps, parameterAssignments, alerts);
+                if (datasetResolveStepsSymbol.State == Symbol.SymbolState.Ready && datasetResolveStepsSymbol.Value != null)
+                {
+                    foreach (JToken requiredLink in (JArray)datasetResolveStepsSymbol.Value)
+                    {
+                        FabricExportResolveStep step = FabricExportResolveStep.FromJToken(requiredLink);
+                        // Place inside this activity's datasetSettings path.
+                        step.TargetPath = $"typeProperties.datasetSettings.{step.TargetPath}"; // becomes properties.activities[n].typeProperties.datasetSettings.externalReferences.connection
+                        resolves.Add(step);
+                    }
+                }
+            }
+
+            return Symbol.ReadySymbol(JArray.Parse(UpgradeSerialization.Serialize(resolves)));
         }
     }
 }

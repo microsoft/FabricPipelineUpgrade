@@ -46,6 +46,13 @@
               "type": "Lookup",
               "dependsOn": [],
               "userProperties": [],
+              "policy": {
+                "timeout": "0.12:00:00",
+                "retry": 0,
+                "retryIntervalInSeconds": 30,
+                "secureOutput": false,
+                "secureInput": false
+              },
               "description": null,
               "typeProperties": {
                 "source": {
@@ -56,11 +63,11 @@
                 },
                 "firstRowOnly": null,
                 "datasetId": "AzureSQLDB_NoneDataset",
-                "dataset": {
+                "datasetSettings": {
                   "annotations": [],
                   "type": "AzureSqlTable",
                   "externalReferences": {
-                    "connection": "00000000-0000-0000-0000-000000000000"
+                    "connection": "0a83f9fe-a58e-4a23-a5a3-c14755571b0b"
                   },
                   "typeProperties": {
                     "database": "testdb"
