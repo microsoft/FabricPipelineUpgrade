@@ -30,6 +30,8 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
             public const string ForEach = "ForEach";
             public const string Lookup = "Lookup";
             public const string Switch = "Switch";
+            public const string Fail = "Fail";
+            public const string WebHook = "WebHook";
         }
 
         protected ActivityUpgrader(
@@ -78,6 +80,8 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
                 ActivityTypes.ForEach => new ForEachActivityUpgrader(parentPath, adfActivityToken, machine),
                 ActivityTypes.Lookup => new LookupActivityUpgrader(parentPath, adfActivityToken, machine),
                 ActivityTypes.Switch => new SwitchActivityUpgrader(parentPath, adfActivityToken, machine),
+                ActivityTypes.Fail => new FailActivityUpgarder(parentPath, adfActivityToken, machine),
+                ActivityTypes.WebHook => new WebHookActivityUpgrader(parentPath, adfActivityToken, machine),
                 _ => new UnsupportedActivityUpgrader(parentPath, adfActivityToken, machine),
             };
         }

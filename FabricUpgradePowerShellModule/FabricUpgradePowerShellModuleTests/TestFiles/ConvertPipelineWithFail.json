@@ -1,0 +1,41 @@
+{
+  "adfSupportFile": "PipelineWithFail_support_live.zip",
+
+  "expectedResponse": {
+    "state": "Succeeded",
+    "alerts": [],
+    "resolutions": [],
+
+    "result": {
+      "exportableFabricResources": [
+        {
+          "resourceName": "fail_pipeline",
+          "resourceType": "DataPipeline",
+          "resolve": [],
+          "export": {
+            "name": "fail_pipeline",
+            "properties": {
+              "activities": [
+                {
+                  "name": "Fail1",
+                  "type": "Fail",
+                  "description": null,
+                  "dependsOn": [],
+                  "userProperties": [],
+                  "typeProperties": {
+                    "message": "Failed to connect to ADF resourcew without credentails",
+                    "errorCode": "400"
+                  }
+                }
+              ],
+              "concurrency": 50
+            },
+            "annotations": []
+          }
+        }
+      ]
+    }
+
+  }
+
+}
