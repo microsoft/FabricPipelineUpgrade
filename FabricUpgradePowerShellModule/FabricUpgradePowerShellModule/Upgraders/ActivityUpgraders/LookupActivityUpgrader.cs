@@ -107,9 +107,8 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
                     datasetSettingsSymbol.State == Symbol.SymbolState.Ready &&
                     datasetSettingsSymbol.Value != null)
                 {
-                    // Instead of using a separate property, write the dataset details
-                    // directly into "typeProperties.dataset" so the dataset is selected.
-                    copier.Set("typeProperties.dataset", datasetSettingsSymbol.Value);
+                    // Write the dataset details into "typeProperties.datasetSettings" for Fabric Lookup activities.
+                    copier.Set("typeProperties.datasetSettings", datasetSettingsSymbol.Value);
                 }
             }
 
@@ -138,8 +137,8 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
                     foreach (JToken requiredLink in (JArray)datasetResolveStepsSymbol.Value)
                     {
                         FabricExportResolveStep step = FabricExportResolveStep.FromJToken(requiredLink);
-                        // Place inside this activity's dataset path.
-                        step.TargetPath = $"typeProperties.dataset.{step.TargetPath}"; // becomes properties.activities[n].typeProperties.dataset.externalReferences.connection
+                        // Place inside this activity's datasetSettings path.
+                        step.TargetPath = $"typeProperties.datasetSettings.{step.TargetPath}"; // becomes properties.activities[n].typeProperties.datasetSettings.externalReferences.connection
                         resolves.Add(step);
                     }
                 }

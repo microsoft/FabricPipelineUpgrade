@@ -63,7 +63,7 @@
                 },
                 "firstRowOnly": null,
                 "datasetId": "AzureSQLDB_NoneDataset",
-                "dataset": {
+                "datasetSettings": {
                   "annotations": [],
                   "type": "AzureSqlTable",
                   "externalReferences": {
