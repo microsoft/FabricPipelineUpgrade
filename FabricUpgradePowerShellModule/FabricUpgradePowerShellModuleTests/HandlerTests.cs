@@ -91,6 +91,8 @@ namespace FabricUpgradePowerShellModuleTests
 
             JObject mismatches = JsonUtils.DeepCompare(expectedResponseObject, actualResponseObject);
 
+            Console.WriteLine(actualConvertResponse.ToString().Replace("\r", "").Replace("\n", ""));
+
             Assert.IsNull(
                     mismatches,
                     $"MISMATCHES:\n{mismatches?.ToString(Formatting.Indented)}\n\nEXPECTED:\n{expectedResponseObject}\n\nACTUAL:\n{actualConvertResponse}");
