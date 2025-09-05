@@ -1,0 +1,95 @@
+{
+  "adfSupportFile": "SimpleParentWithDescriptionAndConcurrency_support_live.zip",
+
+  "expectedResponse": {
+    "state": "Succeeded",
+    "alerts": [],
+    "result": {
+      "exportableFabricResources": [
+        {
+          "resourceType": "DataPipeline",
+          "resourceName": "SimpleChild",
+          "resolve": [],
+          "export": {
+            "name": "SimpleChild",
+            "properties": {
+              "activities": [
+                {
+                  "name": "Wait1",
+                  "type": "Wait",
+                  "dependsOn": [],
+                  "userProperties": [],
+                  "description": null,
+                  "typeProperties": {
+                    "waitTimeInSeconds": 1
+                  }
+                }
+              ]
+            },
+            "annotations": []
+          }
+        },
+        {
+          "resourceType": "DataPipeline",
+          "resourceName": "SimpleParentWithDescriptionAndConcurrency",
+          "resourceDescription": "Custom description",
+          "resolve": [
+            {
+              "type": "WorkspaceId",
+              "targetPath": "properties.activities[0].typeProperties.workspaceId"
+            },
+            {
+              "type": "CredentialConnectionId",
+              "key": "user",
+              "targetPath": "properties.activities[0].externalReferences.connection",
+              "hint": {
+                "connectionType": "Fabric Data Pipelines",
+                "datasource": "FabricDataPipelines",
+                "template": {
+                  "type": "CredentialConnectionId",
+                  "key": "user",
+                  "value": "<Fabric Connection ID>"
+                }
+              }
+            },
+            {
+              "type": "AdfResourceNameToFabricResourceId",
+              "key": "DataPipeline:SimpleChild",
+              "targetPath": "properties.activities[0].typeProperties.pipelineId"
+            }
+          ],
+          "export": {
+            "name": "SimpleParentWithDescriptionAndConcurrency",
+            "properties": {
+              "activities": [
+                {
+                  "name": "Execute Pipeline1",
+                  "type": "InvokePipeline",
+                  "dependsOn": [],
+                  "userProperties": [],
+                  "policy": {
+                    "secureInput": false
+                  },
+                  "description": null,
+                  "typeProperties": {
+                    "waitOnCompletion": true,
+                    "parameters": null,
+                    "operationType": "InvokeFabricPipeline",
+                    "pipelineId": "00000000-0000-0000-0000-000000000000",
+                    "workspaceId": "00000000-0000-0000-0000-000000000000"
+                  },
+                  "externalReferences": {
+                    "connection": "00000000-0000-0000-0000-000000000000"
+                  }
+                }
+              ],
+              "concurrency": 3
+            },
+            "annotations": []
+          }
+        }
+      ]
+    },
+    "resolutions": []
+  }
+}
