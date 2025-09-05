@@ -29,7 +29,7 @@ namespace FabricUpgradePowerShellModule.Importers
             this.alerts = alerts;
         }
 
-        public FabricUpgradeProgress Import()
+        public FabricUpgradeProgress Import(bool includeUnusedResources = true)
         {
             byte[] supportFileData;
             try
@@ -67,6 +67,21 @@ namespace FabricUpgradePowerShellModule.Importers
                         Severity = FabricUpgradeAlert.AlertSeverity.Permanent,
                         Details = "Failed to unzip Upgrade Package.",
                     });
+            }
+
+            // Apply dependency filtering if requested
+            if (!includeUnusedResources)
+            {
+                // Use the common filtering logic from DependencyAnalyzer
+                var (filteredDatasets, filteredLinkedServices) = DependencyAnalyzer.FilterUnusedResources(
+                    upgradePackage.Pipelines,
+                    upgradePackage.Datasets,
+                    upgradePackage.LinkedServices,
+                    this.alerts);
+
+                // Update the upgrade package with filtered resources
+                upgradePackage.Datasets = filteredDatasets;
+                upgradePackage.LinkedServices = filteredLinkedServices;
             }
 
             return new FabricUpgradeProgress()
