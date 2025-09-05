@@ -130,8 +130,6 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
 
             PropertyCopier copier = new PropertyCopier(this.Path, this.AdfResourceToken, fabricActivityObject, alerts);
             copier.Copy("description");
-            copier.Copy("policy");
-
             copier.Copy("typeProperties.method", allowNull: false);
             copier.Copy("typeProperties.headers");
             copier.Set("typeProperties.relativeUrl", relativeUrl);
