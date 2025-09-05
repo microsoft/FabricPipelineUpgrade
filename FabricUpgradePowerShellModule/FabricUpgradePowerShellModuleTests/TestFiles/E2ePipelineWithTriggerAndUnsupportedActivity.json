@@ -62,9 +62,16 @@
                 }
               ],
               "userProperties": [],
+              "policy": {
+                "timeout": "0.12:00:00",
+                "retry": 0,
+                "retryIntervalInSeconds": 30,
+                "secureOutput": false,
+                "secureInput": false
+              },
               "description": "Failed to upgrade activity 'Execute SSIS package1' because it has type 'ExecuteSSISPackage'.\nTo run this pipeline anyway, mark this Activity as 'Deactivated' and select the desired value for 'Mark activity as'.",
               "typeProperties": {
-                "waitTimeInSeconds": 0
+                "waitTimeInSeconds": 1
               }
             }
           ]

@@ -64,6 +64,8 @@ namespace FabricUpgradePowerShellModule.Exporters
 
             try
             {
+                Console.WriteLine($"Creating a Pipeline '{this.exportInstruction.ResourceName}, with payload:\n{this.exportInstruction.Export.ToString()}\n");
+
                 string exportResult = await new PublicApiClient(region, workspaceId, fabricToken)
                     .CreateOrUpdateArtifactAsync(
                         FabricUpgradeResourceTypes.DataPipeline,

@@ -33,7 +33,13 @@
         {
           "resourceType": "DataPipeline",
           "resourceName": "PipelineWithLookup",
-          "resolve": [],
+          "resolve": [
+            {
+              "type": "AdfResourceNameToFabricResourceId",
+              "key": "Connection:lsAzureDB",
+              "targetPath": "properties.activities[0].typeProperties.datasetSettings.externalReferences.connection"
+            }
+          ],
           "export": {
             "name": "PipelineWithLookup",
             "properties": {
@@ -43,6 +49,13 @@
                   "type": "Lookup",
                   "dependsOn": [],
                   "userProperties": [],
+                  "policy": {
+                    "timeout": "0.12:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                  },
                   "description": null,
                   "typeProperties": {
                     "source": {
@@ -53,7 +66,7 @@
                     },
                     "firstRowOnly": null,
                     "datasetId": "AzureSQLDB_NoneDataset",
-                    "dataset": {
+                    "datasetSettings": {
                       "annotations": [],
                       "type": "AzureSqlTable",
                       "externalReferences": {

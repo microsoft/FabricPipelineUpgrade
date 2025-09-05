@@ -171,7 +171,6 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
             PropertyCopier copier = new PropertyCopier(this.Path, this.AdfResourceToken, fabricActivityObject, alerts);
 
             copier.Copy("description");
-            copier.Copy("policy");
             copier.Copy("typeProperties.parallelCopies", copyIfNull: false);
             copier.Copy("typeProperties.dataIntegrationUnits", copyIfNull: false);
 

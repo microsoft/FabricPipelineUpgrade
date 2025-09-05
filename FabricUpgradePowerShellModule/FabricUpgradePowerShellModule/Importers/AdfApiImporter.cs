@@ -53,7 +53,7 @@ namespace FabricUpgradePowerShellModule.Importers
             try
             {
                 adfClient = new AdfApiClient(subscriptionId, resourceGroupName, factoryName, accessToken);
-                
+
                 // Get Data Factory information for the ADF name
                 JObject dataFactory = await adfClient.GetDataFactoryAsync(cancellationToken).ConfigureAwait(false);
                 this.upgradePackage.AdfName = dataFactory["name"]?.ToString() ?? factoryName;
@@ -184,8 +184,8 @@ namespace FabricUpgradePowerShellModule.Importers
         /// <param name="importedLinkedServices">Set of already imported linked service names.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         private async Task ImportPipelineWithDependenciesAsync(
-            AdfApiClient adfClient, 
-            string pipelineName, 
+            AdfApiClient adfClient,
+            string pipelineName,
             HashSet<string> importedPipelines,
             HashSet<string> importedDatasets,
             HashSet<string> importedLinkedServices,
@@ -234,14 +234,91 @@ namespace FabricUpgradePowerShellModule.Importers
 
             foreach (JObject activity in activities)
             {
-                // Import datasets referenced by Copy activities
-                await ImportActivityDatasetsAsync(adfClient, activity, importedDatasets, importedLinkedServices, cancellationToken).ConfigureAwait(false);
+                await ImportActivityAndSubtreeDependenciesAsync(
+                    adfClient,
+                    activity,
+                    importedPipelines,
+                    importedDatasets,
+                    importedLinkedServices,
+                    cancellationToken).ConfigureAwait(false);
+            }
+        }
 
-                // Import pipelines referenced by ExecutePipeline activities
-                await ImportReferencedPipelinesAsync(adfClient, activity, importedPipelines, importedDatasets, importedLinkedServices, cancellationToken).ConfigureAwait(false);
+        private async Task ImportActivityAndSubtreeDependenciesAsync(
+            AdfApiClient adfClient,
+            JObject activity,
+            HashSet<string> importedPipelines,
+            HashSet<string> importedDatasets,
+            HashSet<string> importedLinkedServices,
+            CancellationToken cancellationToken)
+        {
+            // First handle the current activity
+            await ImportActivityDatasetsAsync(adfClient, activity, importedDatasets, importedLinkedServices, cancellationToken).ConfigureAwait(false);
+            await ImportReferencedPipelinesAsync(adfClient, activity, importedPipelines, importedDatasets, importedLinkedServices, cancellationToken).ConfigureAwait(false);
+            await ImportActivityLinkedServicesAsync(adfClient, activity, importedLinkedServices, cancellationToken).ConfigureAwait(false);
 
-                // Import linked services referenced by Web activities
-                await ImportActivityLinkedServicesAsync(adfClient, activity, importedLinkedServices, cancellationToken).ConfigureAwait(false);
+            string activityType = activity.SelectToken("type")?.ToString();
+
+            // Switch cases and defaultActivities
+            if (activityType == "Switch")
+            {
+                var cases = activity.SelectToken("typeProperties.cases") as JArray;
+                if (cases != null)
+                {
+                    foreach (JObject caseToken in cases.OfType<JObject>())
+                    {
+                        var caseActivities = caseToken.SelectToken("activities") as JArray;
+                        if (caseActivities != null)
+                        {
+                            foreach (JObject subAct in caseActivities.OfType<JObject>())
+                            {
+                                await ImportActivityAndSubtreeDependenciesAsync(adfClient, subAct, importedPipelines, importedDatasets, importedLinkedServices, cancellationToken).ConfigureAwait(false);
+                            }
+                        }
+                    }
+                }
+                var defaultActs = activity.SelectToken("typeProperties.defaultActivities") as JArray;
+                if (defaultActs != null)
+                {
+                    foreach (JObject subAct in defaultActs.OfType<JObject>())
+                    {
+                        await ImportActivityAndSubtreeDependenciesAsync(adfClient, subAct, importedPipelines, importedDatasets, importedLinkedServices, cancellationToken).ConfigureAwait(false);
+                    }
+                }
+            }
+
+            // IfCondition: ifTrueActivities / ifFalseActivities
+            if (activityType == "IfCondition")
+            {
+                var trueActs = activity.SelectToken("typeProperties.ifTrueActivities") as JArray;
+                if (trueActs != null)
+                {
+                    foreach (JObject subAct in trueActs.OfType<JObject>())
+                    {
+                        await ImportActivityAndSubtreeDependenciesAsync(adfClient, subAct, importedPipelines, importedDatasets, importedLinkedServices, cancellationToken).ConfigureAwait(false);
+                    }
+                }
+                var falseActs = activity.SelectToken("typeProperties.ifFalseActivities") as JArray;
+                if (falseActs != null)
+                {
+                    foreach (JObject subAct in falseActs.OfType<JObject>())
+                    {
+                        await ImportActivityAndSubtreeDependenciesAsync(adfClient, subAct, importedPipelines, importedDatasets, importedLinkedServices, cancellationToken).ConfigureAwait(false);
+                    }
+                }
+            }
+
+            // ForEach: typeProperties.activities
+            if (activityType == "ForEach")
+            {
+                var forEachActivities = activity.SelectToken("typeProperties.activities") as JArray;
+                if (forEachActivities != null)
+                {
+                    foreach (JObject subAct in forEachActivities.OfType<JObject>())
+                    {
+                        await ImportActivityAndSubtreeDependenciesAsync(adfClient, subAct, importedPipelines, importedDatasets, importedLinkedServices, cancellationToken).ConfigureAwait(false);
+                    }
+                }
             }
         }
 
@@ -255,6 +332,22 @@ namespace FabricUpgradePowerShellModule.Importers
             HashSet<string> importedLinkedServices,
             CancellationToken cancellationToken)
         {
+            // Handle Lookup activity dataset reference (not in inputs/outputs)
+            string activityType = activity.SelectToken("type")?.ToString();
+            if (activityType == "Lookup")
+            {
+                string lookupDatasetName = activity.SelectToken("typeProperties.dataset.referenceName")?.ToString();
+                if (!string.IsNullOrEmpty(lookupDatasetName))
+                {
+                    await ImportDatasetWithLinkedServiceAsync(
+                        adfClient,
+                        lookupDatasetName,
+                        importedDatasets,
+                        importedLinkedServices,
+                        cancellationToken).ConfigureAwait(false);
+                }
+            }
+
             // Check inputs and outputs for dataset references
             var inputs = activity.SelectToken("inputs") as JArray;
             var outputs = activity.SelectToken("outputs") as JArray;

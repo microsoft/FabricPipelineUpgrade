@@ -72,6 +72,7 @@ namespace FabricUpgradePowerShellModuleTests
         [DataRow("ConvertPipelineWithLookup")]
         [DataRow("ConvertPipelineWithSwitch")]
         [DataRow("ConvertPipelineWithForeach")]
+        [DataRow("ConvertSimpleParentWithDescriptionAndConcurrency")]
         public void ConvertToFabricPipeline_Test(
             string testConfigFilename,
             string workspaceId = null) // we can set ws in param or in progress.
@@ -90,6 +91,8 @@ namespace FabricUpgradePowerShellModuleTests
             JObject expectedResponseObject = testConfig.ExpectedResponse;
 
             JObject mismatches = JsonUtils.DeepCompare(expectedResponseObject, actualResponseObject);
+
+            Console.WriteLine(actualConvertResponse.ToString().Replace("\r", "").Replace("\n", ""));
 
             Assert.IsNull(
                     mismatches,

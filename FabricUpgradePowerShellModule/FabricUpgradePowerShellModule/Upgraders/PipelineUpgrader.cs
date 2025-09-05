@@ -79,7 +79,7 @@ namespace FabricUpgradePowerShellModule.Upgraders
         {
             if (symbolName == Symbol.CommonNames.ExportInstructions)
             {
-                PipelineExportInstruction exportInstruction = new PipelineExportInstruction(this.Name, this.adfModel.Description);
+                PipelineExportInstruction exportInstruction = new PipelineExportInstruction(this.Name, this.adfModel.Properties?.Description);
 
                 this.CollectActivityExportResolves(exportInstruction, alerts);
 
@@ -110,7 +110,7 @@ namespace FabricUpgradePowerShellModule.Upgraders
                     if (!string.IsNullOrEmpty(actName))
                     {
                         activityNameMapping[actName] = actName;
-                    }
+                      }
                 }
 
                 // Call the PipelineDependencyUpdater to update the "dependsOn" properties.
@@ -185,16 +185,31 @@ namespace FabricUpgradePowerShellModule.Upgraders
             [JsonProperty(PropertyName = "name")]
             public string Name { get; set; }
 
-            [JsonProperty(PropertyName = "description")]
-            public string Description { get; set; }
-
             [JsonProperty(PropertyName = "properties", Order = 2)]
-            public FabricPipelineProperties Properties { get; set; }
+            public AdfPipelineProperties Properties { get; set; }
 
             public static AdfPipelineModel FromJToken(JToken jToken)
             {
                 return UpgradeSerialization.FromJToken<AdfPipelineModel>(jToken);
             }
+        }
+
+        /// <summary>
+        /// A model of ADF Pipeline Properties.
+        /// </summary>
+        protected class AdfPipelineProperties
+        {
+            [JsonProperty(PropertyName = "description")]
+            public string Description { get; set; }
+
+            [JsonProperty(PropertyName = "concurrency")]
+            public int? Concurrency { get; set; }
+
+            [JsonProperty(PropertyName = "parameters")]
+            public JToken Parameters { get; set; }
+
+            [JsonProperty(PropertyName = "variables")]
+            public JObject Variables { get; set; }
         }
 
         /// <summary>

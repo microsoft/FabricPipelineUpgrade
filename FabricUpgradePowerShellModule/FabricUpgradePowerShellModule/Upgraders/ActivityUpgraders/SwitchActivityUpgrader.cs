@@ -5,6 +5,7 @@
 using Newtonsoft.Json.Linq;
 using FabricUpgradePowerShellModule.UpgradeMachines;
 using FabricUpgradePowerShellModule.Utilities;
+using FabricUpgradePowerShellModule.Models;
 
 namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
 {
@@ -24,7 +25,7 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
         private readonly List<Upgrader> defaultActivityUpgraders = new List<Upgrader>();
 
         public SwitchActivityUpgrader(string parentPath, JToken activityToken, IFabricUpgradeMachine machine)
-            : base("Switch", parentPath, activityToken, machine)
+            : base(ActivityUpgrader.ActivityTypes.Switch, parentPath, activityToken, machine)
         {
         }
 
@@ -56,11 +57,85 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
             }
         }
 
+        public override void PreSort(List<Upgrader> allUpgraders, AlertCollector alerts)
+        {
+            base.PreSort(allUpgraders, alerts);
+
+            // PreSort all activities under cases.
+            foreach (var caseUpgrader in this.caseUpgraders)
+            {
+                caseUpgrader.PreSort(allUpgraders, alerts);
+                this.DependsOn.AddRange(caseUpgrader.DependsOn);
+                foreach (var activityUpgrader in caseUpgrader.ActivityUpgraders)
+                {
+                    this.DependsOn.AddRange(activityUpgrader.DependsOn);
+                }
+            }
+
+            // PreSort default activities.
+            foreach (var defaultUpgrader in this.defaultActivityUpgraders)
+            {
+                defaultUpgrader.PreSort(allUpgraders, alerts);
+                this.DependsOn.AddRange(defaultUpgrader.DependsOn);
+            }
+        }
+
         public override Symbol EvaluateSymbol(string symbolName, Dictionary<string, JToken> parameterAssignments, AlertCollector alerts)
         {
             if (symbolName == Symbol.CommonNames.Activity)
                 return BuildActivitySymbol(parameterAssignments, alerts);
+            if (symbolName == Symbol.CommonNames.ExportResolveSteps)
+                return BuildExportResolveStepsSymbol(parameterAssignments, alerts);
             return base.EvaluateSymbol(symbolName, parameterAssignments, alerts);
+        }
+
+        private Symbol BuildExportResolveStepsSymbol(Dictionary<string, JToken> parameterAssignments, AlertCollector alerts)
+        {
+            List<FabricExportResolveStep> resolves = new List<FabricExportResolveStep>();
+
+            // Gather resolves from case activities
+            for (int caseIndex = 0; caseIndex < this.caseUpgraders.Count; caseIndex++)
+            {
+                var caseUpgrader = this.caseUpgraders[caseIndex];
+                int activityIndex = 0;
+                foreach (var actUpgrader in caseUpgrader.ActivityUpgraders)
+                {
+                    Symbol resSymbol = actUpgrader.EvaluateSymbol(Symbol.CommonNames.ExportResolveSteps, parameterAssignments, alerts);
+                    if (resSymbol.State == Symbol.SymbolState.Ready && resSymbol.Value is JArray arr)
+                    {
+                        foreach (JToken r in arr)
+                        {
+                            FabricExportResolveStep step = FabricExportResolveStep.FromJToken(r);
+                            step.TargetPath = $"typeProperties.cases[{caseIndex}].activities[{activityIndex}].{step.TargetPath}";
+                            resolves.Add(step);
+                        }
+                    }
+                    activityIndex++;
+                }
+            }
+
+            // Gather resolves from default activities
+            for (int i = 0; i < this.defaultActivityUpgraders.Count; i++)
+            {
+                var actUpgrader = this.defaultActivityUpgraders[i];
+                Symbol resSymbol = actUpgrader.EvaluateSymbol(Symbol.CommonNames.ExportResolveSteps, parameterAssignments, alerts);
+                if (resSymbol.State == Symbol.SymbolState.Ready && resSymbol.Value is JArray darr)
+                {
+                    foreach (JToken r in darr)
+                    {
+                        FabricExportResolveStep step = FabricExportResolveStep.FromJToken(r);
+                        step.TargetPath = $"typeProperties.defaultActivities[{i}].{step.TargetPath}";
+                        resolves.Add(step);
+                    }
+                }
+            }
+
+            if (resolves.Count == 0)
+            {
+                return Symbol.ReadySymbol(null);
+            }
+
+            return Symbol.ReadySymbol(JArray.Parse(UpgradeSerialization.Serialize(resolves)));
         }
 
         protected override Symbol BuildActivitySymbol(Dictionary<string, JToken> parameterAssignments, AlertCollector alerts)
@@ -115,11 +190,6 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
             return Symbol.ReadySymbol(fabricActivity);
         }
 
-        /// <summary>
-        /// Converts a JToken to a JArray.
-        /// If token is null, returns an empty JArray.
-        /// If token is an object, wraps it in a new JArray.
-        /// </summary>
         private static JArray ConvertTokenToArray(JToken token)
         {
             if (token == null)
@@ -132,18 +202,14 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
         }
     }
 
-    /// <summary>
-    /// Minimal Switch case upgrader.
-    /// Assumes:
-    /// - "value" exists (or is set to null) and
-    /// - "activities" is an array (or a single object).
-    /// </summary>
     public class SwitchCaseUpgrader : Upgrader
     {
         private const string AdfCaseValuePath = "value";
         private const string AdfCaseActivitiesPath = "activities";
 
         private readonly List<Upgrader> activityUpgraders = new List<Upgrader>();
+
+        public IEnumerable<Upgrader> ActivityUpgraders => this.activityUpgraders;
 
         public SwitchCaseUpgrader(string parentPath, JToken caseToken, IFabricUpgradeMachine machine)
             : base(caseToken, machine)
@@ -153,13 +219,11 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
 
         public override void Compile(AlertCollector alerts)
         {
-            // If the case value is missing, assign null.
             if (this.AdfResourceToken.SelectToken(AdfCaseValuePath) == null)
             {
                 this.AdfResourceToken[AdfCaseValuePath] = JValue.CreateNull();
             }
 
-            // Process activities.
             JToken actsToken = this.AdfResourceToken.SelectToken(AdfCaseActivitiesPath);
             JArray actsArray = ConvertTokenToArray(actsToken);
             foreach (JToken act in actsArray)
@@ -167,6 +231,15 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
                 Upgrader u = ActivityUpgrader.CreateActivityUpgrader(this.Path, act, this.Machine);
                 u.Compile(alerts);
                 this.activityUpgraders.Add(u);
+            }
+        }
+
+        public override void PreSort(List<Upgrader> allUpgraders, AlertCollector alerts)
+        {
+            foreach (var u in this.activityUpgraders)
+            {
+                u.PreSort(allUpgraders, alerts);
+                this.DependsOn.AddRange(u.DependsOn);
             }
         }
 
@@ -180,11 +253,9 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
         private Symbol BuildCaseSymbol(Dictionary<string, JToken> parameterAssignments, AlertCollector alerts)
         {
             JObject caseObj = new JObject();
-            // Copy the case "value".
             JToken caseValue = this.AdfResourceToken.SelectToken(AdfCaseValuePath);
             caseObj["value"] = caseValue != null ? caseValue.DeepClone() : JValue.CreateNull();
 
-            // Build the activities array.
             JArray newActs = new JArray();
             foreach (var u in this.activityUpgraders)
             {

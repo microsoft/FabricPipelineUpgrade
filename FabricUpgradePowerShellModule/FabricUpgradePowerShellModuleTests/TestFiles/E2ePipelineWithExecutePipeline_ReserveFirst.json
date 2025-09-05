@@ -18,7 +18,7 @@
     "alerts": [
       {
         "severity": "Permanent",
-        "details": "The item name 'WaitPipeline' is already in use."
+        "details": "The item name 'WaitPipeline' is already in use. This is likely because you had an item with this name and deleted it recently. If this is the case, please wait about a minute or two and retry the operation."
       }
     ],
     "resolutions": [],

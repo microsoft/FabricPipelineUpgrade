@@ -93,6 +93,7 @@ namespace FabricUpgradePowerShellModuleTests
         [DataRow("E2ePipelineWithLookup")]
         [DataRow("E2ePipelineWithSwitch")]
         [DataRow("E2ePipelineWithForeach")]
+        [DataRow("E2eSimpleParentWithDescriptionAndConcurrency")]
         public async Task EndToEndUpgradePipeline_TestAsync(
             string testConfigFilename)
         {

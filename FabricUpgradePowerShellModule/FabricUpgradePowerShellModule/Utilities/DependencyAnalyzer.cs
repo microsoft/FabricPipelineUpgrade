@@ -18,7 +18,7 @@ namespace FabricUpgradePowerShellModule.Utilities
         /// <param name="datasets">Dictionary of dataset definitions.</param>
         /// <param name="usedDatasets">Set to populate with dataset names that are used.</param>
         /// <param name="usedLinkedServices">Set to populate with linked service names that are used.</param>
-        public static void AnalyzeResourceDependencies(
+        private static void AnalyzeResourceDependencies(
             Dictionary<string, JObject> pipelines,
             Dictionary<string, JObject> datasets,
             HashSet<string> usedDatasets,
@@ -96,22 +96,37 @@ namespace FabricUpgradePowerShellModule.Utilities
             // Check for dataset references in activity type properties
             string activityType = activity.SelectToken("type")?.ToString();
             
-            // Many activities reference datasets through typeProperties
             var typeProperties = activity.SelectToken("typeProperties");
             if (typeProperties != null)
             {
-                // Check for datasetId references (used in Lookup activities)
+                // Check for datasetId references (used in some converted activities)
                 string datasetId = typeProperties.SelectToken("datasetId")?.ToString();
                 if (!string.IsNullOrEmpty(datasetId))
                 {
                     usedDatasets.Add(datasetId);
                 }
 
+                // Lookup Activity: dataset is referenced at typeProperties.dataset.referenceName in ADF JSON
+                if (activityType == "Lookup")
+                {
+                    string lookupDataset = typeProperties.SelectToken("dataset.referenceName")?.ToString();
+                    if (!string.IsNullOrEmpty(lookupDataset))
+                    {
+                        usedDatasets.Add(lookupDataset);
+                    }
+                }
+
+                // Generic scan of dataset object if present
+                string genericDatasetRef = typeProperties.SelectToken("dataset.referenceName")?.ToString();
+                if (!string.IsNullOrEmpty(genericDatasetRef))
+                {
+                    usedDatasets.Add(genericDatasetRef);
+                }
+
                 // Check for dataset references in source/sink
                 var source = typeProperties.SelectToken("source");
                 var sink = typeProperties.SelectToken("sink");
                 
-                // These might contain dataset references indirectly
                 CheckForDatasetReferences(source, usedDatasets);
                 CheckForDatasetReferences(sink, usedDatasets);
             }

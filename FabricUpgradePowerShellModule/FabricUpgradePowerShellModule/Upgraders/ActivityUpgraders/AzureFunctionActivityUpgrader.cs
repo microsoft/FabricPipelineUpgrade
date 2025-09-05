@@ -166,20 +166,12 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
             JObject fabricActivityObject = (JObject)activitySymbol.Value;
             var copier = new PropertyCopier(this.Path, this.AdfResourceToken, fabricActivityObject, alerts);
 
-            // Create a new JSON object for the Fabric activity.
-            JObject fabricActivity = new JObject();
-
-            // Set required top-level properties.
-            string activityName = this.AdfResourceToken.SelectToken("name")?.ToString();
-            fabricActivity["name"] = string.IsNullOrWhiteSpace(activityName)
-                ? "DefaultStoredProcActivity"
-                : activityName;
-
+            // Explicitly copy the dependency information from the original ADF activity.
             JToken adfDependsOn = this.AdfResourceToken.SelectToken("dependsOn");
             if (adfDependsOn != null)
             {
                 // Overwrite the Fabric JSON's "dependsOn" with the original dependencies.
-                fabricActivity["dependsOn"] = adfDependsOn.DeepClone();
+                fabricActivityObject["dependsOn"] = adfDependsOn.DeepClone();
             }
 
             // Copy over common properties.

@@ -131,10 +131,18 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
                 DependsOn = this.AdfBaseModel.DependsOn,
                 State = this.AdfBaseModel.State,
                 OnInactiveMarkAs = this.AdfBaseModel.OnInactiveMarkAs,
-                UserProperties = this.AdfBaseModel.UserProperties,
             };
 
-            return Symbol.ReadySymbol(fabricModel.ToJToken());
+            JObject fabricActivityObject = (JObject)fabricModel.ToJToken();
+
+            // Copy the policy directly from the ADF activity if it exists
+            JToken adfPolicy = this.AdfResourceToken.SelectToken("policy");
+            if (adfPolicy != null)
+            {
+                fabricActivityObject["policy"] = adfPolicy.DeepClone();
+            }
+
+            return Symbol.ReadySymbol(fabricActivityObject);
         }
 
         /// <summary>
@@ -193,9 +201,6 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
             [JsonProperty(PropertyName = "onInactiveMarkAs")]
             public string OnInactiveMarkAs { get; set; }
 
-            [JsonProperty(PropertyName = "userProperties")]
-            public List<UserProperty> UserProperties { get; set; } = new List<UserProperty>();
-
             public static AdfBaseActivityModel Build(JToken activityToken)
             {
                 return UpgradeSerialization.FromJToken<AdfBaseActivityModel>(activityToken);
@@ -224,10 +229,6 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
 
             [JsonProperty(PropertyName = "onInactiveMarkAs")]
             public string OnInactiveMarkAs { get; set; }
-
-            // This does not appear to be used in Fabric, but we can include it in the activity.
-            [JsonProperty(PropertyName = "userProperties")]
-            public List<UserProperty> UserProperties { get; set; } = new List<UserProperty>();
 
             public JToken ToJToken()
             {

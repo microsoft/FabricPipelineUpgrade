@@ -17,7 +17,6 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
     public class SetVariableActivityUpgrader : ActivityUpgrader
     {
         private const string adfVariableNamePath = "typeProperties.variableName";
-        private const string adfPolicyPath = "policy";
         private const string adfValuePath = "typeProperties.value";
         private const string adfValueValuePath = "typeProperties.value.value";
         private const string adfSetSystemVariablePath = "typeProperties.setSystemVariable";
@@ -95,7 +94,6 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
 
             PropertyCopier copier = new PropertyCopier(this.Path, this.AdfResourceToken, fabricActivityObject, alerts);
             copier.Copy("description");
-            copier.Copy(adfPolicyPath);
             copier.Copy(adfVariableNamePath);
 
             JToken setSystemVariableToken = this.AdfResourceToken.SelectToken(adfSetSystemVariablePath);
