@@ -118,6 +118,8 @@ namespace FabricUpgradePowerShellModule.ExportMachines
                     this.Alerts,
                     cancellationToken).ConfigureAwait(false);
 
+                Console.WriteLine("Export result:" + uploadResult.ToString());
+
                 if (this.AlertsIndicateFailure())
                 {
                     throw new UpgradeFailureException("Export");
