@@ -1,4 +1,4 @@
-﻿{
+{
   "adfSupportFile": "PipelineWithForeach_support_live.zip",
 
   "resolutions": [
@@ -37,7 +37,6 @@
               "name": "ForEach1",
               "type": "ForEach",
               "dependsOn": [],
-              "userProperties": [],
               "description": null,
               "typeProperties": {
                 "items": {
@@ -50,7 +49,6 @@
                     "name": "Wait1",
                     "type": "Wait",
                     "dependsOn": [],
-                    "userProperties": [],
                     "description": null,
                     "typeProperties": {
                       "waitTimeInSeconds": 1
@@ -63,7 +61,6 @@
               "name": "ForEach2",
               "type": "ForEach",
               "dependsOn": [],
-              "userProperties": [],
               "description": null,
               "typeProperties": {
                 "items": {
@@ -76,7 +73,6 @@
                     "name": "Wait1_copy1",
                     "type": "Wait",
                     "dependsOn": [],
-                    "userProperties": [],
                     "description": null,
                     "typeProperties": {
                       "waitTimeInSeconds": 1

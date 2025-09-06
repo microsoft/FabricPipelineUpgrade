@@ -1,4 +1,4 @@
-﻿{
+{
   "comments": [
     "The LinkedService has one parameter, 'InitialCatalog' whose default value is 'rodenkew1'.",
     "The dataset hardcodes 'schema' = 'db' and 'table' = 'coriander'.",
@@ -74,7 +74,6 @@
               "type": "Copy",
               "dependsOn": [],
               "description": null,
-              "userProperties": [],
               "typeProperties": {
                 "source": {
                   "type": "AzureSqlSource",

@@ -1,4 +1,4 @@
-﻿{
+{
   "comments": [
     "The LinkedService has no parameters.",
 
@@ -75,7 +75,6 @@
               "name": "Copy data1",
               "type": "Copy",
               "dependsOn": [],
-              "userProperties": [],
               "description": null,
               "policy": {
                 "timeout": "0.12:00:00",

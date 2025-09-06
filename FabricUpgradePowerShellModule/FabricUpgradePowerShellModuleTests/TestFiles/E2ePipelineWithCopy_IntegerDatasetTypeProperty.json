@@ -1,4 +1,4 @@
-﻿{
+{
   "comments": [
     "This support file has been altered to include a new, integer-valued, type property,",
     "in order to demonstrate the proper operation of an integer literal outside of an expression."
@@ -50,7 +50,6 @@
               "name": "Copy data1",
               "type": "Copy",
               "dependsOn": [],
-              "userProperties": [],
               "description": null,
               "policy": {
                 "timeout": "0.12:00:00",

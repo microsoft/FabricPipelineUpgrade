@@ -1,4 +1,4 @@
-﻿{
+{
   "adfSupportFile": "PipelineWithCopy_SqlToSql_support_live.zip",
 
   "resolutions": [
@@ -68,7 +68,6 @@
               "type": "Copy",
               "dependsOn": [],
               "description": null,
-              "userProperties": [],
               "typeProperties": {
                 "source": {
                   "type": "AzureSqlSource",

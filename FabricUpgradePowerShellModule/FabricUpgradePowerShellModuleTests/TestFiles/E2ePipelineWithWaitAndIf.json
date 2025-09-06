@@ -1,4 +1,4 @@
-﻿{
+{
   "adfSupportFile": "PipelineWithWaitAndIf_support_live.zip",
 
   "expectedResponse": {
@@ -41,7 +41,6 @@
                   ]
                 }
               ],
-              "userProperties": [],
               "description": null,
               "typeProperties": {
                 "expression": {
@@ -54,7 +53,6 @@
                     "type": "Wait",
                     "description": "This waits for 1 second",
                     "dependsOn": [],
-                    "userProperties": [],
                     "typeProperties": {
                       "waitTimeInSeconds": 1
                     }
@@ -65,7 +63,6 @@
                     "name": "Wait15Seconds",
                     "type": "Wait",
                     "dependsOn": [],
-                    "userProperties": [],
                     "description": null,
                     "typeProperties": {
                       "waitTimeInSeconds": 5
@@ -82,7 +79,6 @@
                         ]
                       }
                     ],
-                    "userProperties": [],
                     "description": null,
                     "typeProperties": {
                       "waitTimeInSeconds": 4
@@ -95,7 +91,6 @@
               "name": "Wait11Seconds",
               "type": "Wait",
               "dependsOn": [],
-              "userProperties": [],
               "description": null,
               "typeProperties": {
                 "waitTimeInSeconds": 11
@@ -113,3 +108,4 @@
     "CREATE DataPipeline 'PipelineWithWaitAndIf' => $0"
   ]
 }
+

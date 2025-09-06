@@ -1,4 +1,4 @@
-﻿{
+{
   "reservedDisplayNames": [
     "ExecutePipelinePipeline"
   ],
@@ -53,12 +53,6 @@
               "type": "Wait",
               "description": "This activity waits 10 seconds",
               "dependsOn": [],
-              "userProperties": [
-                {
-                  "name": "UserProperty1",
-                  "value": "\"Value1\""
-                }
-              ],
               "typeProperties": {
                 "waitTimeInSeconds": 10
               }
@@ -79,3 +73,4 @@
   ]
 
 }
+

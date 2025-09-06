@@ -1,4 +1,4 @@
-﻿{
+{
   "adfSupportFile": "PipelineWithCopy_JsonToJson_SAMI_ADLS2_support_live.zip",
 
   "resolutions": [
@@ -46,7 +46,6 @@
               "type": "Copy",
               "dependsOn": [],
               "description": null,
-              "userProperties": [],
               "policy": {
                 "timeout": "0.12:00:00",
                 "retry": 0,
@@ -119,3 +118,4 @@
     "CREATE DataPipeline 'PipelineWithCopy_JsonToJson_SAMI_ADLS2' => $0"
   ]
 }
+

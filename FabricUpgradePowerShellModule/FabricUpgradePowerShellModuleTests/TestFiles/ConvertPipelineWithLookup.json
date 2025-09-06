@@ -1,4 +1,4 @@
-﻿{
+{
   "adfSupportFile": "PipelineWithLookup_support_live.zip",
 
   "expectedResponse": {
@@ -48,7 +48,6 @@
                   "name": "Lookup1",
                   "type": "Lookup",
                   "dependsOn": [],
-                  "userProperties": [],
                   "policy": {
                     "timeout": "0.12:00:00",
                     "retry": 0,
