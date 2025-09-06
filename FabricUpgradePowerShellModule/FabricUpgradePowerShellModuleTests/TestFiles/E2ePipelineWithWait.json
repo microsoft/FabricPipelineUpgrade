@@ -1,4 +1,4 @@
-﻿{
+{
   "adfSupportFile": "PipelineWithWait_support_live.zip",
 
   "expectedResponse": {
@@ -35,12 +35,6 @@
               "type": "Wait",
               "description": "This activity waits 10 seconds",
               "dependsOn": [],
-              "userProperties": [
-                {
-                  "name": "UserProperty1",
-                  "value": "\"Value1\""
-                }
-              ],
               "typeProperties": {
                 "waitTimeInSeconds": 10
               }
@@ -58,3 +52,4 @@
     "CREATE DataPipeline 'WaitPipeline' => $0"
   ]
 }
+

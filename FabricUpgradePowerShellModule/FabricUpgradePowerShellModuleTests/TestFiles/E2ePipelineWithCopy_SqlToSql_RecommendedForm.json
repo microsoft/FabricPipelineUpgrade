@@ -1,4 +1,4 @@
-﻿{
+{
   "adfSupportFile": "PipelineWithCopy_SqlToSql_RecommendedForm_support_live.zip",
 
   "resolutions": [
@@ -53,7 +53,6 @@
               "type": "Copy",
               "dependsOn": [],
               "description": "This is my description.",
-              "userProperties": [],
               "typeProperties": {
                 "source": {
                   "type": "AzureSqlSource",

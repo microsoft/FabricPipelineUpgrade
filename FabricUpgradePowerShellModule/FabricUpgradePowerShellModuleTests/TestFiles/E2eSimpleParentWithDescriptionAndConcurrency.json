@@ -62,7 +62,6 @@
               "name": "Wait1",
               "type": "Wait",
               "dependsOn": [],
-              "userProperties": [],
               "description": null,
               "typeProperties": {
                 "waitTimeInSeconds": 1
@@ -89,7 +88,6 @@
               "name": "Execute Pipeline1",
               "type": "InvokePipeline",
               "dependsOn": [],
-              "userProperties": [],
               "policy": {
                 "secureInput": false
               },

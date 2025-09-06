@@ -1,4 +1,4 @@
-﻿{
+{
   "adfSupportFile": "PipelineWithCopy_JsonToJson_support_live.zip",
 
   "expectedResponse": {
@@ -54,7 +54,6 @@
                   "name": "Copy data1",
                   "type": "Copy",
                   "dependsOn": [],
-                  "userProperties": [],
                   "description": null,
                   "policy": {
                     "timeout": "0.12:00:00",

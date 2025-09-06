@@ -1,4 +1,4 @@
-﻿{
+{
   "adfSupportFile": "PipelineWithIf_support_live.zip",
 
   "expectedResponse": {
@@ -93,3 +93,4 @@
     }
   }
 }
+

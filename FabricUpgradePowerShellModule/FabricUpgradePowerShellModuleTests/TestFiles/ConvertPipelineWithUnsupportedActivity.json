@@ -1,4 +1,4 @@
-﻿{
+{
   "adfSupportFile": "PipelineWithUnsupportedActivity_support_live.zip",
 
   "expectedResponse": {
@@ -26,7 +26,6 @@
                   "type": "Wait",
                   "description": "Failed to upgrade activity 'AnUnsupportedActivity' because it has type 'Unsupported'.\nTo run this pipeline anyway, mark this Activity as 'Deactivated' and select the desired value for 'Mark activity as'.\nOriginal description=\nThis activity is unsupported",
                   "dependsOn": [],
-                  "userProperties": [],
                   "typeProperties": {
                     "waitTimeInSeconds": 1
                   }

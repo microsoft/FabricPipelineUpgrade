@@ -1,4 +1,4 @@
-﻿{
+{
   "adfSupportFile": "PipelineWithWaitWithExpression_support_live.zip",
 
   "expectedResponse": {
@@ -20,7 +20,6 @@
                   "name": "Wait1",
                   "type": "Wait",
                   "dependsOn": [],
-                  "userProperties": [],
                   "description": null,
                   "typeProperties": {
                     "waitTimeInSeconds": {

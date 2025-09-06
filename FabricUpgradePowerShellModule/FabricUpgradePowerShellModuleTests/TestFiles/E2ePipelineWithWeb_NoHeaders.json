@@ -1,4 +1,4 @@
-﻿{
+{
   "adfSupportFile": "PipelineWithWebActivity_NoHeaders_support_live.zip",
 
   "resolutions": [
@@ -42,7 +42,6 @@
               "name": "Web1",
               "type": "WebActivity",
               "dependsOn": [],
-              "userProperties": [],
               "description": null,
               "policy": {
                 "timeout": "0.12:00:00",
@@ -77,3 +76,4 @@
     "CREATE DataPipeline 'PipelineWithWebActivity_NoHeaders' => $0"
   ]
 }
+

@@ -1,4 +1,4 @@
-﻿{
+{
   "comments": [
     "This support file has dataset parameters, and the Copy activity does not override any of them.",
     "Therefore, we should see the datasetSettings use the dataset's default parameter values."
@@ -50,7 +50,6 @@
               "name": "Copy data1",
               "type": "Copy",
               "dependsOn": [],
-              "userProperties": [],
               "description": null,
               "policy": {
                 "timeout": "0.12:00:00",

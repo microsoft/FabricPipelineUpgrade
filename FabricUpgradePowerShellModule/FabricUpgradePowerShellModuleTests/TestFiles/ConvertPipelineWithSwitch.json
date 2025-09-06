@@ -1,4 +1,4 @@
-﻿{
+{
   "adfSupportFile": "PipelineWithSwitch_support_live.zip",
 
   "expectedResponse": {
@@ -18,7 +18,6 @@
                   "name": "Switch1",
                   "type": "Switch",
                   "dependsOn": [],
-                  "userProperties": [],
                   "typeProperties": {
                     "on": {
                       "value": "@string(99)",
@@ -32,7 +31,6 @@
                             "name": "Wait2",
                             "type": "Wait",
                             "dependsOn": [],
-                            "userProperties": [],
                             "description": null,
                             "typeProperties": {
                               "waitTimeInSeconds": 1
@@ -46,7 +44,6 @@
                         "name": "Wait1",
                         "type": "Wait",
                         "dependsOn": [],
-                        "userProperties": [],
                         "description": null,
                         "typeProperties": {
                           "waitTimeInSeconds": 1
