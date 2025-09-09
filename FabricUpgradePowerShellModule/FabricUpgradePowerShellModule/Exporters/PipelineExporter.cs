@@ -5,6 +5,7 @@
 using FabricUpgradePowerShellModule.ExportMachines;
 using FabricUpgradePowerShellModule.Models;
 using FabricUpgradePowerShellModule.Utilities;
+using Microsoft.VisualBasic;
 using Newtonsoft.Json.Linq;
 
 namespace FabricUpgradePowerShellModule.Exporters
@@ -15,14 +16,17 @@ namespace FabricUpgradePowerShellModule.Exporters
     public class PipelineExporter : ResourceExporter
     {
         private readonly PipelineExportInstruction exportInstruction;
+        private readonly bool verbose;
 
         public PipelineExporter(
             JToken toExport,
-            FabricExportMachine machine)
+            FabricExportMachine machine,
+            bool verbose = false)
             : base(toExport, FabricUpgradeResourceTypes.DataPipeline, machine)
         {
             this.exportInstruction = PipelineExportInstruction.FromJToken(toExport);
             this.Name = this.exportInstruction.ResourceName;
+            this.verbose = verbose;
         }
 
         /// <inheritdoc/>
@@ -64,7 +68,12 @@ namespace FabricUpgradePowerShellModule.Exporters
 
             try
             {
-                Console.WriteLine($"Creating a Pipeline '{this.exportInstruction.ResourceName}, with payload:\n{this.exportInstruction.Export.ToString()}\n");
+                Console.WriteLine($"Upgrading Pipeline '{this.exportInstruction.ResourceName}'");
+                
+                if (this.verbose)
+                {
+                    Console.WriteLine("Payload: " + this.exportInstruction.Export.ToString());
+                }
 
                 string exportResult = await new PublicApiClient(region, workspaceId, fabricToken)
                     .CreateOrUpdateArtifactAsync(

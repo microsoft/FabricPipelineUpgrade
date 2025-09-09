@@ -28,9 +28,12 @@ namespace FabricUpgradePowerShellModule
         [Parameter(Mandatory = true)]
         public string Filename { get; set; }
 
+        [Parameter(Mandatory = false)]
+        public SwitchParameter EnableVerboseLogging { get; set; }
+
         protected override void ProcessRecord()
         {
-            var result = new FabricUpgradeHandler().ImportAdfSupportFile(
+            var result = new FabricUpgradeHandler(this.EnableVerboseLogging).ImportAdfSupportFile(
                 this.Progress,
                 this.Filename,
                 true,
@@ -75,11 +78,19 @@ namespace FabricUpgradePowerShellModule
         [Parameter(Mandatory = false, HelpMessage = "Include datasets and linked services that are not used by any pipelines. Useful for factory-level upgrades.")]
         public SwitchParameter IncludeUnusedResources { get; set; }
 
+        [Parameter(Mandatory = false)]
+        public SwitchParameter EnableVerboseLogging { get; set; }
+
         protected override void ProcessRecord()
         {
             string plainAdfToken = TokenUnwrapper.Unwrap(AdfToken, nameof(AdfToken));
+
+            if (EnableVerboseLogging)
+            {
+                Console.WriteLine($"Importing from ADF Factory: {this.FactoryName} in resource group: {this.ResourceGroupName}");
+            }
             
-            var task = new FabricUpgradeHandler().ImportAdfFactoryAsync(
+            var task = new FabricUpgradeHandler(this.EnableVerboseLogging).ImportAdfFactoryAsync(
                 this.Progress,
                 this.SubscriptionId,
                 this.ResourceGroupName,
@@ -110,9 +121,16 @@ namespace FabricUpgradePowerShellModule
         [ValidateNotNullOrEmpty]
         public string Progress { get; set; }
 
+        [Parameter(Mandatory = false)]
+        public SwitchParameter EnableVerboseLogging { get; set; }
+
         protected override void ProcessRecord()
         {
-            WriteObject(new FabricUpgradeHandler().ConvertToFabricResources(this.Progress).ToString());
+            if (EnableVerboseLogging)
+            {
+                Console.WriteLine("Converting ADF resources to Fabric pipeline definitions...");
+            }
+            WriteObject(new FabricUpgradeHandler(this.EnableVerboseLogging).ConvertToFabricResources(this.Progress).ToString());
         }
     }
 
@@ -136,9 +154,17 @@ namespace FabricUpgradePowerShellModule
         [Parameter(Mandatory = false)]
         public string ResolutionsFilename { get; set; }
 
+        [Parameter(Mandatory = false)]
+        public SwitchParameter EnableVerboseLogging { get; set; }
+
         protected override void ProcessRecord()
         {
-            string result = new FabricUpgradeHandler().ImportFabricResolutions(
+            if (EnableVerboseLogging)
+            {
+                Console.WriteLine($"Importing resolutions from file: {this.ResolutionsFilename}");
+            }
+            
+            string result = new FabricUpgradeHandler(this.EnableVerboseLogging).ImportFabricResolutions(
                 this.Progress,
                 this.ResolutionsFilename).ToString();
 
@@ -172,16 +198,23 @@ namespace FabricUpgradePowerShellModule
         [Parameter(Mandatory = true, HelpMessage = "Fabric user access token. Accepts string, SecureString, or object with AccessToken/Token property (e.g. Get-AzAccessToken).")]
         public object Token { get; set; }
 
+        [Parameter(Mandatory = false)]
+        public SwitchParameter EnableVerboseLogging { get; set; }
+
         protected override void ProcessRecord()
         {
-            CancellationTokenSource cts = new CancellationTokenSource(TimeSpan.FromSeconds(120));
             string plainFabricToken = TokenUnwrapper.Unwrap(Token, nameof(Token));
-            string result = new FabricUpgradeHandler().ExportFabricResourcesAsync(
+            
+            if (EnableVerboseLogging)
+            {
+                Console.WriteLine($"Exporting Fabric resources to workspace: {this.Workspace} in region: {this.Region}");
+            }
+            
+            string result = new FabricUpgradeHandler(this.EnableVerboseLogging).ExportFabricResourcesAsync(
                 this.Progress,
                 this.Region,
                 this.Workspace,
-                plainFabricToken,
-                cts.Token).Result.ToString();
+                plainFabricToken).Result.ToString();
 
             WriteObject(result);
         }
@@ -200,9 +233,17 @@ namespace FabricUpgradePowerShellModule
         [ValidateNotNullOrEmpty]
         public string Progress { get; set; }
 
+        [Parameter(Mandatory = false)]
+        public SwitchParameter EnableVerboseLogging { get; set; }
+
         protected override void ProcessRecord()
         {
-            string result = new FabricUpgradeHandler().SelectWhatIf(this.Progress).ToString();
+            if (EnableVerboseLogging)
+            {
+                Console.WriteLine($"Performing what-if analysis...");
+            }
+
+            string result = new FabricUpgradeHandler(this.EnableVerboseLogging).SelectWhatIf(this.Progress).ToString();
             WriteObject(result);
         }
     }

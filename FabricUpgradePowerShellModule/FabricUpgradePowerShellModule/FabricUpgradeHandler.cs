@@ -23,7 +23,15 @@ namespace FabricUpgradePowerShellModule
         /// </summary>
         private AlertCollector alerts = new AlertCollector();
 
-        public FabricUpgradeHandler() { }
+        /// <summary>
+        /// Whether verbose logging is enabled for this handler instance.
+        /// </summary>
+        private readonly bool verbose;
+
+        public FabricUpgradeHandler(bool verbose = false) 
+        { 
+            this.verbose = verbose;
+        }
 
         /// <summary>
         /// Import an ADF Support File (zip file).
@@ -184,6 +192,7 @@ namespace FabricUpgradePowerShellModule
                     Alerts = this.alerts.ToList(),
                 };
             }
+
             List<FabricUpgradeAlert> alerts = new List<FabricUpgradeAlert>();
             foreach (FabricUpgradeAlert alert in previousProgress.Alerts)
             {
@@ -289,7 +298,7 @@ namespace FabricUpgradePowerShellModule
             string region,
             string workspaceId,
             string fabricToken,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken = default)
         {
             if (!this.CheckProgress(progressString, out FabricUpgradeProgress progress))
             {
@@ -312,7 +321,8 @@ namespace FabricUpgradePowerShellModule
                     workspaceId,
                     fabricToken,
                     progress.Resolutions,
-                    this.alerts);
+                    this.alerts,
+                    this.verbose);
 
             return await machine.ExportAsync(cancellationToken).ConfigureAwait(false);
         }
