@@ -418,6 +418,18 @@ namespace FabricUpgradePowerShellModule.Importers
                     await ImportLinkedServiceAsync(adfClient, linkedServiceName, importedLinkedServices, cancellationToken).ConfigureAwait(false);
                 }
             }
+
+            // Most of external activities reference linked services directly
+            // Examples: AzureFunctionActivity, SqlServerStoredProcedure
+            if (activityType == "AzureFunctionActivity"
+                || activityType == "SqlServerStoredProcedure")
+            {
+                string linkedServiceName = activity.SelectToken("linkedServiceName.referenceName")?.ToString();
+                if (!string.IsNullOrEmpty(linkedServiceName))
+                {
+                    await ImportLinkedServiceAsync(adfClient, linkedServiceName, importedLinkedServices, cancellationToken).ConfigureAwait(false);
+                }
+            }
         }
 
         /// <summary>
