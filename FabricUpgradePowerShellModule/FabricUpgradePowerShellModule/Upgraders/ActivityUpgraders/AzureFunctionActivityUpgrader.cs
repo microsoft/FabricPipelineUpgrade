@@ -4,7 +4,9 @@
 
 using FabricUpgradePowerShellModule.Models;
 using FabricUpgradePowerShellModule.UpgradeMachines;
+using FabricUpgradePowerShellModule.Upgraders.LinkedServiceUpgraders;
 using FabricUpgradePowerShellModule.Utilities;
+
 using Newtonsoft.Json.Linq;
 
 namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
@@ -15,23 +17,22 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
     /// </summary>
     public class AzureFunctionActivityUpgrader : ActivityUpgrader
     {
-        // Path to the function name in the ADF activity JSON.
+        // JSON paths for key properties in the ADF Azure Function activity.
         private const string adfFunctionNamePath = "typeProperties.functionName";
-        // Path to the Azure Function connection in the ADF activity JSON.
-        private const string adfFunctionConnectionPath = "typeProperties.azureFunctionConnection";
+        private const string adfFunctionMethodPath = "typeProperties.method";
+        private const string adfFunctionHeadersPath = "typeProperties.headers";
+        private const string adfLinkedServiceReferencePath = "linkedServiceName.referenceName";
 
-        // We require the function name but the connection can be omitted for anonymous access.
-        private readonly List<string> requiredAdfProperties = new List<string>
+        // Required properties for a valid Azure Function activity.
+        private readonly List<string> requiredAzureFunctionProperties = new List<string>
         {
-            adfFunctionNamePath
-            // Note: Not including adfFunctionConnectionPath since anonymous access is allowed.
+            adfFunctionNamePath,
+            adfFunctionMethodPath,
+            adfLinkedServiceReferencePath
         };
 
-        // Reference to the upgrader that handles the Azure Function connection (if provided).
-        private Upgrader azureFunctionConnectionUpgrader;
-
-        // Flag indicating if the activity uses anonymous access.
-        private bool isAnonymousAccess = false;
+        // Reference to the linked service upgrader.
+        private LinkedServiceUpgrader linkedServiceUpgrader { get; set; }
 
         public AzureFunctionActivityUpgrader(
             string parentPath,
@@ -45,16 +46,8 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
         public override void Compile(AlertCollector alerts)
         {
             base.Compile(alerts);
-            // Validate that required properties exist.
-            this.CheckRequiredAdfProperties(this.requiredAdfProperties, alerts);
-
-            // Check if the Azure Function connection is provided.
-            JToken connectionToken = this.AdfResourceToken.SelectToken(adfFunctionConnectionPath);
-            if (connectionToken == null || string.IsNullOrWhiteSpace(connectionToken.ToString()))
-            {
-                // Allow anonymous access.
-                this.isAnonymousAccess = true;
-            }
+            // Ensure required properties exist.
+            this.CheckRequiredAdfProperties(this.requiredAzureFunctionProperties, alerts);
         }
 
         /// <inheritdoc/>
@@ -62,19 +55,12 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
             List<Upgrader> allUpgraders,
             AlertCollector alerts)
         {
-            // Only attempt to resolve the connection if it's not anonymous.
-            if (!this.isAnonymousAccess)
+            // Look up the linked service upgrader for the referenced linked service.
+            Upgrader upgrader = this.FindOtherUpgrader(allUpgraders, FabricUpgradeResourceTypes.LinkedService, adfLinkedServiceReferencePath, alerts);
+            linkedServiceUpgrader = (LinkedServiceUpgrader)upgrader;
+            if (linkedServiceUpgrader != null)
             {
-                this.azureFunctionConnectionUpgrader = this.FindOtherUpgrader(
-                    allUpgraders,
-                    FabricUpgradeResourceTypes.Connection,
-                    adfFunctionConnectionPath,
-                    alerts);
-
-                if (this.azureFunctionConnectionUpgrader != null)
-                {
-                    this.DependsOn.Add(this.azureFunctionConnectionUpgrader);
-                }
+                this.DependsOn.Add(linkedServiceUpgrader);
             }
         }
 
@@ -102,50 +88,23 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
             Dictionary<string, JToken> parameterAssignments,
             AlertCollector alerts)
         {
-            var resolves = new List<FabricExportResolveStep>();
+            List<FabricExportResolveStep> resolves = new List<FabricExportResolveStep>();
 
-            // Resolve the workspaceId (to be set during export).
-            var workspaceIdResolve = new FabricExportResolveStep(
-                FabricUpgradeResolution.ResolutionType.WorkspaceId,
-                null,
-                "typeProperties.workspaceId");
-            resolves.Add(workspaceIdResolve);
-
-            // Only add a resolution step for the connection if it's not anonymous.
-            if (!this.isAnonymousAccess)
+            if (this.linkedServiceUpgrader != null)
             {
-                var resolutionType = FabricUpgradeResolution.ResolutionType.CredentialConnectionId;
-                var functionConnectionResolve = new FabricExportResolveStep(
-                    resolutionType,
-                    "azurefunction",
-                    "typeProperties.azureFunctionConnection")
-                    .WithHint(new FabricUpgradeConnectionHint
+                // Ask the linkedService for its resolve steps (which resolve its LinkedService -> Connection resource id).
+                Symbol linkedServiceResolveStepsSymbol = this.linkedServiceUpgrader.EvaluateSymbol(Symbol.CommonNames.ExportResolveSteps, parameterAssignments, alerts);
+                if (linkedServiceResolveStepsSymbol.State == Symbol.SymbolState.Ready && linkedServiceResolveStepsSymbol.Value != null)
+                {
+                    foreach (JToken requiredLink in (JArray)linkedServiceResolveStepsSymbol.Value)
                     {
-                        LinkedServiceName = null,
-                        ConnectionType = "AzureFunction",
-                        Datasource = "AzureFunction"
+                        FabricExportResolveStep step = FabricExportResolveStep.FromJToken(requiredLink);
+                        // Place inside this activity's path.
+                        step.TargetPath = $"{step.TargetPath}"; // becomes properties.activities[n].externalReferences.connection
+                        resolves.Add(step);
                     }
-                    .WithTemplate(new FabricUpgradeResolution
-                    {
-                        Type = resolutionType,
-                        Key = "azurefunction",
-                        Value = "<Fabric Azure Function Connection ID>"
-                    }));
-                resolves.Add(functionConnectionResolve);
+                }
             }
-            else
-            {
-                // Optionally, you can add a resolve step that marks this connection as anonymous,
-                // or simply leave it out and set a default value during the Activity build.
-            }
-
-            // Resolve the Azure Function resource ID using the function name.
-            string functionName = this.AdfResourceToken.SelectToken(adfFunctionNamePath)?.ToString();
-            var functionNameResolve = new FabricExportResolveStep(
-                FabricUpgradeResolution.ResolutionType.AdfResourceNameToFabricResourceId,
-                $"AzureFunction:{functionName}",
-                "typeProperties.functionId");
-            resolves.Add(functionNameResolve);
 
             return Symbol.ReadySymbol(JArray.Parse(UpgradeSerialization.Serialize(resolves)));
         }
@@ -155,50 +114,29 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
             Dictionary<string, JToken> parameterAssignments,
             AlertCollector alerts)
         {
-            // Build the common activity symbol.
-            Symbol activitySymbol = base.EvaluateSymbol(Symbol.CommonNames.Activity, parameterAssignments, alerts);
-
-            if (activitySymbol.State != Symbol.SymbolState.Ready)
-            {
-                // TODO: Handle non-ready state if necessary.
-            }
-
-            JObject fabricActivityObject = (JObject)activitySymbol.Value;
-            var copier = new PropertyCopier(this.Path, this.AdfResourceToken, fabricActivityObject, alerts);
+            // Use the helper method from the base class to get the common activity JSON.
+            Symbol baseSymbol = this.BuildCommonActivitySymbol(alerts);
+            JObject fabricActivity = baseSymbol?.Value as JObject ?? new JObject();
 
             // Explicitly copy the dependency information from the original ADF activity.
             JToken adfDependsOn = this.AdfResourceToken.SelectToken("dependsOn");
             if (adfDependsOn != null)
             {
                 // Overwrite the Fabric JSON's "dependsOn" with the original dependencies.
-                fabricActivityObject["dependsOn"] = adfDependsOn.DeepClone();
+                fabricActivity["dependsOn"] = adfDependsOn.DeepClone();
             }
 
-            // Copy over common properties.
+            PropertyCopier copier = new PropertyCopier(this.Path, this.AdfResourceToken, fabricActivity, alerts);
             copier.Copy("description");
-            copier.Copy("typeProperties.parameters");
-            copier.Copy(adfFunctionNamePath);
-            copier.Copy("dependsOn");
+            copier.Copy(adfFunctionNamePath, allowNull: false);
+            copier.Copy(adfFunctionMethodPath, allowNull: false);
+            copier.Copy(adfFunctionHeadersPath, copyIfNull: false);
 
-            // Set the Fabric-specific operation type.
-            copier.Set("typeProperties.operationType", "InvokeAzureFunction");
+            // This property cannot be set until the Export operation phase.
+            // We include this property in the "exportResolve" symbol.
+            copier.Set("externalReferences.connection", Guid.Empty.ToString());
 
-            // Set placeholder IDs to be replaced during the export phase.
-            copier.Set("typeProperties.functionId", Guid.Empty.ToString());
-            copier.Set("typeProperties.workspaceId", Guid.Empty.ToString());
-
-            // For the Azure Function connection, either use the resolved connection ID or a default value for anonymous access.
-            if (!this.isAnonymousAccess)
-            {
-                copier.Set("typeProperties.azureFunctionConnection", Guid.Empty.ToString());
-            }
-            else
-            {
-                // For anonymous access, set a known placeholder (e.g., "anonymous") instead of null.
-                copier.Set("typeProperties.azureFunctionConnection", "anonymous");
-            }
-
-            return Symbol.ReadySymbol(fabricActivityObject);
+            return Symbol.ReadySymbol(fabricActivity);
         }
     }
 }

@@ -10,19 +10,15 @@ using Newtonsoft.Json.Linq;
 namespace FabricUpgradePowerShellModule.Upgraders.LinkedServiceUpgraders
 {
     /// <summary>
-    /// This class handles the Upgrade for an Azure Function LinkedService, allowing anonymous access when applicable.
+    /// This class handles the Upgrade for an Azure Function LinkedService
     /// </summary>
     public class AzureFunctionLinkedServiceUpgrader : LinkedServiceUpgrader
     {
-        private const string FunctionAppUrlPath = "properties.typeProperties.functionAppUrl";
-        private const string AuthenticationKeyPath = "properties.typeProperties.authenticationKey";
-        private const string FunctionKeyPath = "properties.typeProperties.functionKey";
-        private const string MethodPath = "properties.typeProperties.method";
-        private const string HeadersPath = "properties.typeProperties.headers";
+        private const string functionAppUrlPath = "properties.typeProperties.functionAppUrl";
 
         private readonly List<string> requiredAdfProperties = new List<string>
         {
-            FunctionAppUrlPath,
+            functionAppUrlPath
         };
 
         public AzureFunctionLinkedServiceUpgrader(
@@ -35,21 +31,9 @@ namespace FabricUpgradePowerShellModule.Upgraders.LinkedServiceUpgraders
         /// <inheritdoc/>
         public override void Compile(AlertCollector alerts)
         {
-            this.ForceToCanonicalForm(alerts);
             base.Compile(alerts);
-            this.CheckRequiredAdfProperties(this.requiredAdfProperties, alerts);
-            this.CheckForExpressionInProperty(FunctionAppUrlPath, alerts);
 
-            // Make authenticationKey optional
-            JToken authKeyToken = this.AdfResourceToken.SelectToken(AuthenticationKeyPath);
-            if (authKeyToken == null || string.IsNullOrWhiteSpace(authKeyToken.ToString()))
-            {
-                alerts.AddWarning($"LinkedService '{this.Name}' is using anonymous access as authenticationKey is missing.");
-            }
-            else
-            {
-                this.CheckForExpressionInProperty(AuthenticationKeyPath, alerts);
-            }
+            this.CheckRequiredAdfProperties(this.requiredAdfProperties, alerts);
         }
 
         /// <inheritdoc/>
@@ -60,69 +44,64 @@ namespace FabricUpgradePowerShellModule.Upgraders.LinkedServiceUpgraders
             base.PreSort(allUpgraders, alerts);
         }
 
-        /// <summary>
-        /// If this AzureFunction LinkedService is in the "Legacy" format,
-        /// then convert it to the "Recommended" format.
-        /// </summary>
-        /// <param name="alerts">Add any generated alerts to this collector.</param>
-        private void ForceToCanonicalForm(AlertCollector alerts)
+        /// <inheritdoc/>
+        public override Symbol EvaluateSymbol(
+            string symbolName,
+            Dictionary<string, JToken> parameterAssignments,
+            AlertCollector alerts)
         {
-            JToken functionUrlToken = this.AdfResourceToken.SelectToken(FunctionAppUrlPath);
-
-            if (functionUrlToken == null)
-            {
-                this.VerifyCanonicalProperties(alerts);
-            }
-            else
-            {
-                this.ConvertToCanonicalForm(functionUrlToken, alerts);
-            }
-        }
-
-        private void VerifyCanonicalProperties(AlertCollector alerts)
-        {
-            // TODO: Add specific validation checks if required
-        }
-
-        private void ConvertToCanonicalForm(JToken functionUrlToken, AlertCollector alerts)
-        {
-            if (functionUrlToken.Type != JTokenType.String)
-            {
-                alerts.AddPermanentError($"Cannot upgrade LinkedService '{this.Name}' because FunctionAppUrl is not a string.");
-                return;
-            }
-
-            JObject typeProperties = (JObject)this.AdfResourceToken.SelectToken("properties.typeProperties");
-
-            if (typeProperties != null)
-            {
-                typeProperties["functionAppUrl"] = functionUrlToken;
-
-                if (this.AdfResourceToken.SelectToken(FunctionKeyPath) != null)
-                {
-                    typeProperties["functionKey"] = this.AdfResourceToken.SelectToken(FunctionKeyPath);
-                }
-
-                if (this.AdfResourceToken.SelectToken(MethodPath) != null)
-                {
-                    typeProperties["method"] = this.AdfResourceToken.SelectToken(MethodPath);
-                }
-
-                if (this.AdfResourceToken.SelectToken(HeadersPath) != null)
-                {
-                    typeProperties["headers"] = this.AdfResourceToken.SelectToken(HeadersPath);
-                }
-            }
+            return base.EvaluateSymbol(symbolName, parameterAssignments, alerts);
         }
 
         /// <inheritdoc/>
         protected override FabricUpgradeConnectionHint BuildFabricConnectionHint()
         {
-            string functionAppUrl = this.AdfResourceToken.SelectToken(FunctionAppUrlPath)?.ToString();
+            string functionAppHostName = null;
+            JToken functionAppUrlToken = this.AdfResourceToken.SelectToken(functionAppUrlPath);
 
+            if (functionAppUrlToken?.Type == JTokenType.String)
+            {
+                (functionAppHostName, _) = this.ProcessUrl(functionAppUrlToken.ToString());
+            }
+            
             return base.BuildFabricConnectionHint()
                 .WithConnectionType(this.LinkedServiceType)
-                .WithDatasource(functionAppUrl ?? "unknown");
+                .WithDatasource(functionAppHostName ?? this.Name);
+        }
+
+        /// <summary>
+        /// Break the URL into its components.
+        /// </summary>
+        /// <returns>The host name and the relative URL.</returns>
+        private (string HostName, string RelativeUrl) ProcessUrl(string url)
+        {
+            url = this.EnsureHttpSchemeIsPresent(url, "http");
+
+            // Note: We might want to support Connections that have a HostName and a path "prefix".
+            // For example, the Connection has the URL "http://abc.com/orders" and we convert
+            // "http://abc.com/orders/1234" into <connectionId>, "/1234".
+            // This is a little bit complicated, so, for now, we'll just support Connections that
+            // point at the Host.
+            Uri uri = new Uri(url);
+
+            string hostname = uri.Authority;
+            string pathAndQuery = uri.PathAndQuery;
+
+            return (hostname, pathAndQuery);
+        }
+
+        // The constructor for System.Uri will fail if the URL does
+        // not include a schema. Make sure that there is one.
+        private string EnsureHttpSchemeIsPresent(
+            string url,
+            string defaultHttpScheme)
+        {
+            if (url.StartsWith("http://") || url.StartsWith("https://"))
+            {
+                return url;
+            }
+
+            return defaultHttpScheme + "://" + url;
         }
     }
 }

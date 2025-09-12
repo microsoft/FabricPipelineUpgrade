@@ -61,6 +61,7 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
             {
                 return BuildActivitySymbol(parameterAssignments, alerts);
             }
+
             return Symbol.ReadySymbol(null);
         }
 

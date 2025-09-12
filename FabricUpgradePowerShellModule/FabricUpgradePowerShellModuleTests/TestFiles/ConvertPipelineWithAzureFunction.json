@@ -3,26 +3,41 @@
 
   "expectedResponse": {
     "state": "Succeeded",
-    "alerts": [
-      {
-        "severity": "Warning",
-        "details": "LinkedService 'AzureFunction1' is using anonymous access as authenticationKey is missing."
-      }
-    ],
+    "alerts": [],
     "result": {
       "exportableFabricResources": [
+        {
+          "resourceType": "Connection",
+          "resourceName": "AzureFunction1",
+          "resolve": [
+            {
+              "type": "LinkedServiceToConnectionId",
+              "key": "AzureFunction1",
+              "targetPath": "id",
+              "hint": {
+                "linkedServiceName": "AzureFunction1",
+                "connectionType": "AzureFunction",
+                "datasource": "dklajdslkjfdlk.azurewebsites.net",
+                "template": {
+                  "type": "LinkedServiceToConnectionId",
+                  "key": "AzureFunction1",
+                  "value": "<Fabric Connection ID>"
+                }
+              }
+            }
+          ],
+          "export": {
+            "id": "00000000-0000-0000-0000-000000000000"
+          }
+        },
         {
           "resourceType": "DataPipeline",
           "resourceName": "PipelineWithAzureFunction",
           "resolve": [
             {
-              "type": "WorkspaceId",
-              "targetPath": "properties.activities[0].typeProperties.workspaceId"
-            },
-            {
               "type": "AdfResourceNameToFabricResourceId",
-              "key": "AzureFunction:function1",
-              "targetPath": "properties.activities[0].typeProperties.functionId"
+              "key": "Connection:AzureFunction1",
+              "targetPath": "properties.activities[0].externalReferences.connection"
             }
           ],
           "export": {
@@ -42,41 +57,16 @@
                   },
                   "description": null,
                   "typeProperties": {
-                    "parameters": null,
                     "functionName": "function1",
-                    "operationType": "InvokeAzureFunction",
-                    "functionId": "00000000-0000-0000-0000-000000000000",
-                    "workspaceId": "00000000-0000-0000-0000-000000000000",
-                    "azureFunctionConnection": "anonymous"
+                    "method": "GET"
+                  },
+                  "externalReferences": {
+                    "connection": "00000000-0000-0000-0000-000000000000"
                   }
                 }
               ]
             },
             "annotations": []
-          }
-        },
-        {
-          "resourceType": "Connection",
-          "resourceName": "AzureFunction1",
-          "resolve": [
-            {
-              "type": "LinkedServiceToConnectionId",
-              "key": "AzureFunction1",
-              "targetPath": "id",
-              "hint": {
-                "linkedServiceName": "AzureFunction1",
-                "connectionType": "AzureFunction",
-                "datasource": "https://dklajdslkjfdlk.azurewebsites.net",
-                "template": {
-                  "type": "LinkedServiceToConnectionId",
-                  "key": "AzureFunction1",
-                  "value": "<Fabric Connection ID>"
-                }
-              }
-            }
-          ],
-          "export": {
-            "id": "00000000-0000-0000-0000-000000000000"
           }
         }
       ]

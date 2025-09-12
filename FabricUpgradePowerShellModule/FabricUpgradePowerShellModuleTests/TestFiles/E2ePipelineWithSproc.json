@@ -44,13 +44,23 @@
             {
               "name": "Stored procedure1",
               "dependsOn": [],
-              "description": "",
+              "policy": {
+                "timeout": "0.12:00:00",
+                "retry": 0,
+                "retryIntervalInSeconds": 30,
+                "secureOutput": false,
+                "secureInput": false
+              },
+              "description": null,
               "type": "SqlServerStoredProcedure",
               "typeProperties": {
+                "database": "testdb",
                 "operationType": "SqlServerStoredProcedure",
                 "storedProcedureName": "dbo.sp_mysproc"
               },
-              "linkedService": {}
+              "externalReferences": {
+                "connection": "0a83f9fe-a58e-4a23-a5a3-c14755571b0b"
+              }
             }
           ]
         },
