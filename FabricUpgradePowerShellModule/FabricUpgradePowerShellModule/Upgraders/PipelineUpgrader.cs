@@ -43,6 +43,9 @@ namespace FabricUpgradePowerShellModule.Upgraders
         {
             base.Compile(alerts);
 
+            // Set the source pipeline name for all alerts generated during compilation
+            alerts.SourcePipelineName = this.Name;
+
             JToken activitiesToken = this.AdfResourceToken.SelectToken(AdfActivityPath);
 
             if (activitiesToken != null && activitiesToken.Type == JTokenType.Array)
@@ -62,6 +65,9 @@ namespace FabricUpgradePowerShellModule.Upgraders
             List<Upgrader> allUpgraders,
             AlertCollector alerts)
         {
+            // Set the source pipeline name for all alerts generated during PreSort
+            alerts.SourcePipelineName = this.Name;
+            
             foreach (Upgrader activityUpgrader in this.activityUpgraders)
             {
                 activityUpgrader.PreSort(allUpgraders, alerts);
@@ -79,6 +85,9 @@ namespace FabricUpgradePowerShellModule.Upgraders
         {
             if (symbolName == Symbol.CommonNames.ExportInstructions)
             {
+                // Set the source pipeline name for all alerts generated during symbol evaluation
+                alerts.SourcePipelineName = this.Name;
+                
                 PipelineExportInstruction exportInstruction = new PipelineExportInstruction(this.Name, this.adfModel.Properties?.Description);
 
                 this.CollectActivityExportResolves(exportInstruction, alerts);
@@ -134,6 +143,9 @@ namespace FabricUpgradePowerShellModule.Upgraders
             PipelineExportInstruction exportInstruction,
             AlertCollector alerts)
         {
+            // Ensure the source pipeline name is set
+            alerts.SourcePipelineName = this.Name;
+            
             int nActivity = 0;
             foreach (Upgrader activityUpgrader in this.activityUpgraders)
             {
@@ -166,6 +178,9 @@ namespace FabricUpgradePowerShellModule.Upgraders
             FabricPipelineModel pipeline,
             AlertCollector alerts)
         {
+            // Ensure the source pipeline name is set
+            alerts.SourcePipelineName = this.Name;
+            
             foreach (Upgrader activityUpgrader in this.activityUpgraders)
             {
                 Symbol activitySymbol = activityUpgrader.EvaluateSymbol(Symbol.CommonNames.Activity, alerts);

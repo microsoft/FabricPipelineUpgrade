@@ -1,26 +1,26 @@
 ﻿{
-  "adfSupportFile": "EmptyPipeline_support_live.zip",
+    "adfSupportFile":  "EmptyPipeline_support_live.zip",
+    "reservedDisplayNames":  [
+                                 "EmptyPipeline"
+                             ],
+    "expectedResponse":  {
+                             "state":  "Failed",
+                             "alerts":  [
+                                            {
+                                                "severity":  "Permanent",
+                                                "details":  "The item name \u0027EmptyPipeline\u0027 is already in use. This is likely because you had an item with this name and deleted it recently. If this is the case, please wait about a minute or two and retry the operation.",
+                                                "sourcePipelineName":  "EmptyPipeline"
+                                            }
+                                        ],
+                             "result":  {
 
-  "reservedDisplayNames": [
-    "EmptyPipeline"
-  ],
+                                        }
+                         },
+    "expectedItems":  [
 
-  "expectedResponse": {
-    "state": "Failed",
-    "alerts": [
-      {
-        "severity": "Permanent",
-        "details": "The item name 'EmptyPipeline' is already in use. This is likely because you had an item with this name and deleted it recently. If this is the case, please wait about a minute or two and retry the operation."
-      }
-    ],
-    "result": {}
-  },
-
-  "expectedItems": [],
-
+                      ],
   "expectedEndpointEvents": [
     "LIST DataPipeline",
-    "CREATE DataPipeline 'EmptyPipeline' DisplayNameAlreadyInUse"
+    "CREATE DataPipeline \u0027EmptyPipeline\u0027 DisplayNameAlreadyInUse"
   ]
-
 }

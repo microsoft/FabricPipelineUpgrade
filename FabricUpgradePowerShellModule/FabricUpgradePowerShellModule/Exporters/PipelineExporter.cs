@@ -34,6 +34,9 @@ namespace FabricUpgradePowerShellModule.Exporters
         {
             base.CheckBeforeExports(alerts);
 
+            // Set the source pipeline name for all alerts generated during export checks
+            alerts.SourcePipelineName = this.exportInstruction.ResourceName;
+
             // This DataPipeline (technically, its Activities) may need to resolve certain
             // connection IDs. If it cannot, then fail!
             foreach (FabricExportResolveStep resolve in this.exportInstruction.Resolves)
@@ -64,6 +67,9 @@ namespace FabricUpgradePowerShellModule.Exporters
             AlertCollector alerts,
             CancellationToken cancellationToken)
         {
+            // Set the source pipeline name for all alerts generated during export
+            alerts.SourcePipelineName = this.exportInstruction.ResourceName;
+            
             this.ExecuteResolveSteps(alerts);
 
             try
@@ -108,6 +114,9 @@ namespace FabricUpgradePowerShellModule.Exporters
         /// <param name="alerts">Add any generated alerts to this collector.</param>
         private void ExecuteResolveSteps(AlertCollector alerts)
         {
+            // Ensure the source pipeline name is set
+            alerts.SourcePipelineName = this.exportInstruction.ResourceName;
+            
             foreach (FabricExportResolveStep resolve in this.exportInstruction.Resolves)
             {
                 var resolution = this.Machine.Resolve(resolve.Type, resolve.Key, alerts);

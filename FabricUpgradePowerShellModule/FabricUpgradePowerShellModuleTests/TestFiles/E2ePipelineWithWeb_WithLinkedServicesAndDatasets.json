@@ -1,43 +1,52 @@
 ﻿{
-  "adfSupportFile": "PipelineWithWebActivity_WithLinkedServicesAndDatasets_support_live.zip",
+    "adfSupportFile":  "PipelineWithWebActivity_WithLinkedServicesAndDatasets_support_live.zip",
+    "resolutions":  [
+                        {
+                            "type":  "UrlHostToConnectionId",
+                            "key":  "www.bing.com",
+                            "value":  "c97b2144-fa4c-49a8-8c24-e5426690b7eb"
+                        }
+                    ],
+    "expectedResponse":  {
+                             "state":  "Failed",
+                             "alerts":  [
+                              {
+                                "severity": "Permanent",
+                                "details": "Cannot upgrade Web Activity \u0027PipelineWithWebActivity_WithLinkedServicesAndDatasets/Web1\u0027 because it includes LinkedServices",
+                                "sourcePipelineName": "PipelineWithWebActivity_WithLinkedServicesAndDatasets"
+                              },
+                              {
+                                "severity": "Permanent",
+                                "details": "Cannot upgrade Web Activity \u0027PipelineWithWebActivity_WithLinkedServicesAndDatasets/Web1\u0027 because it includes Datasets",
+                                "sourcePipelineName": "PipelineWithWebActivity_WithLinkedServicesAndDatasets"
+                              }
+                                        ],
+                             "resolutions":  [
 
-  "resolutions": [
-    {
-      "type": "UrlHostToConnectionId",
-      "key": "www.bing.com",
-      "value": "c97b2144-fa4c-49a8-8c24-e5426690b7eb"
-    }
-  ],
+                                             ],
+                             "result":  {
 
-  "expectedResponse": {
-    "state": "Failed",
-    "alerts": [
-      {
-        "severity": "Permanent",
-        "details": "Cannot upgrade Web Activity 'PipelineWithWebActivity_WithLinkedServicesAndDatasets/Web1' because it includes LinkedServices"
-      },
-      {
-        "severity": "Permanent",
-        "details": "Cannot upgrade Web Activity 'PipelineWithWebActivity_WithLinkedServicesAndDatasets/Web1' because it includes Datasets"
-      }
-    ],
-    "resolutions": [],
-    "result": {}
-  },
+                                        }
+                         },
+    "expectedWhatIfResponse":  {
+                                   "state":  "Failed",
+                                   "alerts":  [
+                                    {
+                                      "severity": "Permanent",
+                                      "details": "Cannot upgrade Web Activity \u0027PipelineWithWebActivity_WithLinkedServicesAndDatasets/Web1\u0027 because it includes LinkedServices",
+                                      "sourcePipelineName": "PipelineWithWebActivity_WithLinkedServicesAndDatasets"
+                                    },
+                                    {
+                                      "severity": "Permanent",
+                                      "details": "Cannot upgrade Web Activity \u0027PipelineWithWebActivity_WithLinkedServicesAndDatasets/Web1\u0027 because it includes Datasets",
+                                      "sourcePipelineName": "PipelineWithWebActivity_WithLinkedServicesAndDatasets"
+                                    }
+                                              ],
+                                   "resolutions":  [
 
-  "expectedWhatIfResponse": {
-    "state": "Failed",
-    "alerts": [
-      {
-        "severity": "Permanent",
-        "details": "Cannot upgrade Web Activity 'PipelineWithWebActivity_WithLinkedServicesAndDatasets/Web1' because it includes LinkedServices"
-      },
-      {
-        "severity": "Permanent",
-        "details": "Cannot upgrade Web Activity 'PipelineWithWebActivity_WithLinkedServicesAndDatasets/Web1' because it includes Datasets"
-      }
-    ],
-    "resolutions": [],
-    "result": {}
-  }
+                                                   ],
+                                   "result":  {
+
+                                              }
+                               }
 }
