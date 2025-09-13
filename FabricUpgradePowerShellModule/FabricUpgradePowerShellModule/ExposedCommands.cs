@@ -8,14 +8,47 @@ using System.Runtime.InteropServices;
 using System.Security;
 using System.Threading;
 using System.Reflection;
+using System.Threading.Tasks;
 
 namespace FabricUpgradePowerShellModule
 {
     /// <summary>
+    /// Helper class for PowerShell cancellation token support
+    /// </summary>
+    internal static class PowerShellCancellationHelper
+    {
+        public static CancellationToken CreateCancellationToken(PSCmdlet cmdlet)
+        {
+            var cancellationTokenSource = new CancellationTokenSource();
+            
+            // Check for stopping periodically using a timer
+            var timer = new System.Threading.Timer(_ =>
+            {
+                try
+                {
+                    if (cmdlet.Stopping)
+                    {
+                        cancellationTokenSource.Cancel();
+                    }
+                }
+                catch
+                {
+                    // Ignore any exceptions during stopping check
+                }
+            }, null, TimeSpan.FromMilliseconds(100), TimeSpan.FromMilliseconds(100));
+
+            // Register cleanup when cancellation is requested
+            cancellationTokenSource.Token.Register(() => timer?.Dispose());
+            
+            return cancellationTokenSource.Token;
+        }
+    }
+
+    /// <summary>
     /// Import an ADF Support File.
     /// </summary>
     [Cmdlet(VerbsData.Import, "AdfSupportFile")]
-    public class ImportAdfSupportFile : Cmdlet
+    public class ImportAdfSupportFile : PSCmdlet
     {
         [Parameter(
             Position = 0,
@@ -33,13 +66,23 @@ namespace FabricUpgradePowerShellModule
 
         protected override void ProcessRecord()
         {
-            var result = new FabricUpgradeHandler(this.EnableVerboseLogging).ImportAdfSupportFile(
-                this.Progress,
-                this.Filename,
-                true,
-                CancellationToken.None);
+            try
+            {
+                var cancellationToken = PowerShellCancellationHelper.CreateCancellationToken(this);
 
-            WriteObject(result.ToString());
+                var result = new FabricUpgradeHandler(this.EnableVerboseLogging).ImportAdfSupportFile(
+                    this.Progress,
+                    this.Filename,
+                    true,
+                    cancellationToken);
+
+                WriteObject(result.ToString());
+            }
+            catch (OperationCanceledException)
+            {
+                WriteWarning("Import operation was cancelled by user request.");
+                throw;
+            }
         }
     }
 
@@ -47,7 +90,7 @@ namespace FabricUpgradePowerShellModule
     /// Import ADF resources directly from Azure Data Factory using REST APIs.
     /// </summary>
     [Cmdlet(VerbsData.Import, "AdfFactory")]
-    public class ImportAdfFactory : Cmdlet
+    public class ImportAdfFactory : PSCmdlet
     {
         [Parameter(
             Position = 0,
@@ -89,18 +132,29 @@ namespace FabricUpgradePowerShellModule
             {
                 Console.WriteLine($"Importing from ADF Factory: {this.FactoryName} in resource group: {this.ResourceGroupName}");
             }
-            
-            var task = new FabricUpgradeHandler(this.EnableVerboseLogging).ImportAdfFactoryAsync(
-                this.Progress,
-                this.SubscriptionId,
-                this.ResourceGroupName,
-                this.FactoryName,
-                plainAdfToken,
-                this.PipelineName,
-                this.IncludeUnusedResources,
-                CancellationToken.None);
 
-            WriteObject(task.Result.ToString());
+            try
+            {
+                var cancellationToken = PowerShellCancellationHelper.CreateCancellationToken(this);
+
+                var task = new FabricUpgradeHandler(this.EnableVerboseLogging).ImportAdfFactoryAsync(
+                    this.Progress,
+                    this.SubscriptionId,
+                    this.ResourceGroupName,
+                    this.FactoryName,
+                    plainAdfToken,
+                    this.PipelineName,
+                    this.IncludeUnusedResources,
+                    cancellationToken);
+
+                string result = task.GetAwaiter().GetResult().ToString();
+                WriteObject(result);
+            }
+            catch (OperationCanceledException)
+            {
+                WriteWarning("Import operation was cancelled by user request.");
+                throw;
+            }
         }
     }
 
@@ -177,7 +231,7 @@ namespace FabricUpgradePowerShellModule
     // Import-AdfSupportFile '...' | ConvertTo-FabricResources | Export-FabricResources -Workspace ABC -Token 123
     // This cmdlet uploads the pipelines to the PublicApi endpoint to create/update the items.
     [Cmdlet(VerbsData.Export, "FabricResources")]
-    public class ExportFabricPipeline : Cmdlet
+    public class ExportFabricPipeline : PSCmdlet
     {
         [Parameter(
             Position = 0,
@@ -210,13 +264,25 @@ namespace FabricUpgradePowerShellModule
                 Console.WriteLine($"Exporting Fabric resources to workspace: {this.Workspace} in region: {this.Region}");
             }
             
-            string result = new FabricUpgradeHandler(this.EnableVerboseLogging).ExportFabricResourcesAsync(
-                this.Progress,
-                this.Region,
-                this.Workspace,
-                plainFabricToken).Result.ToString();
+            try
+            {
+                var cancellationToken = PowerShellCancellationHelper.CreateCancellationToken(this);
 
-            WriteObject(result);
+                var task = new FabricUpgradeHandler(this.EnableVerboseLogging).ExportFabricResourcesAsync(
+                    this.Progress,
+                    this.Region,
+                    this.Workspace,
+                    plainFabricToken,
+                    cancellationToken);
+
+                string result = task.GetAwaiter().GetResult().ToString();
+                WriteObject(result);
+            }
+            catch (OperationCanceledException)
+            {
+                WriteWarning("Export operation was cancelled by user request.");
+                throw;
+            }
         }
     }
 
