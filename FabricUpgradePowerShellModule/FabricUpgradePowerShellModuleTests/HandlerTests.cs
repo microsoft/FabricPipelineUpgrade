@@ -32,7 +32,7 @@ namespace FabricUpgradePowerShellModuleTests
             FabricUpgradeProgress actualResponse = new FabricUpgradeHandler().ImportAdfSupportFile(
                 testConfig.Progress?.ToString(),
                 "./TestFiles/AdfSupportFiles/" + testConfig.AdfSupportFile,
-                true);
+                true); 
 
             JObject actualResponseObject = actualResponse.ToJObject();
 
@@ -84,7 +84,7 @@ namespace FabricUpgradePowerShellModuleTests
                 "./TestFiles/AdfSupportFiles/" + testConfig.AdfSupportFile,
                 true);
 
-            FabricUpgradeProgress actualConvertResponse = new FabricUpgradeHandler().ConvertToFabricResources(importResponse.ToString());
+            FabricUpgradeProgress actualConvertResponse = new FabricUpgradeHandler().ConvertToFabricResources(importResponse.ToString()); 
 
             JObject actualResponseObject = actualConvertResponse.ToJObject();
 
@@ -114,7 +114,7 @@ namespace FabricUpgradePowerShellModuleTests
             };
             progress.Result = JObject.Parse($"{{ '{resultKey}': {{}} }}");
 
-            FabricUpgradeProgress actualResponse = new FabricUpgradeHandler().ConvertToFabricResources(progress.ToString());
+            FabricUpgradeProgress actualResponse = new FabricUpgradeHandler().ConvertToFabricResources(progress.ToString()); 
 
             Assert.AreEqual(FabricUpgradeProgress.FabricUpgradeState.Failed, actualResponse.State);
             Assert.AreEqual(1, actualResponse.Alerts.Count);
@@ -151,7 +151,7 @@ namespace FabricUpgradePowerShellModuleTests
                 _ => null,
             };
 
-            FabricUpgradeProgress actualResponse = new FabricUpgradeHandler().ConvertToFabricResources(progress);
+            FabricUpgradeProgress actualResponse = new FabricUpgradeHandler().ConvertToFabricResources(progress); 
 
             var mismatches = JsonUtils.DeepCompare(expectedResponse.ToJObject(), actualResponse.ToJObject());
             Assert.IsNull(
@@ -210,7 +210,7 @@ namespace FabricUpgradePowerShellModuleTests
                 "daily",
                 "wsId",
                 "token",
-                CancellationToken.None).ConfigureAwait(false);
+                CancellationToken.None).ConfigureAwait(false); 
 
             Assert.AreEqual(FabricUpgradeProgress.FabricUpgradeState.Failed, actualResponse.State);
             Assert.AreEqual(1, actualResponse.Alerts.Count);

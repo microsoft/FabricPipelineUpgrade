@@ -8,14 +8,47 @@ using System.Runtime.InteropServices;
 using System.Security;
 using System.Threading;
 using System.Reflection;
+using System.Threading.Tasks;
 
 namespace FabricUpgradePowerShellModule
 {
     /// <summary>
+    /// Helper class for PowerShell cancellation token support
+    /// </summary>
+    internal static class PowerShellCancellationHelper
+    {
+        public static CancellationToken CreateCancellationToken(PSCmdlet cmdlet)
+        {
+            var cancellationTokenSource = new CancellationTokenSource();
+            
+            // Check for stopping periodically using a timer
+            var timer = new System.Threading.Timer(_ =>
+            {
+                try
+                {
+                    if (cmdlet.Stopping)
+                    {
+                        cancellationTokenSource.Cancel();
+                    }
+                }
+                catch
+                {
+                    // Ignore any exceptions during stopping check
+                }
+            }, null, TimeSpan.FromMilliseconds(100), TimeSpan.FromMilliseconds(100));
+
+            // Register cleanup when cancellation is requested
+            cancellationTokenSource.Token.Register(() => timer?.Dispose());
+            
+            return cancellationTokenSource.Token;
+        }
+    }
+
+    /// <summary>
     /// Import an ADF Support File.
     /// </summary>
     [Cmdlet(VerbsData.Import, "AdfSupportFile")]
-    public class ImportAdfSupportFile : Cmdlet
+    public class ImportAdfSupportFile : PSCmdlet
     {
         [Parameter(
             Position = 0,
@@ -28,15 +61,28 @@ namespace FabricUpgradePowerShellModule
         [Parameter(Mandatory = true)]
         public string Filename { get; set; }
 
+        [Parameter(Mandatory = false)]
+        public SwitchParameter EnableVerboseLogging { get; set; }
+
         protected override void ProcessRecord()
         {
-            var result = new FabricUpgradeHandler().ImportAdfSupportFile(
-                this.Progress,
-                this.Filename,
-                true,
-                CancellationToken.None);
+            try
+            {
+                var cancellationToken = PowerShellCancellationHelper.CreateCancellationToken(this);
 
-            WriteObject(result.ToString());
+                var result = new FabricUpgradeHandler(this.EnableVerboseLogging).ImportAdfSupportFile(
+                    this.Progress,
+                    this.Filename,
+                    true,
+                    cancellationToken);
+
+                WriteObject(result.ToString());
+            }
+            catch (OperationCanceledException)
+            {
+                WriteWarning("Import operation was cancelled by user request.");
+                throw;
+            }
         }
     }
 
@@ -44,7 +90,7 @@ namespace FabricUpgradePowerShellModule
     /// Import ADF resources directly from Azure Data Factory using REST APIs.
     /// </summary>
     [Cmdlet(VerbsData.Import, "AdfFactory")]
-    public class ImportAdfFactory : Cmdlet
+    public class ImportAdfFactory : PSCmdlet
     {
         [Parameter(
             Position = 0,
@@ -75,21 +121,40 @@ namespace FabricUpgradePowerShellModule
         [Parameter(Mandatory = false, HelpMessage = "Include datasets and linked services that are not used by any pipelines. Useful for factory-level upgrades.")]
         public SwitchParameter IncludeUnusedResources { get; set; }
 
+        [Parameter(Mandatory = false)]
+        public SwitchParameter EnableVerboseLogging { get; set; }
+
         protected override void ProcessRecord()
         {
             string plainAdfToken = TokenUnwrapper.Unwrap(AdfToken, nameof(AdfToken));
-            
-            var task = new FabricUpgradeHandler().ImportAdfFactoryAsync(
-                this.Progress,
-                this.SubscriptionId,
-                this.ResourceGroupName,
-                this.FactoryName,
-                plainAdfToken,
-                this.PipelineName,
-                this.IncludeUnusedResources,
-                CancellationToken.None);
 
-            WriteObject(task.Result.ToString());
+            if (EnableVerboseLogging)
+            {
+                Console.WriteLine($"Importing from ADF Factory: {this.FactoryName} in resource group: {this.ResourceGroupName}");
+            }
+
+            try
+            {
+                var cancellationToken = PowerShellCancellationHelper.CreateCancellationToken(this);
+
+                var task = new FabricUpgradeHandler(this.EnableVerboseLogging).ImportAdfFactoryAsync(
+                    this.Progress,
+                    this.SubscriptionId,
+                    this.ResourceGroupName,
+                    this.FactoryName,
+                    plainAdfToken,
+                    this.PipelineName,
+                    this.IncludeUnusedResources,
+                    cancellationToken);
+
+                string result = task.GetAwaiter().GetResult().ToString();
+                WriteObject(result);
+            }
+            catch (OperationCanceledException)
+            {
+                WriteWarning("Import operation was cancelled by user request.");
+                throw;
+            }
         }
     }
 
@@ -110,9 +175,16 @@ namespace FabricUpgradePowerShellModule
         [ValidateNotNullOrEmpty]
         public string Progress { get; set; }
 
+        [Parameter(Mandatory = false)]
+        public SwitchParameter EnableVerboseLogging { get; set; }
+
         protected override void ProcessRecord()
         {
-            WriteObject(new FabricUpgradeHandler().ConvertToFabricResources(this.Progress).ToString());
+            if (EnableVerboseLogging)
+            {
+                Console.WriteLine("Converting ADF resources to Fabric pipeline definitions...");
+            }
+            WriteObject(new FabricUpgradeHandler(this.EnableVerboseLogging).ConvertToFabricResources(this.Progress).ToString());
         }
     }
 
@@ -136,9 +208,17 @@ namespace FabricUpgradePowerShellModule
         [Parameter(Mandatory = false)]
         public string ResolutionsFilename { get; set; }
 
+        [Parameter(Mandatory = false)]
+        public SwitchParameter EnableVerboseLogging { get; set; }
+
         protected override void ProcessRecord()
         {
-            string result = new FabricUpgradeHandler().ImportFabricResolutions(
+            if (EnableVerboseLogging)
+            {
+                Console.WriteLine($"Importing resolutions from file: {this.ResolutionsFilename}");
+            }
+            
+            string result = new FabricUpgradeHandler(this.EnableVerboseLogging).ImportFabricResolutions(
                 this.Progress,
                 this.ResolutionsFilename).ToString();
 
@@ -151,7 +231,7 @@ namespace FabricUpgradePowerShellModule
     // Import-AdfSupportFile '...' | ConvertTo-FabricResources | Export-FabricResources -Workspace ABC -Token 123
     // This cmdlet uploads the pipelines to the PublicApi endpoint to create/update the items.
     [Cmdlet(VerbsData.Export, "FabricResources")]
-    public class ExportFabricPipeline : Cmdlet
+    public class ExportFabricPipeline : PSCmdlet
     {
         [Parameter(
             Position = 0,
@@ -172,18 +252,37 @@ namespace FabricUpgradePowerShellModule
         [Parameter(Mandatory = true, HelpMessage = "Fabric user access token. Accepts string, SecureString, or object with AccessToken/Token property (e.g. Get-AzAccessToken).")]
         public object Token { get; set; }
 
+        [Parameter(Mandatory = false)]
+        public SwitchParameter EnableVerboseLogging { get; set; }
+
         protected override void ProcessRecord()
         {
-            CancellationTokenSource cts = new CancellationTokenSource(TimeSpan.FromSeconds(120));
             string plainFabricToken = TokenUnwrapper.Unwrap(Token, nameof(Token));
-            string result = new FabricUpgradeHandler().ExportFabricResourcesAsync(
-                this.Progress,
-                this.Region,
-                this.Workspace,
-                plainFabricToken,
-                cts.Token).Result.ToString();
+            
+            if (EnableVerboseLogging)
+            {
+                Console.WriteLine($"Exporting Fabric resources to workspace: {this.Workspace} in region: {this.Region}");
+            }
+            
+            try
+            {
+                var cancellationToken = PowerShellCancellationHelper.CreateCancellationToken(this);
 
-            WriteObject(result);
+                var task = new FabricUpgradeHandler(this.EnableVerboseLogging).ExportFabricResourcesAsync(
+                    this.Progress,
+                    this.Region,
+                    this.Workspace,
+                    plainFabricToken,
+                    cancellationToken);
+
+                string result = task.GetAwaiter().GetResult().ToString();
+                WriteObject(result);
+            }
+            catch (OperationCanceledException)
+            {
+                WriteWarning("Export operation was cancelled by user request.");
+                throw;
+            }
         }
     }
 
@@ -200,9 +299,17 @@ namespace FabricUpgradePowerShellModule
         [ValidateNotNullOrEmpty]
         public string Progress { get; set; }
 
+        [Parameter(Mandatory = false)]
+        public SwitchParameter EnableVerboseLogging { get; set; }
+
         protected override void ProcessRecord()
         {
-            string result = new FabricUpgradeHandler().SelectWhatIf(this.Progress).ToString();
+            if (EnableVerboseLogging)
+            {
+                Console.WriteLine($"Performing what-if analysis...");
+            }
+
+            string result = new FabricUpgradeHandler(this.EnableVerboseLogging).SelectWhatIf(this.Progress).ToString();
             WriteObject(result);
         }
     }

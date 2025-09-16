@@ -21,11 +21,13 @@ namespace FabricUpgradePowerShellModule.ExportMachines
             string workspaceId,
             string fabricToken,
             List<FabricUpgradeResolution> resolutions,
-            AlertCollector alerts)
+            AlertCollector alerts,
+            bool verbose = false)
             : base(toExport, workspaceId, resolutions, alerts)
         {
             this.Region = region;
             this.FabricToken = fabricToken;
+            this.Verbose = verbose;
         }
 
         // The region of the user's workspace.
@@ -33,6 +35,9 @@ namespace FabricUpgradePowerShellModule.ExportMachines
 
         // The user's PowerBI AAD token.
         protected string FabricToken { get; private set; }
+
+        // Whether verbose logging is enabled.
+        public bool Verbose { get; private set; }
 
         /// <inheritdoc/>
         public override async Task<FabricUpgradeProgress> ExportAsync(CancellationToken cancellationToken)
@@ -118,7 +123,10 @@ namespace FabricUpgradePowerShellModule.ExportMachines
                     this.Alerts,
                     cancellationToken).ConfigureAwait(false);
 
-                Console.WriteLine("Export result:" + uploadResult.ToString());
+                if (this.Verbose)
+                {
+                    Console.WriteLine("Export result:" + uploadResult.ToString());
+                }
 
                 if (this.AlertsIndicateFailure())
                 {

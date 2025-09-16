@@ -14,7 +14,8 @@
     "alerts": [
       {
         "severity": "Permanent",
-        "details": "PipelineWithCopy_JsonToJson_Params_GlobalParams/Copy data1.typeProperties.sink.formatSettings.filePattern references GlobalParameters and that is not allowed in an Upgrade"
+        "details": "PipelineWithCopy_JsonToJson_Params_GlobalParams/Copy data1.typeProperties.sink.formatSettings.filePattern references GlobalParameters and that is not allowed in an Upgrade",
+        "sourcePipelineName": "PipelineWithCopy_JsonToJson_Params_GlobalParams"
       }
     ],
     "resolutions": [],
@@ -26,7 +27,8 @@
     "alerts": [
       {
         "severity": "Permanent",
-        "details": "PipelineWithCopy_JsonToJson_Params_GlobalParams/Copy data1.typeProperties.sink.formatSettings.filePattern references GlobalParameters and that is not allowed in an Upgrade"
+        "details": "PipelineWithCopy_JsonToJson_Params_GlobalParams/Copy data1.typeProperties.sink.formatSettings.filePattern references GlobalParameters and that is not allowed in an Upgrade",
+        "sourcePipelineName": "PipelineWithCopy_JsonToJson_Params_GlobalParams"
       }
     ],
     "resolutions": [],
