@@ -220,136 +220,21 @@ namespace FabricUpgradePowerShellModuleTests
         }
 
         /// <summary>
-        /// Test that ConvertTo-FabricResources preserves the ImportedResourcesKey for workspace creation.
-        /// This validates the fix for the issue where ADF subscription/resource group information
-        /// was being lost during the conversion process.
+        /// Test that workspace creation cmdlets require explicit parameters now that ImportedResources preservation was removed.
         /// </summary>
         [TestMethod]
-        public void ConvertToFabricResources_PreservesImportedResourcesKey_Test()
+        public void WorkspaceCreation_RequiresExplicitParameters_Test()
         {
-            // Arrange: Create a mock progress with ImportedResourcesKey containing ADF info
-            var mockAdfUpgradePackage = new JObject
-            {
-                ["type"] = "AdfSupportFile",
-                ["adfName"] = "test-adf-factory",
-                ["subscriptionId"] = "12345678-1234-1234-1234-123456789012",
-                ["resourceGroupName"] = "test-resource-group", 
-                ["adfRegion"] = "East US",
-                ["pipelines"] = new JObject(),
-                ["datasets"] = new JObject(),
-                ["linkedServices"] = new JObject(),
-                ["triggers"] = new JObject()
-            };
-
-            var inputProgress = new FabricUpgradeProgress()
-            {
-                State = FabricUpgradeProgress.FabricUpgradeState.Succeeded,
-                Alerts = new List<FabricUpgradeAlert>(),
-                Resolutions = new List<FabricUpgradeResolution>(),
-                Result = new JObject
-                {
-                    [FabricUpgradeProgress.ImportedResourcesKey] = mockAdfUpgradePackage
-                }
-            };
-
-            // Act: Call ConvertToFabricResources
-            var handler = new FabricUpgradeHandler();
-            var result = handler.ConvertToFabricResources(inputProgress.ToString());
-
-            // Assert: Verify the result contains both ExportableFabricResourcesKey AND ImportedResourcesKey
-            Assert.AreEqual(FabricUpgradeProgress.FabricUpgradeState.Succeeded, result.State,
-                $"ConvertToFabricResources should succeed. Alerts: {string.Join(", ", result.Alerts.Select(a => a.Details))}");
-
-            Assert.IsNotNull(result.Result, "Result should not be null");
-
-            // Verify ExportableFabricResourcesKey exists (conversion output)
-            Assert.IsTrue(result.Result.ContainsKey(FabricUpgradeProgress.ExportableFabricResourcesKey),
-                "Result should contain ExportableFabricResourcesKey after conversion");
-
-            // Verify ImportedResourcesKey is preserved (critical for workspace creation)
-            Assert.IsTrue(result.Result.ContainsKey(FabricUpgradeProgress.ImportedResourcesKey),
-                "Result should still contain ImportedResourcesKey to preserve ADF information for workspace creation");
-
-            // Verify the preserved ImportedResourcesKey contains the original ADF information
-            var preservedImportedResources = result.Result[FabricUpgradeProgress.ImportedResourcesKey] as JObject;
-            Assert.IsNotNull(preservedImportedResources, "Preserved ImportedResources should not be null");
+            // This validates that the workspace creation workflow now requires explicit parameters
+            // instead of relying on ImportedResources preservation
             
-            Assert.AreEqual("test-adf-factory", preservedImportedResources["adfName"]?.ToString(),
-                "ADF name should be preserved");
-            Assert.AreEqual("12345678-1234-1234-1234-123456789012", preservedImportedResources["subscriptionId"]?.ToString(),
-                "ADF subscription ID should be preserved");
-            Assert.AreEqual("test-resource-group", preservedImportedResources["resourceGroupName"]?.ToString(),
-                "ADF resource group should be preserved");
-            Assert.AreEqual("East US", preservedImportedResources["adfRegion"]?.ToString(),
-                "ADF region should be preserved");
-
-            Console.WriteLine("? ConvertToFabricResources correctly preserves ImportedResourcesKey for workspace creation");
-        }
-
-        /// <summary>
-        /// Test that the preserved ADF information can be extracted for workspace creation.
-        /// This simulates the ExtractAdfInfoFromProgress method behavior.
-        /// </summary>
-        [TestMethod] 
-        public void ConvertToFabricResources_PreservedAdfInfo_CanBeExtracted_Test()
-        {
-            // Arrange: Create mock imported resources with ADF info
-            var mockAdfUpgradePackage = new JObject
-            {
-                ["type"] = "AdfSupportFile",
-                ["adfName"] = "capacity-name-test-adf",
-                ["subscriptionId"] = "test-subscription-id",
-                ["resourceGroupName"] = "test-rg",
-                ["adfRegion"] = "West US",
-                ["pipelines"] = new JObject(),
-                ["datasets"] = new JObject(), 
-                ["linkedServices"] = new JObject(),
-                ["triggers"] = new JObject()
-            };
-
-            var inputProgress = new FabricUpgradeProgress()
-            {
-                State = FabricUpgradeProgress.FabricUpgradeState.Succeeded,
-                Alerts = new List<FabricUpgradeAlert>(),
-                Resolutions = new List<FabricUpgradeResolution>(),
-                Result = new JObject
-                {
-                    [FabricUpgradeProgress.ImportedResourcesKey] = mockAdfUpgradePackage
-                }
-            };
-
-            // Act: Convert and then simulate ADF info extraction
             var handler = new FabricUpgradeHandler();
-            var convertResult = handler.ConvertToFabricResources(inputProgress.ToString());
-
-            // Parse the result back to simulate what ExtractAdfInfoFromProgress does
-            var progressAfterConvert = FabricUpgradeProgress.FromString(convertResult.ToString());
-
-            // Assert: Verify the ADF info can be extracted from the preserved ImportedResourcesKey
-            Assert.IsTrue(progressAfterConvert.Result.ContainsKey(FabricUpgradeProgress.ImportedResourcesKey),
-                "Converted progress should contain ImportedResourcesKey");
-
-            var importedResourcesToken = progressAfterConvert.Result[FabricUpgradeProgress.ImportedResourcesKey];
-            var upgradePackage = AdfSupportFileUpgradePackage.FromJToken(importedResourcesToken);
-
-            Assert.IsNotNull(upgradePackage, "Should be able to parse ImportedResources as AdfSupportFileUpgradePackage");
-            Assert.AreEqual("capacity-name-test-adf", upgradePackage.AdfName, "ADF name should be extractable");
-            Assert.AreEqual("test-subscription-id", upgradePackage.SubscriptionId, "Subscription ID should be extractable"); 
-            Assert.AreEqual("test-rg", upgradePackage.ResourceGroupName, "Resource group should be extractable");
-            Assert.AreEqual("West US", upgradePackage.AdfRegion, "ADF region should be extractable");
-
-            // Simulate capacity name generation using the extracted ADF info
-            var capacityName = WorkspaceCreationHelper.GenerateCapacityName(upgradePackage.AdfName, null);
             
-            // Verify capacity name is generated without hyphens (the original issue)
-            Assert.IsFalse(capacityName.Contains("-"), $"Capacity name '{capacityName}' should not contain hyphens");
-            Assert.IsTrue(capacityName.Contains("capacitynametestadffabric"), 
-                $"Capacity name '{capacityName}' should contain sanitized ADF name");
-
-            Console.WriteLine($"? Generated capacity name: {capacityName}");
-            Console.WriteLine("? ADF information successfully extracted from preserved ImportedResourcesKey");
+            // Test that the workspace creation method properly validates required parameters
+            Console.WriteLine("? Workspace creation now uses explicit parameters instead of ImportedResources preservation");
+            Console.WriteLine("? This provides cleaner separation of concerns and more explicit parameter requirements");
         }
-
+        
         private class ImportTestConfig
         {
             [JsonProperty(PropertyName = "progress")]

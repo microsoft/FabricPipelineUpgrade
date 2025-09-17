@@ -253,12 +253,9 @@ namespace FabricUpgradePowerShellModule
         [Parameter(Mandatory = false, HelpMessage = "Azure access token for capacity operations. Required when creating a workspace (for both new capacity creation and existing capacity validation). Accepts string, SecureString, or object with AccessToken/Token property (e.g. Get-AzAccessToken).")]
         public object AzureToken { get; set; }
 
-        // Unified parameters for capacity location (whether existing or new)
-        [Parameter(Mandatory = false, HelpMessage = "Azure subscription ID where the capacity is located or will be created. If not provided, uses the same subscription as the source ADF.")]
-        public string SubscriptionId { get; set; }
-
-        [Parameter(Mandatory = false, HelpMessage = "Azure resource group name where the capacity is located or will be created. If not provided, uses the same resource group as the source ADF.")]
-        public string ResourceGroupName { get; set; }
+        // For now needed during workspace creation, when creating or reusing a capacity
+        [Parameter(Mandatory = false, HelpMessage = "Azure Resource ID of the source Data Factory (e.g., '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataFactory/factories/{factoryName}'). Required for workspace creation. The capacity will be created in the same subscription and resource group as the source factory.")]
+        public string FactoryResourceId { get; set; }
 
         [Parameter(Mandatory = false, HelpMessage = "Name of existing capacity to use, or name for new capacity to create. If capacity with this name exists, it will be used; otherwise, a new capacity will be created with this name.")]
         public string CapacityName { get; set; }
@@ -281,15 +278,14 @@ namespace FabricUpgradePowerShellModule
             // Check if workspace is a GUID (existing workspace) or name (new/existing workspace)
             bool isWorkspaceGuid = !string.IsNullOrEmpty(Workspace) && FabricUpgradeHandler.IsValidGuid(Workspace);
             bool hasCapacityInfo = !string.IsNullOrEmpty(CapacityName) || 
-                                   !string.IsNullOrEmpty(SubscriptionId) || 
-                                   !string.IsNullOrEmpty(ResourceGroupName) ||
+                                   !string.IsNullOrEmpty(FactoryResourceId) ||
                                    AzureToken != null;
 
             // Validate parameter combinations
             if (isWorkspaceGuid && hasCapacityInfo)
             {
                 WriteError(new ErrorRecord(
-                    new ArgumentException("Cannot specify both a workspace GUID and capacity-related parameters (CapacityName, SubscriptionId, ResourceGroupName, AzureToken). Use workspace GUID for existing workspace or workspace name with capacity parameters for workspace creation."),
+                    new ArgumentException("Cannot specify both a workspace GUID and capacity-related parameters (CapacityName, FactoryResourceId, AzureToken). Use workspace GUID for existing workspace or workspace name with capacity parameters for workspace creation."),
                     "ConflictingWorkspaceGuidAndCapacityParameters",
                     ErrorCategory.InvalidArgument,
                     this));
@@ -352,8 +348,7 @@ namespace FabricUpgradePowerShellModule
                         if (hasCapacityName)
                         {
                             Console.WriteLine($"Using capacity name: '{CapacityName}' (will search for existing or create new)");
-                            Console.WriteLine($"Capacity Subscription: {SubscriptionId ?? "(will use ADF subscription if available)"}");
-                            Console.WriteLine($"Capacity Resource Group: {ResourceGroupName ?? "(will use ADF resource group if available)"}");
+                            Console.WriteLine($"Factory Resource ID: {FactoryResourceId ?? "(required for workspace creation)"}");
                             Console.WriteLine("Azure token will be used to validate existing capacity or create new capacity");
                         }
                         else
@@ -366,8 +361,7 @@ namespace FabricUpgradePowerShellModule
                             }
 
                             Console.WriteLine("Will create new capacity with auto-generated name (if workspace creation is needed)");
-                            Console.WriteLine($"Target subscription: {SubscriptionId ?? "(will use ADF subscription if available)"}");
-                            Console.WriteLine($"Target resource group: {ResourceGroupName ?? "(will use ADF resource group if available)"}");
+                            Console.WriteLine($"Factory Resource ID: {FactoryResourceId ?? "(required for workspace creation)"}");
                             Console.WriteLine($"Capacity SKU: {SkuName}");
                         }
                     }
@@ -379,8 +373,7 @@ namespace FabricUpgradePowerShellModule
                         this.Region,
                         this.Workspace,
                         plainFabricToken,
-                        this.SubscriptionId,
-                        this.ResourceGroupName,
+                        this.FactoryResourceId,
                         plainAzureToken,
                         this.CapacityName,
                         this.SkuName,
