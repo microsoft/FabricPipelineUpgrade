@@ -534,7 +534,7 @@ namespace FabricUpgradePowerShellModule
             string exceptionMessage = $"{operation} for {artifactType}" +
                 (displayName == null ? string.Empty : $" '{displayName}'") +
                 $" returned unexpected status code {statusCode}" +
-                (errorCode == null ? string.Empty : $" with error code {errorCode}");
+                (errorCode == null ? string.Empty : $" with error code {errorCode}, and message: {errorModel?.Message}");
 
             return (errorCode, exceptionMessage);
         }
