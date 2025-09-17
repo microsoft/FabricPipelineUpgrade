@@ -89,11 +89,15 @@ namespace FabricUpgradePowerShellModule.Exporters
                         this.exportInstruction.Export,
                         cancellationToken).ConfigureAwait(false);
 
+                // Show success tick mark after successful pipeline upgrade
+                Console.WriteLine($"✓ Pipeline '{this.exportInstruction.ResourceName}' upgraded successfully");
+
                 return JObject.Parse(exportResult);
             }
             catch (Exception ex)
             {
                 alerts.AddPermanentError(ex.Message);
+                Console.WriteLine($"✗ Failed to upgrade pipeline '{this.exportInstruction.ResourceName}': {ex.Message}");
                 return new JObject();
             }
         }

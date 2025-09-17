@@ -91,6 +91,13 @@ namespace FabricUpgradePowerShellModule.ExportMachines
         /// <exception cref="UpgradeFailureException"></exception>
         private void CheckAllExportersBeforeExport()
         {
+            // Show progress for pending pipeline exports
+            int totalPipelines = this.exporters.Count(e => e.ResourceType == FabricUpgradeResourceTypes.DataPipeline);
+            if (totalPipelines > 0)
+            {
+                Console.WriteLine($"Preparing to export {totalPipelines} pipeline(s) to Fabric workspace");
+            }
+
             foreach (ResourceExporter exporter in this.exporters)
             {
                 exporter.CheckBeforeExports(this.Alerts);
@@ -114,6 +121,10 @@ namespace FabricUpgradePowerShellModule.ExportMachines
         /// <exception cref="UpgradeFailureException"></exception>
         private async Task<JObject> ExportAllExportersAsync(CancellationToken cancellationToken)
         {
+            // Track pipeline export progress
+            int totalPipelines = this.exporters.Count(e => e.ResourceType == FabricUpgradeResourceTypes.DataPipeline);
+            int exportedPipelines = 0;
+
             foreach (ResourceExporter exporter in this.exporters)
             {
                 JObject uploadResult = await exporter.ExportAsync(
@@ -126,6 +137,16 @@ namespace FabricUpgradePowerShellModule.ExportMachines
                 if (this.Verbose)
                 {
                     Console.WriteLine("Export result:" + uploadResult.ToString());
+                }
+
+                // Track pipeline export progress
+                if (exporter.ResourceType == FabricUpgradeResourceTypes.DataPipeline)
+                {
+                    exportedPipelines++;
+                    if (totalPipelines > 1)
+                    {
+                        Console.WriteLine($"Pipeline export progress: {exportedPipelines}/{totalPipelines} pipelines completed");
+                    }
                 }
 
                 if (this.AlertsIndicateFailure())
@@ -144,6 +165,12 @@ namespace FabricUpgradePowerShellModule.ExportMachines
                     Value = uploadResult.SelectToken("$.id")?.ToString(),
                 };
                 this.Resolutions.Add(newResolution);
+            }
+
+            // Show final completion status
+            if (totalPipelines > 0)
+            {
+                Console.WriteLine($"✓ All {totalPipelines} pipeline(s) exported successfully to Fabric workspace");
             }
 
             return this.BuildResult();

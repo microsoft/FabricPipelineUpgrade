@@ -34,6 +34,10 @@ namespace FabricUpgradePowerShellModule.UpgradeMachines
         {
             try
             {
+                // Display initial pipeline count information
+                int totalPipelineCount = this.upgradePackage.Pipelines.Count;
+                Console.WriteLine($"Starting upgrade process for {totalPipelineCount} pipeline(s)");
+
                 this.BuildUpgraders();
                 this.CompileUpgraders();
                 this.PreSortUpgraders();
