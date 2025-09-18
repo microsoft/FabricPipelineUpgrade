@@ -17,6 +17,11 @@
                                 "severity": "Permanent",
                                 "details": "The item name \u0027WaitPipeline\u0027 is already in use. This is likely because you had an item with this name and deleted it recently. If this is the case, please wait about a minute or two and retry the operation.",
                                 "sourcePipelineName": "WaitPipeline"
+                              },
+                              {
+                                "severity": "Warning",
+                                "details": "Pipeline \u0027ExecutePipelinePipeline\u0027 skipped due to failed dependency pipeline(s).",
+                                "sourcePipelineName": "ExecutePipelinePipeline"
                               }
                                         ],
                              "resolutions":  [
