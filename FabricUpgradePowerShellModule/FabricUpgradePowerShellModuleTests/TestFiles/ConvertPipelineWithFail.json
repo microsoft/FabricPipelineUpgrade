@@ -21,7 +21,6 @@
                   "type": "Fail",
                   "description": null,
                   "dependsOn": [],
-                  "userProperties": [],
                   "typeProperties": {
                     "message": "Failed to connect to ADF resourcew without credentails",
                     "errorCode": "400"

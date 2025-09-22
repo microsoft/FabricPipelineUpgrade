@@ -35,8 +35,11 @@
                   "name": "WebHook1",
                   "type": "WebHook",
                   "dependsOn": [],
-                  "userProperties": [],
                   "description": null,
+                  "policy": {
+                    "secureOutput": true,
+                    "secureInput": true
+                  },
                   "typeProperties": {
                     "method": "POST",
                     "headers": null,
