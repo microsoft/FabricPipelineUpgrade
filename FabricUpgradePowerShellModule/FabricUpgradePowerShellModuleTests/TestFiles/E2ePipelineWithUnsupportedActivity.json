@@ -6,7 +6,8 @@
     "alerts": [
       {
         "severity": "Warning",
-        "details": "Cannot upgrade Activity 'PipelineWithUnsupportedActivity/AnUnsupportedActivity'; please inspect this Activity for more details"
+        "details": "Cannot upgrade Activity 'PipelineWithUnsupportedActivity/AnUnsupportedActivity'; please inspect this Activity for more details",
+            "sourcePipelineName": "PipelineWithUnsupportedActivity"
       }
     ],
     "result": {

@@ -54,9 +54,12 @@ namespace FabricUpgradePowerShellModule.Importers
             {
                 adfClient = new AdfApiClient(subscriptionId, resourceGroupName, factoryName, accessToken);
 
-                // Get Data Factory information for the ADF name
+                // Get Data Factory information
                 JObject dataFactory = await adfClient.GetDataFactoryAsync(cancellationToken).ConfigureAwait(false);
                 this.upgradePackage.AdfName = dataFactory["name"]?.ToString() ?? factoryName;
+                this.upgradePackage.AdfRegion = dataFactory["location"]?.ToString();
+                this.upgradePackage.SubscriptionId = this.subscriptionId;
+                this.upgradePackage.ResourceGroupName = this.resourceGroupName;
 
                 // If a specific pipeline is requested, import only that pipeline and its dependencies
                 if (!string.IsNullOrEmpty(pipelineResourceId))

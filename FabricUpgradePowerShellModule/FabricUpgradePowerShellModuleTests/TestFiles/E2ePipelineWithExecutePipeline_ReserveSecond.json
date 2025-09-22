@@ -1,76 +1,75 @@
-{
-  "reservedDisplayNames": [
-    "ExecutePipelinePipeline"
-  ],
+﻿{
+    "reservedDisplayNames":  [
+                                 "ExecutePipelinePipeline"
+                             ],
+    "adfSupportFile":  "PipelineWithExecutePipeline_support_live.zip",
+    "resolutions":  [
+                        {
+                            "type":  "CredentialConnectionId",
+                            "key":  "user",
+                            "value":  "d9c82ff5-bb3e-46d6-9e35-a84872ad550f"
+                        }
+                    ],
+    "expectedResponse":  {
+                             "state":  "Failed",
+                             "alerts":  [
+                              {
+                                "severity": "Permanent",
+                                "details": "The item name \u0027ExecutePipelinePipeline\u0027 is already in use. This is likely because you had an item with this name and deleted it recently. If this is the case, please wait about a minute or two and retry the operation.",
+                                "sourcePipelineName": "ExecutePipelinePipeline"
+                              }
+                                        ],
+                             "resolutions":  [
 
-  "adfSupportFile": "PipelineWithExecutePipeline_support_live.zip",
+                                             ],
+                             "result":  {
+                                            "exportedFabricResources":  {
+                                                                            "WaitPipeline":  {
+                                                                                                 "type":  "DataPipeline",
+                                                                                                 "workspaceId":  "",
+                                                                                                 "id":  0,
+                                                                                                 "displayName":  "WaitPipeline",
+                                                                                                 "description":  null
+                                                                                             }
+                                                                        }
+                                        }
+                         },
+    "expectedItems":  [
+                          {
+                              "item":  {
+                                           "type":  "DataPipeline",
+                                           "workspaceId":  "",
+                                           "id":  0,
+                                           "displayName":  "WaitPipeline",
+                                           "description":  null
+                                       },
+                              "definition":  {
+                                                 "name":  "WaitPipeline",
+                                                 "properties":  {
+                                                                    "activities":  [
+                                                                                       {
+                                                                                           "name":  "Wait10Seconds",
+                                                                                           "type":  "Wait",
+                                                                                           "description":  "This activity waits 10 seconds",
+                                                                                           "dependsOn":  [
 
-  "resolutions": [
-    {
-      "type": "CredentialConnectionId",
-      "key": "user",
-      "value": "d9c82ff5-bb3e-46d6-9e35-a84872ad550f"
-    }
-  ],
+                                                                                                         ],
+                                                                                           "typeProperties":  {
+                                                                                                                  "waitTimeInSeconds":  10
+                                                                                                              }
+                                                                                       }
+                                                                                   ]
+                                                                },
+                                                 "annotations":  [
 
-  "expectedResponse": {
-    "state": "Failed",
-    "alerts": [
-      {
-        "severity": "Permanent",
-        "details": "The item name 'ExecutePipelinePipeline' is already in use. This is likely because you had an item with this name and deleted it recently. If this is the case, please wait about a minute or two and retry the operation."
-      }
-    ],
-    "resolutions": [],
-    "result": {
-      "exportedFabricResources": {
-        "WaitPipeline": {
-          "type": "DataPipeline",
-          "workspaceId": "",
-          "id": 0,
-          "displayName": "WaitPipeline",
-          "description": null
-        }
-      }
-    }
-  },
-
-  "expectedItems": [
-    {
-      "item": {
-        "type": "DataPipeline",
-        "workspaceId": "",
-        "id": 0,
-        "displayName": "WaitPipeline",
-        "description": null
-      },
-      "definition": {
-        "name": "WaitPipeline",
-        "properties": {
-          "activities": [
-            {
-              "name": "Wait10Seconds",
-              "type": "Wait",
-              "description": "This activity waits 10 seconds",
-              "dependsOn": [],
-              "typeProperties": {
-                "waitTimeInSeconds": 10
-              }
-            }
-          ]
-        },
-        "annotations": []
-      }
-    }
-
-  ],
-
-  "expectedEndpointEvents": [
-    "LIST DataPipeline",
-    "CREATE DataPipeline 'WaitPipeline' => $0",
-    "LIST DataPipeline",
-    "CREATE DataPipeline 'ExecutePipelinePipeline' DisplayNameAlreadyInUse"
-  ]
-
+                                                                 ]
+                                             }
+                          }
+                      ],
+    "expectedEndpointEvents":  [
+                                   "LIST DataPipeline",
+                                   "CREATE DataPipeline \u0027WaitPipeline\u0027 =\u003e $0",
+                                   "LIST DataPipeline",
+                                   "CREATE DataPipeline \u0027ExecutePipelinePipeline\u0027 DisplayNameAlreadyInUse"
+                               ]
 }
-
