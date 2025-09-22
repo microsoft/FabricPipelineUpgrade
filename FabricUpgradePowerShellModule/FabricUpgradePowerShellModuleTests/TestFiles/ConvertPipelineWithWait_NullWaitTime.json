@@ -10,7 +10,8 @@
     "alerts": [
       {
         "severity": "Permanent",
-        "details": "WaitPipeline/Wait10Seconds/typeProperties.waitTimeInSeconds must not be null."
+        "details": "WaitPipeline/Wait10Seconds/typeProperties.waitTimeInSeconds must not be null.",
+        "sourcePipelineName": "WaitPipeline"
       }
     ],
     "result": {},

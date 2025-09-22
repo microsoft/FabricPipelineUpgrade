@@ -1,45 +1,52 @@
 ﻿{
-  "comments": [
-    "The LinkedService uses System Assigned Managed Identity for authentication.",
-    "This is not supported."
-  ],
+    "comments":  [
+                     "The LinkedService uses System Assigned Managed Identity for authentication.",
+                     "This is not supported."
+                 ],
+    "adfSupportFile":  "PipelineWithCopy_SMI_BlobLinkedService_support_live.zip",
+    "resolutions":  [
+                        {
+                            "type":  "LinkedServiceToConnectionId",
+                            "key":  "shghatgeblobsmi",
+                            "value":  "99379220-ae1a-467f-b9f5-537cc3142b9f"
+                        }
+                    ],
+    "expectedResponse":  {
+                             "state":  "Failed",
+                             "alerts":  [
+                              {
+                                "severity": "Permanent",
+                                "details": "Cannot upgrade LinkedService \u0027shghatgeblobsmi\u0027 because only authentication with Account Key is supported for Azure Blob Storage LinkedService upgrade.",
+                                "sourcePipelineName": "PipelineWithCopy_SMI_BlobLinkedService"
+                              }
+                                        ],
+                             "result":  {
 
-  "adfSupportFile": "PipelineWithCopy_SMI_BlobLinkedService_support_live.zip",
+                                        },
+                             "resolutions":  [
 
-  "resolutions": [
-    {
-      "type": "LinkedServiceToConnectionId",
-      "key": "shghatgeblobsmi",
-      "value": "99379220-ae1a-467f-b9f5-537cc3142b9f"
-    }
-  ],
+                                             ]
+                         },
+    "expectedWhatIfResponse":  {
+                                   "state":  "Failed",
+                                   "alerts":  [
+                                    {
+                                      "severity": "Permanent",
+                                      "details": "Cannot upgrade LinkedService \u0027shghatgeblobsmi\u0027 because only authentication with Account Key is supported for Azure Blob Storage LinkedService upgrade.",
+                                      "sourcePipelineName": "PipelineWithCopy_SMI_BlobLinkedService"
+                                    }
+                                              ],
+                                   "result":  {
 
-  "expectedResponse": {
-    "state": "Failed",
-    "alerts": [
-      {
-        "severity": "Permanent",
-        "details": "Cannot upgrade LinkedService 'shghatgeblobsmi' because only authentication with Account Key is supported for Azure Blob Storage LinkedService upgrade."
-      }
-    ],
-    "result": {},
-    "resolutions": []
-  },
+                                              },
+                                   "resolutions":  [
 
-  "expectedWhatIfResponse": {
-    "state": "Failed",
-    "alerts": [
-      {
-        "severity": "Permanent",
-        "details": "Cannot upgrade LinkedService 'shghatgeblobsmi' because only authentication with Account Key is supported for Azure Blob Storage LinkedService upgrade."
-      }
-    ],
-    "result": {},
-    "resolutions": []
-  },
+                                                   ]
+                               },
+    "expectedItems":  [
 
-  "expectedItems": [],
+                      ],
+    "expectedEndpointEvents":  [
 
-  "expectedEndpointEvents": []
-
+                               ]
 }

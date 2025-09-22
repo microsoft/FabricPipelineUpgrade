@@ -1,4 +1,4 @@
-﻿{
+{
   "adfSupportFile": "PipelineWithExecutePipeline_support_live.zip",
 
   "expectedResponse": {
@@ -36,10 +36,10 @@
                       ]
                     }
                   ],
+                  "userProperties": [],
                   "policy": {
                     "secureInput": false
                   },
-                  "userProperties": [],
                   "typeProperties": {
                     "pipeline": {
                       "referenceName": "WaitPipeline",
@@ -83,3 +83,4 @@
     }
   }
 }
+

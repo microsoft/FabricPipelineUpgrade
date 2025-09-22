@@ -1,4 +1,4 @@
-﻿{
+{
   "adfSupportFile": "PipelineWithSetVariable_ReturnValue_support_live.zip",
 
   "expectedResponse": {
@@ -34,7 +34,6 @@
               "name": "Set variable1",
               "type": "SetVariable",
               "dependsOn": [],
-              "userProperties": [],
               "description": null,
               "policy": {
                 "secureOutput": false,
@@ -68,3 +67,4 @@
   ]
 
 }
+

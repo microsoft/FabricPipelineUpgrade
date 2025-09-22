@@ -50,7 +50,7 @@ namespace FabricUpgradePowerShellModule.Exporters
             return instruction.ResourceType switch
             {
                 FabricUpgradeResourceTypes.Connection => new ConnectionExporter(exportable, machine),
-                FabricUpgradeResourceTypes.DataPipeline => new PipelineExporter(exportable, machine),
+                FabricUpgradeResourceTypes.DataPipeline => new PipelineExporter(exportable, machine, machine.Verbose),
                 _ => new UnsupportedResourceExporter(exportable, machine),
             };
         }

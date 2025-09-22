@@ -1,61 +1,72 @@
 ﻿{
-  "comments": [
-    "The LinkedService has expressions in server, username, and password.",
-    "These are all errors."
-  ],
+    "comments":  [
+                     "The LinkedService has expressions in server, username, and password.",
+                     "These are all errors."
+                 ],
+    "adfSupportFile":  "PipelineWithCopy_MisplacedExpressionsInAzureSqlLinkedService_support_live.zip",
+    "resolutions":  [
+                        {
+                            "type":  "LinkedServiceToConnectionId",
+                            "key":  "AzureSqlDatabase3",
+                            "value":  "99379220-ae1a-467f-b9f5-537cc3142b9f"
+                        }
+                    ],
+    "expectedResponse":  {
+                             "state":  "Failed",
+                             "alerts":  [
+                                            {
+                                                "severity":  "Permanent",
+                                                "details":  "Cannot upgrade LinkedService \u0027AzureSqlDatabase4\u0027 because its property \u0027properties.typeProperties.server\u0027 is an expression.",
+                                                "sourcePipelineName":  "PipelineWithCopy_MisplacedExpressionsInAzureSqlLinkedService"
+                                            },
+                                            {
+                                                "severity":  "Permanent",
+                                                "details":  "Cannot upgrade LinkedService \u0027AzureSqlDatabase4\u0027 because its property \u0027properties.typeProperties.userName\u0027 is an expression.",
+                                                "sourcePipelineName":  "PipelineWithCopy_MisplacedExpressionsInAzureSqlLinkedService"
+                                            },
+                                            {
+                                                "severity":  "Permanent",
+                                                "details":  "Cannot upgrade LinkedService \u0027AzureSqlDatabase4\u0027 because its property \u0027properties.typeProperties.password\u0027 is an expression.",
+                                                "sourcePipelineName":  "PipelineWithCopy_MisplacedExpressionsInAzureSqlLinkedService"
+                                            }
+                                        ],
+                             "result":  {
 
-  "adfSupportFile": "PipelineWithCopy_MisplacedExpressionsInAzureSqlLinkedService_support_live.zip",
+                                        },
+                             "resolutions":  [
 
-  "resolutions": [
-    {
-      "type": "LinkedServiceToConnectionId",
-      "key": "AzureSqlDatabase3",
-      "value": "99379220-ae1a-467f-b9f5-537cc3142b9f"
-    }
-  ],
+                                             ]
+                         },
+    "expectedWhatIfResponse":  {
+                                   "state":  "Failed",
+                                   "alerts":  [
+                                                  {
+                                                      "severity":  "Permanent",
+                                                      "details":  "Cannot upgrade LinkedService \u0027AzureSqlDatabase4\u0027 because its property \u0027properties.typeProperties.server\u0027 is an expression.",
+                                                      "sourcePipelineName":  "PipelineWithCopy_MisplacedExpressionsInAzureSqlLinkedService"
+                                                  },
+                                                  {
+                                                      "severity":  "Permanent",
+                                                      "details":  "Cannot upgrade LinkedService \u0027AzureSqlDatabase4\u0027 because its property \u0027properties.typeProperties.userName\u0027 is an expression.",
+                                                      "sourcePipelineName":  "PipelineWithCopy_MisplacedExpressionsInAzureSqlLinkedService"
+                                                  },
+                                                  {
+                                                      "severity":  "Permanent",
+                                                      "details":  "Cannot upgrade LinkedService \u0027AzureSqlDatabase4\u0027 because its property \u0027properties.typeProperties.password\u0027 is an expression.",
+                                                      "sourcePipelineName":  "PipelineWithCopy_MisplacedExpressionsInAzureSqlLinkedService"
+                                                  }
+                                              ],
+                                   "result":  {
 
-  "expectedResponse": {
-    "state": "Failed",
-    "alerts": [
-      {
-        "severity": "Permanent",
-        "details": "Cannot upgrade LinkedService 'AzureSqlDatabase4' because its property 'properties.typeProperties.server' is an expression."
-      },
-      {
-        "severity": "Permanent",
-        "details": "Cannot upgrade LinkedService 'AzureSqlDatabase4' because its property 'properties.typeProperties.userName' is an expression."
-      },
-      {
-        "severity": "Permanent",
-        "details": "Cannot upgrade LinkedService 'AzureSqlDatabase4' because its property 'properties.typeProperties.password' is an expression."
-      }
-    ],
-    "result": {},
-    "resolutions": []
-  },
+                                              },
+                                   "resolutions":  [
 
-  "expectedWhatIfResponse": {
-    "state": "Failed",
-    "alerts": [
-      {
-        "severity": "Permanent",
-        "details": "Cannot upgrade LinkedService 'AzureSqlDatabase4' because its property 'properties.typeProperties.server' is an expression."
-      },
-      {
-        "severity": "Permanent",
-        "details": "Cannot upgrade LinkedService 'AzureSqlDatabase4' because its property 'properties.typeProperties.userName' is an expression."
-      },
-      {
-        "severity": "Permanent",
-        "details": "Cannot upgrade LinkedService 'AzureSqlDatabase4' because its property 'properties.typeProperties.password' is an expression."
-      }
-    ],
-    "result": {},
-    "resolutions": []
-  },
+                                                   ]
+                               },
+    "expectedItems":  [
 
-  "expectedItems": [],
+                      ],
+    "expectedEndpointEvents":  [
 
-  "expectedEndpointEvents": []
-
+                               ]
 }

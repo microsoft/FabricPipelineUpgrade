@@ -1,4 +1,4 @@
-﻿{
+{
   "adfSupportFile": "PipelineWithCopy_SqlToSql_ExpressionInitialCatalog_support_live.zip",
 
   "resolutions": [
@@ -60,7 +60,6 @@
               "name": "Copy data1",
               "type": "Copy",
               "dependsOn": [],
-              "userProperties": [],
               "description": null,
               "policy": {
                 "timeout": "0.12:00:00",

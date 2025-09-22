@@ -1,4 +1,4 @@
-﻿{
+{
   "adfSupportFile": "PipelineWithAzureFunction_support_live.zip",
 
   "expectedResponse": {
@@ -6,7 +6,8 @@
     "alerts": [
       {
         "severity": "Warning",
-        "details": "LinkedService 'AzureFunction1' is using anonymous access as authenticationKey is missing."
+        "details": "LinkedService 'AzureFunction1' is using anonymous access as authenticationKey is missing.",
+        "sourcePipelineName": "PipelineWithAzureFunction"
       }
     ],
     "result": {
@@ -33,7 +34,6 @@
                   "name": "Azure Function1",
                   "type": "AzureFunctionActivity",
                   "dependsOn": [],
-                  "userProperties": [],
                   "policy": {
                     "timeout": "0.12:00:00",
                     "retry": 0,

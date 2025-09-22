@@ -1,4 +1,4 @@
-﻿{
+{
   "prestocks": [
     {
       "workspaceId": "",
@@ -71,12 +71,6 @@
               "type": "Wait",
               "description": "This activity waits 10 seconds",
               "dependsOn": [],
-              "userProperties": [
-                {
-                  "name": "UserProperty1",
-                  "value": "\"Value1\""
-                }
-              ],
               "typeProperties": {
                 "waitTimeInSeconds": 10
               }
@@ -103,7 +97,6 @@
               "type": "Wait",
               "description": "This activity waits 5 seconds",
               "dependsOn": [],
-              "userProperties": [],
               "typeProperties": {
                 "waitTimeInSeconds": 5
               }
@@ -120,7 +113,6 @@
                   ]
                 }
               ],
-              "userProperties": [],
               "policy": {
                 "secureInput": false
               },
@@ -152,3 +144,4 @@
   ]
 
 }
+

@@ -1,4 +1,4 @@
-﻿{
+{
   "adfSupportFile": "PipelineWithWebActivity_support_live.zip",
 
   "expectedResponse": {
@@ -35,7 +35,6 @@
                   "name": "Web1",
                   "type": "WebActivity",
                   "dependsOn": [],
-                  "userProperties": [],
                   "description": null,
                   "policy": {
                     "timeout": "0.12:00:00",

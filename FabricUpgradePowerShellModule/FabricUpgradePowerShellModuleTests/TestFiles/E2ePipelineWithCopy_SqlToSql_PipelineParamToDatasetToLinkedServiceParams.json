@@ -1,4 +1,4 @@
-﻿{
+{
   "comments": [
     "The LinkedService has one parameter, InitialCatalog, whose default value is rodenkew1.",
     "The SourceDataset has one parameter, databaseName, whose default value is alfalfa.",
@@ -83,7 +83,6 @@
               "type": "Copy",
               "dependsOn": [],
               "description": null,
-              "userProperties": [],
               "typeProperties": {
                 "source": {
                   "type": "AzureSqlSource",

@@ -19,6 +19,18 @@ namespace FabricUpgradePowerShellModule.Models
         [JsonProperty(PropertyName = "adfName", Order = 10)]
         public string AdfName { get; set; }
 
+        // The subscription ID where the Azure Data Factory is located.
+        [JsonProperty(PropertyName = "subscriptionId", Order = 11)]
+        public string SubscriptionId { get; set; }
+
+        // The resource group name where the Azure Data Factory is located.
+        [JsonProperty(PropertyName = "resourceGroupName", Order = 12)]
+        public string ResourceGroupName { get; set; }
+
+        // The Azure region where the Azure Data Factory is located.
+        [JsonProperty(PropertyName = "adfRegion", Order = 13)]
+        public string AdfRegion { get; set; }
+
         [JsonProperty(PropertyName = "pipelines", Order = 100)]
         public Dictionary<string, JObject> Pipelines { get; set; } = new Dictionary<string, JObject>();
 

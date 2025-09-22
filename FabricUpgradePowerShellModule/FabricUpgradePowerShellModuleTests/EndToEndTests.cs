@@ -128,11 +128,11 @@ namespace FabricUpgradePowerShellModuleTests
             runningProgress = new FabricUpgradeHandler().ImportAdfSupportFile(
                 runningProgress?.ToString(),
                 "./TestFiles/AdfSupportFiles/" + testConfig.AdfSupportFile,
-                true);
+                true); 
 
-            runningProgress = new FabricUpgradeHandler().ConvertToFabricResources(runningProgress?.ToString());
+            runningProgress = new FabricUpgradeHandler().ConvertToFabricResources(runningProgress?.ToString()); 
 
-            FabricUpgradeProgress whatIfProgress = new FabricUpgradeHandler().SelectWhatIf(runningProgress?.ToString());
+            FabricUpgradeProgress whatIfProgress = new FabricUpgradeHandler().SelectWhatIf(runningProgress?.ToString()); 
 
             foreach (FabricUpgradeResolution resolution in testConfig.Resolutions)
             {
@@ -146,7 +146,7 @@ namespace FabricUpgradePowerShellModuleTests
                 "daily",
                 workspaceId.ToString(),
                 pbiAadToken,
-                CancellationToken.None).ConfigureAwait(false);
+                CancellationToken.None).ConfigureAwait(false); 
 
             Assert.AreEqual(testConfig.ExpectedResponse.State, runningProgress.State, runningProgress.ToString());
             Assert.AreEqual(testConfig.ExpectedResponse.Alerts.Count, runningProgress.Alerts.Count, runningProgress.ToString());
@@ -247,7 +247,7 @@ namespace FabricUpgradePowerShellModuleTests
                 initialProgress.ToString(),
                 "./TestFiles/AdfSupportFiles/PipelineWithCopy_JsonToJson_support_live.zip",
                 true, // Include unused resources
-                CancellationToken.None);
+                CancellationToken.None); 
 
             // Both should succeed
             Assert.AreEqual(FabricUpgradeProgress.FabricUpgradeState.Succeeded, filteredProgress.State, 
@@ -302,7 +302,7 @@ namespace FabricUpgradePowerShellModuleTests
                 "test-token",
                 null,
                 true,
-                CancellationToken.None).ConfigureAwait(false);
+                CancellationToken.None).ConfigureAwait(false); 
 
             Assert.AreEqual(FabricUpgradeProgress.FabricUpgradeState.Failed, result.State);
             Assert.IsTrue(result.Alerts.Any(a => a.Details.Contains("SubscriptionId, ResourceGroupName, FactoryName, and AdfToken are all required")));

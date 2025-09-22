@@ -15,8 +15,18 @@ namespace FabricUpgradePowerShellModule.Utilities
     public class AlertCollector : IEnumerable<FabricUpgradeAlert>
     {
         private readonly List<FabricUpgradeAlert> alerts = new List<FabricUpgradeAlert>();
+        private string sourcePipelineName;
 
         public int Count { get => this.alerts.Count; }
+
+        /// <summary>
+        /// Gets or sets the source pipeline name that will be applied to all alerts added to this collector.
+        /// </summary>
+        public string SourcePipelineName 
+        { 
+            get => this.sourcePipelineName; 
+            set => this.sourcePipelineName = value; 
+        }
 
         /// <summary>
         /// Exposes an enumerable interface method.
@@ -43,6 +53,12 @@ namespace FabricUpgradePowerShellModule.Utilities
         /// <returns>this, for chaining.</returns>
         public AlertCollector AddAlert(FabricUpgradeAlert alert)
         {
+            // Set the source pipeline name if not already set
+            if (string.IsNullOrEmpty(alert.SourcePipelineName) && !string.IsNullOrEmpty(this.sourcePipelineName))
+            {
+                alert.SourcePipelineName = this.sourcePipelineName;
+            }
+            
             this.alerts.Add(alert);
             return this;
         }
@@ -126,6 +142,7 @@ namespace FabricUpgradePowerShellModule.Utilities
             {
                 Severity = severity,
                 Details = details,
+                SourcePipelineName = !string.IsNullOrEmpty(this.sourcePipelineName) ? this.sourcePipelineName : null,
                 ConnectionHint = connectionHint,
                 ResolutionTemplate = resolutionTemplate,
             });

@@ -8,14 +8,48 @@ using System.Runtime.InteropServices;
 using System.Security;
 using System.Threading;
 using System.Reflection;
+using System.Threading.Tasks;
+using FabricUpgradePowerShellModule.Utilities;
 
 namespace FabricUpgradePowerShellModule
 {
     /// <summary>
+    /// Helper class for PowerShell cancellation token support
+    /// </summary>
+    internal static class PowerShellCancellationHelper
+    {
+        public static CancellationToken CreateCancellationToken(PSCmdlet cmdlet)
+        {
+            var cancellationTokenSource = new CancellationTokenSource();
+            
+            // Check for stopping periodically using a timer
+            var timer = new System.Threading.Timer(_ =>
+            {
+                try
+                {
+                    if (cmdlet.Stopping)
+                    {
+                        cancellationTokenSource.Cancel();
+                    }
+                }
+                catch
+                {
+                    // Ignore any exceptions during stopping check
+                }
+            }, null, TimeSpan.FromMilliseconds(100), TimeSpan.FromMilliseconds(100));
+
+            // Register cleanup when cancellation is requested
+            cancellationTokenSource.Token.Register(() => timer?.Dispose());
+            
+            return cancellationTokenSource.Token;
+        }
+    }
+
+    /// <summary>
     /// Import an ADF Support File.
     /// </summary>
     [Cmdlet(VerbsData.Import, "AdfSupportFile")]
-    public class ImportAdfSupportFile : Cmdlet
+    public class ImportAdfSupportFile : PSCmdlet
     {
         [Parameter(
             Position = 0,
@@ -28,15 +62,30 @@ namespace FabricUpgradePowerShellModule
         [Parameter(Mandatory = true)]
         public string Filename { get; set; }
 
+        [Parameter(Mandatory = false)]
+        public SwitchParameter EnableVerboseLogging { get; set; }
+
         protected override void ProcessRecord()
         {
-            var result = new FabricUpgradeHandler().ImportAdfSupportFile(
-                this.Progress,
-                this.Filename,
-                true,
-                CancellationToken.None);
+            Console.WriteLine($"Importing ADF Support File: {this.Filename}");
 
-            WriteObject(result.ToString());
+            try
+            {
+                var cancellationToken = PowerShellCancellationHelper.CreateCancellationToken(this);
+
+                var result = new FabricUpgradeHandler(this.EnableVerboseLogging).ImportAdfSupportFile(
+                    this.Progress,
+                    this.Filename,
+                    true,
+                    cancellationToken);
+
+                WriteObject(result.ToString());
+            }
+            catch (OperationCanceledException)
+            {
+                WriteWarning("Import operation was cancelled by user request.");
+                throw;
+            }
         }
     }
 
@@ -44,7 +93,7 @@ namespace FabricUpgradePowerShellModule
     /// Import ADF resources directly from Azure Data Factory using REST APIs.
     /// </summary>
     [Cmdlet(VerbsData.Import, "AdfFactory")]
-    public class ImportAdfFactory : Cmdlet
+    public class ImportAdfFactory : PSCmdlet
     {
         [Parameter(
             Position = 0,
@@ -75,21 +124,37 @@ namespace FabricUpgradePowerShellModule
         [Parameter(Mandatory = false, HelpMessage = "Include datasets and linked services that are not used by any pipelines. Useful for factory-level upgrades.")]
         public SwitchParameter IncludeUnusedResources { get; set; }
 
+        [Parameter(Mandatory = false)]
+        public SwitchParameter EnableVerboseLogging { get; set; }
+
         protected override void ProcessRecord()
         {
             string plainAdfToken = TokenUnwrapper.Unwrap(AdfToken, nameof(AdfToken));
-            
-            var task = new FabricUpgradeHandler().ImportAdfFactoryAsync(
-                this.Progress,
-                this.SubscriptionId,
-                this.ResourceGroupName,
-                this.FactoryName,
-                plainAdfToken,
-                this.PipelineName,
-                this.IncludeUnusedResources,
-                CancellationToken.None);
 
-            WriteObject(task.Result.ToString());
+            Console.WriteLine($"Importing from ADF Factory: {this.FactoryName} in resource group: {this.ResourceGroupName}");
+
+            try
+            {
+                var cancellationToken = PowerShellCancellationHelper.CreateCancellationToken(this);
+
+                var task = new FabricUpgradeHandler(this.EnableVerboseLogging).ImportAdfFactoryAsync(
+                    this.Progress,
+                    this.SubscriptionId,
+                    this.ResourceGroupName,
+                    this.FactoryName,
+                    plainAdfToken,
+                    this.PipelineName,
+                    this.IncludeUnusedResources,
+                    cancellationToken);
+
+                string result = task.GetAwaiter().GetResult().ToString();
+                WriteObject(result);
+            }
+            catch (OperationCanceledException)
+            {
+                WriteWarning("Import operation was cancelled by user request.");
+                throw;
+            }
         }
     }
 
@@ -110,9 +175,13 @@ namespace FabricUpgradePowerShellModule
         [ValidateNotNullOrEmpty]
         public string Progress { get; set; }
 
+        [Parameter(Mandatory = false)]
+        public SwitchParameter EnableVerboseLogging { get; set; }
+
         protected override void ProcessRecord()
         {
-            WriteObject(new FabricUpgradeHandler().ConvertToFabricResources(this.Progress).ToString());
+            Console.WriteLine("Converting ADF resources to Fabric pipeline definitions...");
+            WriteObject(new FabricUpgradeHandler(this.EnableVerboseLogging).ConvertToFabricResources(this.Progress).ToString());
         }
     }
 
@@ -136,9 +205,14 @@ namespace FabricUpgradePowerShellModule
         [Parameter(Mandatory = false)]
         public string ResolutionsFilename { get; set; }
 
+        [Parameter(Mandatory = false)]
+        public SwitchParameter EnableVerboseLogging { get; set; }
+
         protected override void ProcessRecord()
         {
-            string result = new FabricUpgradeHandler().ImportFabricResolutions(
+            Console.WriteLine($"Importing resolutions from file: {this.ResolutionsFilename}");
+            
+            string result = new FabricUpgradeHandler(this.EnableVerboseLogging).ImportFabricResolutions(
                 this.Progress,
                 this.ResolutionsFilename).ToString();
 
@@ -150,8 +224,11 @@ namespace FabricUpgradePowerShellModule
     // and takes the workspace and AAD token from named parameters:
     // Import-AdfSupportFile '...' | ConvertTo-FabricResources | Export-FabricResources -Workspace ABC -Token 123
     // This cmdlet uploads the pipelines to the PublicApi endpoint to create/update the items.
+    /// <summary>
+    /// Export Fabric Resources to a workspace. If no workspace is provided, creates a new one with capacity.
+    /// </summary>
     [Cmdlet(VerbsData.Export, "FabricResources")]
-    public class ExportFabricPipeline : Cmdlet
+    public class ExportFabricPipeline : PSCmdlet
     {
         [Parameter(
             Position = 0,
@@ -164,7 +241,7 @@ namespace FabricUpgradePowerShellModule
         public string Region { get; set; } = "prod";
 
         [Alias("ws")]
-        [Parameter(Mandatory = true)]
+        [Parameter(Mandatory = false, HelpMessage = "Workspace ID (GUID) or name. If GUID, uses existing workspace; if name, searches for existing workspace or creates new one with that name.")]
         public string Workspace { get; set; }
 
         // Accept string, SecureString, PSSecureAccessToken, etc.
@@ -172,18 +249,149 @@ namespace FabricUpgradePowerShellModule
         [Parameter(Mandatory = true, HelpMessage = "Fabric user access token. Accepts string, SecureString, or object with AccessToken/Token property (e.g. Get-AzAccessToken).")]
         public object Token { get; set; }
 
+        [Alias("at")]
+        [Parameter(Mandatory = false, HelpMessage = "Azure access token for capacity operations. Required when creating a workspace (for both new capacity creation and existing capacity validation). Accepts string, SecureString, or object with AccessToken/Token property (e.g. Get-AzAccessToken).")]
+        public object AzureToken { get; set; }
+
+        // For now needed during workspace creation, when creating or reusing a capacity
+        [Parameter(Mandatory = false, HelpMessage = "Azure Resource ID of the source Data Factory (e.g., '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataFactory/factories/{factoryName}'). Required for workspace creation. The capacity will be created in the same subscription and resource group as the source factory.")]
+        public string FactoryResourceId { get; set; }
+
+        [Parameter(Mandatory = false, HelpMessage = "Name of existing capacity to use, or name for new capacity to create. If capacity with this name exists, it will be used; otherwise, a new capacity will be created with this name.")]
+        public string CapacityName { get; set; }
+
+        [Parameter(Mandatory = false, HelpMessage = "SKU for the new capacity. Defaults to F2. Only used when creating a new capacity.")]
+        public string SkuName { get; set; } = "F2";
+
+        [Parameter(Mandatory = false, HelpMessage = "List of admin user emails for the capacity. Only used when creating a new capacity.")]
+        public string[] AdminMembers { get; set; }
+
+        [Parameter(Mandatory = false)]
+        public SwitchParameter EnableVerboseLogging { get; set; }
+
         protected override void ProcessRecord()
         {
-            CancellationTokenSource cts = new CancellationTokenSource(TimeSpan.FromSeconds(120));
-            string plainFabricToken = TokenUnwrapper.Unwrap(Token, nameof(Token));
-            string result = new FabricUpgradeHandler().ExportFabricResourcesAsync(
-                this.Progress,
-                this.Region,
-                this.Workspace,
-                plainFabricToken,
-                cts.Token).Result.ToString();
+            Console.WriteLine("Exporting pipeline definitions into Fabric workspace...");
 
-            WriteObject(result);
+            string plainFabricToken = TokenUnwrapper.Unwrap(Token, nameof(Token));
+            
+            // Check if workspace is a GUID (existing workspace) or name (new/existing workspace)
+            bool isWorkspaceGuid = !string.IsNullOrEmpty(Workspace) && FabricUpgradeHandler.IsValidGuid(Workspace);
+            bool hasCapacityInfo = !string.IsNullOrEmpty(CapacityName) || 
+                                   !string.IsNullOrEmpty(FactoryResourceId) ||
+                                   AzureToken != null;
+
+            // Validate parameter combinations
+            if (isWorkspaceGuid && hasCapacityInfo)
+            {
+                WriteError(new ErrorRecord(
+                    new ArgumentException("Cannot specify both a workspace GUID and capacity-related parameters (CapacityName, FactoryResourceId, AzureToken). Use workspace GUID for existing workspace or workspace name with capacity parameters for workspace creation."),
+                    "ConflictingWorkspaceGuidAndCapacityParameters",
+                    ErrorCategory.InvalidArgument,
+                    this));
+                return;
+            }
+            
+            if (EnableVerboseLogging)
+            {
+                if (isWorkspaceGuid)
+                {
+                    Console.WriteLine($"Exporting Fabric resources to existing workspace ID: {this.Workspace} in region: {this.Region}");
+                }
+                else if (!string.IsNullOrEmpty(Workspace))
+                {
+                    Console.WriteLine($"Using workspace name: '{this.Workspace}' (will search for existing or create new) in region: {this.Region}");
+                }
+                else
+                {
+                    Console.WriteLine($"Creating new workspace with auto-generated name in region: {this.Region}");
+                }
+            }
+            
+            try
+            {
+                var cancellationToken = PowerShellCancellationHelper.CreateCancellationToken(this);
+
+                // Check if we need workspace creation capabilities
+                if (isWorkspaceGuid)
+                {
+                    // Simple export to existing workspace by GUID
+                    var task = new FabricUpgradeHandler(this.EnableVerboseLogging).ExportFabricResourcesAsync(
+                        this.Progress,
+                        this.Region,
+                        this.Workspace,
+                        plainFabricToken,
+                        cancellationToken);
+
+                    string result = task.GetAwaiter().GetResult().ToString();
+                    if (this.EnableVerboseLogging)
+                    {
+                        WriteObject(result);
+                    }
+                }
+                else
+                {
+                    // Workspace creation flow
+                    // AzureToken is required for capacity operations
+                    if (AzureToken == null && hasCapacityInfo)
+                    {
+                        WriteError(new ErrorRecord(
+                            new ArgumentException("When creating a workspace or using capacity parameters, AzureToken is required for both capacity validation and creation."),
+                            "MissingAzureTokenForWorkspaceCreation",
+                            ErrorCategory.InvalidArgument,
+                            this));
+                        return;
+                    }
+
+                    // Determine capacity strategy
+                    bool hasCapacityName = !string.IsNullOrEmpty(CapacityName);
+                    
+                    if (EnableVerboseLogging)
+                    {
+                        if (hasCapacityName)
+                        {
+                            Console.WriteLine($"Using capacity name: '{CapacityName}' (will search for existing or create new)");
+                            Console.WriteLine($"Factory Resource ID: {FactoryResourceId ?? "(required for workspace creation)"}");
+                            Console.WriteLine("Azure token will be used to validate existing capacity or create new capacity");
+                        }
+                        else
+                        {
+                            // Validate SKU if provided
+                            if (!string.IsNullOrEmpty(SkuName) && !WorkspaceCreationHelper.IsValidFabricSku(SkuName))
+                            {
+                                WriteWarning($"Invalid SKU '{SkuName}' provided. Using default SKU 'F2'.");
+                                SkuName = "F2";
+                            }
+
+                            Console.WriteLine("Will create new capacity with auto-generated name (if workspace creation is needed)");
+                            Console.WriteLine($"Factory Resource ID: {FactoryResourceId ?? "(required for workspace creation)"}");
+                            Console.WriteLine($"Capacity SKU: {SkuName}");
+                        }
+                    }
+
+                    string plainAzureToken = AzureToken != null ? TokenUnwrapper.Unwrap(AzureToken, nameof(AzureToken)) : null;
+
+                    var task = new FabricUpgradeHandler(this.EnableVerboseLogging).ExportFabricResourcesWithWorkspaceCreationAsync(
+                        this.Progress,
+                        this.Region,
+                        this.Workspace,
+                        plainFabricToken,
+                        this.FactoryResourceId,
+                        plainAzureToken,
+                        this.CapacityName,
+                        this.SkuName,
+                        this.AdminMembers?.ToList(),
+                        cancellationToken);
+
+                    string result = task.GetAwaiter().GetResult().ToString();
+                    WriteObject(result);
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                WriteWarning("Export operation was cancelled by user request.");
+                throw;
+            }
         }
     }
 
@@ -200,9 +408,14 @@ namespace FabricUpgradePowerShellModule
         [ValidateNotNullOrEmpty]
         public string Progress { get; set; }
 
+        [Parameter(Mandatory = false)]
+        public SwitchParameter EnableVerboseLogging { get; set; }
+
         protected override void ProcessRecord()
         {
-            string result = new FabricUpgradeHandler().SelectWhatIf(this.Progress).ToString();
+            Console.WriteLine($"Performing what-if analysis...");
+
+            string result = new FabricUpgradeHandler(this.EnableVerboseLogging).SelectWhatIf(this.Progress).ToString();
             WriteObject(result);
         }
     }

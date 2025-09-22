@@ -76,18 +76,24 @@ namespace FabricUpgradePowerShellModule.Models
         public string Details { get; set; }
 
         /// <summary>
+        /// Gets or sets the name of the source pipeline that generated this alert.
+        /// </summary>
+        [JsonProperty(PropertyName = "sourcePipelineName", Order = 3, NullValueHandling = NullValueHandling.Ignore)]
+        public string SourcePipelineName { get; set; }
+
+        /// <summary>
         /// Gets or sets hints about the nature of an unresolved connection.
         /// A client/user can use this to find/create a Fabric Connection to
         /// associate with an ADF LinkedService.
         /// </summary>
-        [JsonProperty(PropertyName = "connectionHint", Order = 3, NullValueHandling = NullValueHandling.Ignore)]
+        [JsonProperty(PropertyName = "connectionHint", Order = 4, NullValueHandling = NullValueHandling.Ignore)]
         public FabricUpgradeConnectionHint ConnectionHint { get; set; }
 
         /// <summary>
         /// Gets or sets the 'template' for an unresolved connection.
         /// A client/user can use this to add a new FabricUpgradeResolution to the Resolutions.
         /// </summary>
-        [JsonProperty(PropertyName = "resolutionTemplate", Order = 3, NullValueHandling = NullValueHandling.Ignore)]
+        [JsonProperty(PropertyName = "resolutionTemplate", Order = 5, NullValueHandling = NullValueHandling.Ignore)]
         public FabricUpgradeResolution ResolutionTemplate { get; set; }
 
         public JToken ToJToken()
