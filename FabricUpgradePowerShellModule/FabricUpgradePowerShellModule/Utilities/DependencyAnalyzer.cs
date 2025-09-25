@@ -238,7 +238,6 @@ namespace FabricUpgradePowerShellModule.Utilities
                 }
                 else if (verbose)
                 {
-                    // Only show these informational messages in verbose mode
                     Console.WriteLine($"Excluding unused dataset '{datasetEntry.Key}' from import");
                 }
             }
@@ -256,7 +255,6 @@ namespace FabricUpgradePowerShellModule.Utilities
                 }
                 else if (verbose)
                 {
-                    // Only show these informational messages in verbose mode
                     string linkedServiceType = linkedServiceEntry.Value.SelectToken("properties.type")?.ToString();
                     Console.WriteLine($"Excluding unused linked service '{linkedServiceEntry.Key}' of type '{linkedServiceType}' from import");
                 }
