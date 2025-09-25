@@ -121,7 +121,56 @@ namespace FabricUpgradePowerShellModule
                 pipelineResourceId, 
                 this.alerts);
 
-            return await apiImporter.ImportAsync(includeUnusedResources, cancellationToken).ConfigureAwait(false);
+            return await apiImporter.ImportAsync(includeUnusedResources, this.verbose, cancellationToken).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Import Synapse pipelines/resources using Synapse workspace REST APIs (pipeline, dataset, linkedService, trigger APIs align with ADF).
+        /// </summary>
+        public async Task<FabricUpgradeProgress> ImportSynapseWorkspaceAsync(
+            string progressString,
+            string subscriptionId,
+            string resourceGroupName,
+            string workspaceName,
+            string synapseToken,
+            string armToken,
+            string pipelineName,
+            bool includeUnusedResources,
+            CancellationToken cancellationToken = default)
+        {
+            if (!this.CheckProgress(progressString, out FabricUpgradeProgress progress))
+            {
+                return progress;
+            }
+
+            if (string.IsNullOrEmpty(subscriptionId) ||
+                string.IsNullOrEmpty(resourceGroupName) ||
+                string.IsNullOrEmpty(workspaceName) ||
+                string.IsNullOrEmpty(synapseToken) ||
+                string.IsNullOrEmpty(armToken))
+            {
+                return new FabricUpgradeProgress()
+                {
+                    State = FabricUpgradeProgress.FabricUpgradeState.Failed,
+                }
+                .WithAlert(new FabricUpgradeAlert()
+                {
+                    Severity = FabricUpgradeAlert.AlertSeverity.Permanent,
+                    Details = "SubscriptionId, ResourceGroupName, WorkspaceName, SynapseToken, and ArmToken are all required for Synapse import.",
+                });
+            }
+
+            Importers.SynapseApiImporter importer = new Importers.SynapseApiImporter(
+                progress,
+                subscriptionId,
+                resourceGroupName,
+                workspaceName,
+                synapseToken,
+                armToken,
+                pipelineName,
+                this.alerts);
+
+            return await importer.ImportAsync(includeUnusedResources, this.verbose, cancellationToken).ConfigureAwait(false);
         }
 
 
@@ -142,7 +191,7 @@ namespace FabricUpgradePowerShellModule
 
             if (!progress.Result.ContainsKey(FabricUpgradeProgress.ImportedResourcesKey))
             {
-                this.alerts.AddPermanentError("ConvertTo-FabricResources expects imported ADF resources.");
+                this.alerts.AddPermanentError("ConvertTo-FabricResources expects imported resources.");
                 return new FabricUpgradeProgress()
                 {
                     State = FabricUpgradeProgress.FabricUpgradeState.Failed,
@@ -414,28 +463,6 @@ namespace FabricUpgradePowerShellModule
                 };
             }
 
-            // Parse factory resource ID to extract subscription, resource group, and factory name
-            if (string.IsNullOrEmpty(factoryResourceId))
-            {
-                this.alerts.AddPermanentError("FactoryResourceId is required for workspace creation.");
-                return new FabricUpgradeProgress()
-                {
-                    State = FabricUpgradeProgress.FabricUpgradeState.Failed,
-                    Alerts = this.alerts.ToList(),
-                };
-            }
-
-            var factoryInfo = ParseFactoryResourceId(factoryResourceId);
-            if (factoryInfo == null)
-            {
-                this.alerts.AddPermanentError($"Invalid FactoryResourceId format: '{factoryResourceId}'. Expected format: '/subscriptions/{{subscriptionId}}/resourceGroups/{{resourceGroupName}}/providers/Microsoft.DataFactory/factories/{{factoryName}}'");
-                return new FabricUpgradeProgress()
-                {
-                    State = FabricUpgradeProgress.FabricUpgradeState.Failed,
-                    Alerts = this.alerts.ToList(),
-                };
-            }
-
             string finalWorkspaceId = null;
             string workspaceName = null;
 
@@ -486,6 +513,28 @@ namespace FabricUpgradePowerShellModule
             // Create workspace if no existing workspace was found/specified
             if (string.IsNullOrEmpty(finalWorkspaceId))
             {
+                // Only now validate FactoryResourceId since we need to create a workspace
+                if (string.IsNullOrEmpty(factoryResourceId))
+                {
+                    this.alerts.AddPermanentError("FactoryResourceId is required for workspace creation.");
+                    return new FabricUpgradeProgress()
+                    {
+                        State = FabricUpgradeProgress.FabricUpgradeState.Failed,
+                        Alerts = this.alerts.ToList(),
+                    };
+                }
+
+                var factoryInfo = ParseFactoryResourceId(factoryResourceId);
+                if (factoryInfo == null)
+                {
+                    this.alerts.AddPermanentError($"Invalid FactoryResourceId format: '{factoryResourceId}'. Expected format: '/subscriptions/{{subscriptionId}}/resourceGroups/{{resourceGroupName}}/providers/Microsoft.DataFactory/factories/{{factoryName}}'");
+                    return new FabricUpgradeProgress()
+                    {
+                        State = FabricUpgradeProgress.FabricUpgradeState.Failed,
+                        Alerts = this.alerts.ToList(),
+                    };
+                }
+
                 try
                 {
                     if (this.verbose)
@@ -509,6 +558,11 @@ namespace FabricUpgradePowerShellModule
                         Console.WriteLine($"  Capacity will be created in the same subscription/resource group");
                     }
 
+                    // Determine the source type based on the factory resource ID
+                    string sourceType = factoryResourceId.Contains("Microsoft.Synapse") ? "Azure Synapse Workspace" : "Azure Data Factory";
+
+                    string workspaceDescription = $"Workspace created for migrating {sourceType} '{factoryInfo.FactoryName}' to Microsoft Fabric - {DateTime.UtcNow:yyyy-MM-dd HH:mm:ss} UTC";
+
                     finalWorkspaceId = await this.CreateWorkspaceWithCapacityAsync(
                         factoryInfo.SubscriptionId,
                         factoryInfo.ResourceGroupName,
@@ -520,6 +574,7 @@ namespace FabricUpgradePowerShellModule
                         skuName,
                         adminMembers,
                         factoryInfo,
+                        factoryResourceId,
                         cancellationToken).ConfigureAwait(false);
 
                     if (this.verbose)
@@ -560,6 +615,7 @@ namespace FabricUpgradePowerShellModule
         /// <param name="skuName">Capacity SKU name (for new capacity).</param>
         /// <param name="adminMembers">Capacity admin members (for new capacity).</param>
         /// <param name="factoryInfo">Factory information parsed from resource ID.</param>
+        /// <param name="factoryResourceId">The original factory resource ID to determine source type.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>The workspace ID.</returns>
         private async Task<string> CreateWorkspaceWithCapacityAsync(
@@ -573,6 +629,7 @@ namespace FabricUpgradePowerShellModule
             string skuName,
             List<string> adminMembers,
             FactoryInfo factoryInfo,
+            string factoryResourceId,
             CancellationToken cancellationToken)
         {
             // Generate workspace name using factory name
@@ -737,7 +794,11 @@ namespace FabricUpgradePowerShellModule
             }
 
             var fabricAdminClientForWorkspace = new FabricAdminApiClient(region, fabricToken, this.verbose);
-            string workspaceDescription = $"Workspace created for migrating Azure Data Factory '{factoryInfo.FactoryName}' to Microsoft Fabric - {DateTime.UtcNow:yyyy-MM-dd HH:mm:ss} UTC";
+            
+            // Determine the source type based on the factory resource ID
+            string sourceType = factoryResourceId.Contains("Microsoft.Synapse") ? "Azure Synapse Workspace": "Azure Data Factory";
+            
+            string workspaceDescription = $"Workspace created for migrating {sourceType} '{factoryInfo.FactoryName}' to Microsoft Fabric - {DateTime.UtcNow:yyyy-MM-dd HH:mm:ss} UTC";
                 
             string workspaceId = await fabricAdminClientForWorkspace.CreateWorkspaceAsync(
                 workspaceName,
@@ -918,20 +979,25 @@ namespace FabricUpgradePowerShellModule
             if (string.IsNullOrEmpty(factoryResourceId))
                 return null;
 
-            // Expected format: /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataFactory/factories/{factoryName}
             var parts = factoryResourceId.Split('/', StringSplitOptions.RemoveEmptyEntries);
-            
-            // Should have at least 8 parts: [subscriptions, {sub}, resourceGroups, {rg}, providers, Microsoft.DataFactory, factories, {name}]
             if (parts.Length < 8)
                 return null;
 
             try
             {
-                if (!string.Equals(parts[0], "subscriptions", StringComparison.OrdinalIgnoreCase) ||
-                    !string.Equals(parts[2], "resourceGroups", StringComparison.OrdinalIgnoreCase) ||
-                    !string.Equals(parts[4], "providers", StringComparison.OrdinalIgnoreCase) ||
-                    !string.Equals(parts[5], "Microsoft.DataFactory", StringComparison.OrdinalIgnoreCase) ||
-                    !string.Equals(parts[6], "factories", StringComparison.OrdinalIgnoreCase))
+                bool isAdf = string.Equals(parts[0], "subscriptions", StringComparison.OrdinalIgnoreCase) &&
+                              string.Equals(parts[2], "resourceGroups", StringComparison.OrdinalIgnoreCase) &&
+                              string.Equals(parts[4], "providers", StringComparison.OrdinalIgnoreCase) &&
+                              string.Equals(parts[5], "Microsoft.DataFactory", StringComparison.OrdinalIgnoreCase) &&
+                              string.Equals(parts[6], "factories", StringComparison.OrdinalIgnoreCase);
+
+                bool isSynapse = string.Equals(parts[0], "subscriptions", StringComparison.OrdinalIgnoreCase) &&
+                                 string.Equals(parts[2], "resourceGroups", StringComparison.OrdinalIgnoreCase) &&
+                                 string.Equals(parts[4], "providers", StringComparison.OrdinalIgnoreCase) &&
+                                 string.Equals(parts[5], "Microsoft.Synapse", StringComparison.OrdinalIgnoreCase) &&
+                                 string.Equals(parts[6], "workspaces", StringComparison.OrdinalIgnoreCase);
+
+                if (!isAdf && !isSynapse)
                 {
                     return null;
                 }
