@@ -208,13 +208,15 @@ namespace FabricUpgradePowerShellModule.Utilities
         /// <param name="allDatasets">Dictionary of all available dataset definitions.</param>
         /// <param name="allLinkedServices">Dictionary of all available linked service definitions.</param>
         /// <param name="alerts">Alert collector for logging messages.</param>
+        /// <param name="verbose">Whether to output informational messages about filtering process.</param>
         /// <returns>A tuple containing filtered datasets and linked services.</returns>
         public static (Dictionary<string, JObject> FilteredDatasets, Dictionary<string, JObject> FilteredLinkedServices) 
             FilterUnusedResources(
                 Dictionary<string, JObject> pipelines,
                 Dictionary<string, JObject> allDatasets,
                 Dictionary<string, JObject> allLinkedServices,
-                AlertCollector alerts)
+                AlertCollector alerts,
+                bool verbose = false)
         {
             var usedDatasets = new HashSet<string>();
             var usedLinkedServices = new HashSet<string>();
@@ -234,9 +236,10 @@ namespace FabricUpgradePowerShellModule.Utilities
                 {
                     filteredDatasets[datasetEntry.Key] = datasetEntry.Value;
                 }
-                else
+                else if (verbose)
                 {
-                    alerts.AddWarning($"Excluding unused dataset '{datasetEntry.Key}' from import");
+                    // Only show these informational messages in verbose mode
+                    Console.WriteLine($"Excluding unused dataset '{datasetEntry.Key}' from import");
                 }
             }
 
@@ -251,16 +254,21 @@ namespace FabricUpgradePowerShellModule.Utilities
                     // Only include used linked services
                     filteredLinkedServices[linkedServiceEntry.Key] = linkedServiceEntry.Value;
                 }
-                else
+                else if (verbose)
                 {
-                    // Exclude unused linked services
+                    // Only show these informational messages in verbose mode
                     string linkedServiceType = linkedServiceEntry.Value.SelectToken("properties.type")?.ToString();
-                    alerts.AddWarning($"Excluding unused linked service '{linkedServiceEntry.Key}' of type '{linkedServiceType}' from import");
+                    Console.WriteLine($"Excluding unused linked service '{linkedServiceEntry.Key}' of type '{linkedServiceType}' from import");
                 }
             }
 
-            // Log summary
-            alerts.AddWarning($"Dependency analysis completed: Datasets {originalDatasetCount} ? {filteredDatasets.Count}, Linked Services {originalLinkedServiceCount} ? {filteredLinkedServices.Count}");
+            // Log summary in verbose mode
+            if (verbose)
+            {
+                Console.WriteLine($"Dependency analysis completed:");
+                Console.WriteLine($"  Datasets: {originalDatasetCount} total → {filteredDatasets.Count} used ({originalDatasetCount - filteredDatasets.Count} excluded)");
+                Console.WriteLine($"  Linked Services: {originalLinkedServiceCount} total → {filteredLinkedServices.Count} used ({originalLinkedServiceCount - filteredLinkedServices.Count} excluded)");
+            }
 
             return (filteredDatasets, filteredLinkedServices);
         }

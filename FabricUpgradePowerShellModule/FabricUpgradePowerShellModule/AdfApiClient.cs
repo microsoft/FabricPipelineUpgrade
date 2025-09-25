@@ -12,7 +12,7 @@ namespace FabricUpgradePowerShellModule
     /// <summary>
     /// This client interacts with Azure Data Factory REST API endpoints.
     /// </summary>
-    public class AdfApiClient
+    public class AdfApiClient : IApiClient
     {
         private readonly string subscriptionId;
         private readonly string resourceGroupName;

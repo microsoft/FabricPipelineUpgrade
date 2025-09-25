@@ -2,11 +2,12 @@
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-using System.Net;
-using System.Text;
 using FabricUpgradePowerShellModule.Utilities;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.Net;
+using System.Net.Http.Headers;
+using System.Text;
 
 namespace FabricUpgradePowerShellModule
 {
@@ -314,6 +315,14 @@ namespace FabricUpgradePowerShellModule
             HttpClient httpClient = httpClientFactory.CreateHttpClient();
             string fabricAdminBaseUrl = this.ComputeFabricAdminBaseUrl();
             httpClient.BaseAddress = new Uri(fabricAdminBaseUrl);
+
+            httpClient.DefaultRequestHeaders.UserAgent.Clear();
+
+            // Prefer structured ProductInfoHeaderValue when possible
+            var version = this.GetType().Assembly.GetName().Version?.ToString() ?? "DefaultVersion";
+            httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("FabricUpgradePowerShellModule", version));
+            httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("(+https://github.com/microsoft/FabricPipelineUpgrade)"));
+
             return httpClient;
         }
 

@@ -120,7 +120,7 @@ namespace FabricUpgradePowerShellModuleTests
             Assert.AreEqual(FabricUpgradeProgress.FabricUpgradeState.Failed, actualResponse.State);
             Assert.AreEqual(1, actualResponse.Alerts.Count);
             Assert.AreEqual(FabricUpgradeAlert.AlertSeverity.Permanent, actualResponse.Alerts[0].Severity);
-            Assert.AreEqual("ConvertTo-FabricResources expects imported ADF resources.", actualResponse.Alerts[0].Details);
+            Assert.AreEqual("ConvertTo-FabricResources expects imported resources.", actualResponse.Alerts[0].Details);
         }
 
         // If the progress passed to ConvertTo-FabricResources has a state of Failed,
