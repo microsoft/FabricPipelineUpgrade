@@ -7,30 +7,6 @@
     "result": {
       "exportableFabricResources": [
         {
-          "resourceType": "DataPipeline",
-          "resourceName": "PipelineWithSproc",
-          "resolve": [],
-          "export": {
-            "name": "PipelineWithSproc",
-            "properties": {
-              "activities": [
-                {
-                  "name": "Stored procedure1",
-                  "dependsOn": [],
-                  "description": "",
-                  "type": "SqlServerStoredProcedure",
-                  "typeProperties": {
-                    "operationType": "SqlServerStoredProcedure",
-                    "storedProcedureName": "dbo.sp_mysproc"
-                  },
-                  "linkedService": {}
-                }
-              ]
-            },
-            "annotations": []
-          }
-        },
-        {
           "resourceType": "Connection",
           "resourceName": "lsAzureDB",
           "resolve": [
@@ -52,6 +28,46 @@
           ],
           "export": {
             "id": "00000000-0000-0000-0000-000000000000"
+          }
+        },
+        {
+          "resourceType": "DataPipeline",
+          "resourceName": "PipelineWithSproc",
+          "resolve": [
+            {
+              "type": "AdfResourceNameToFabricResourceId",
+              "key": "Connection:lsAzureDB",
+              "targetPath": "properties.activities[0].externalReferences.connection"
+            }
+          ],
+          "export": {
+            "name": "PipelineWithSproc",
+            "properties": {
+              "activities": [
+                {
+                  "name": "Stored procedure1",
+                  "type": "SqlServerStoredProcedure",
+                  "dependsOn": [],
+                  "policy": {
+                    "timeout": "0.12:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                  },
+                  "description": null,
+                  "typeProperties": {
+                    "database": "testdb",
+                    "operationType": "SqlServerStoredProcedure",
+                    "storedProcedureName": "dbo.sp_mysproc"
+                  },
+                  "externalReferences": {
+                    "connection": "00000000-0000-0000-0000-000000000000"
+                  }
+                }
+              ]
+            },
+            "annotations": []
           }
         }
       ]

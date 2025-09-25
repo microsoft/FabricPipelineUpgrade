@@ -6,10 +6,8 @@ using FabricUpgradePowerShellModule;
 using FabricUpgradePowerShellModule.Models;
 using FabricUpgradePowerShellModule.Utilities;
 using FabricUpgradePowerShellModuleTests.Utilities;
-using FabricUpgradePowerShellModuleTests.TestConfigModels;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Microsoft.ApplicationInsights.DataContracts;
 
 namespace FabricUpgradePowerShellModuleTests
 {
