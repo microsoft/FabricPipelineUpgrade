@@ -181,6 +181,11 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
                 copier.Copy($"typeProperties.{dataset}.formatSettings", copyIfNull: false);
             }
 
+            // Preserve Cosmos-specific fields present in Copy activitiy.
+            copier.Copy("typeProperties.source.preferredRegions", copyIfNull: false);
+            copier.Copy("typeProperties.sink.writeBehavior", copyIfNull: false);
+            copier.Copy("typeProperties.sink.disableMetricsCollection", copyIfNull: false);
+
             this.AddDatasetSettings(copier, "inputs", this.inputDatasetUpgrader, sourceDatasetSettingsPath, alerts);
             this.AddDatasetSettings(copier, "outputs", this.outputDatasetUpgrader, sinkDatasetSettingsPath, alerts);
 

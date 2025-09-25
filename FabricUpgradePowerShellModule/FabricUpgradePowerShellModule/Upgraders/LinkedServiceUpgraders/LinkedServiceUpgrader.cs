@@ -20,6 +20,7 @@ namespace FabricUpgradePowerShellModule.Upgraders.LinkedServiceUpgraders
             public const string AzureSqlDatabase = "AzureSqlDatabase";
             public const string AzureBlobFS = "AzureBlobFS";
             public const string AzureFunction = "AzureFunction";
+            public const string AzureCosmosDatabase = "CosmosDb";
         }
 
         protected const string AdfLinkedServiceTypePath = "properties.type";
@@ -68,6 +69,7 @@ namespace FabricUpgradePowerShellModule.Upgraders.LinkedServiceUpgraders
                 LinkedServiceTypes.AzureBlobFS => new AzureDataLakeStorageGen2LinkedServiceUpgrader(linkedServiceToken, machine),
                 LinkedServiceTypes.AzureSqlDatabase => new AzureSqlDatabaseLinkedServiceUpgrader(linkedServiceToken, machine),
                 LinkedServiceTypes.AzureFunction => new AzureFunctionLinkedServiceUpgrader(linkedServiceToken, machine),
+                LinkedServiceTypes.AzureCosmosDatabase => new AzureCosmosDatabaseLinkedServiceUpgrader(linkedServiceToken, machine),
                 _ => new UnsupportedLinkedServiceUpgrader(linkedServiceToken, machine),
             };
         }
