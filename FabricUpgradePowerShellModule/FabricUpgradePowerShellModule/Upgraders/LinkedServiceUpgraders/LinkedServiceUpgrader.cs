@@ -28,6 +28,8 @@ namespace FabricUpgradePowerShellModule.Upgraders.LinkedServiceUpgraders
         protected const string AdfStorageServiceEndpointPath = "properties.typeProperties.serviceEndpoint";
         protected const string AdfSasUriPath = "properties.typeProperties.sasUri";
 
+        protected const string FabricConnectionIdPath = "externalReferences.connection";
+
         private readonly List<string> requiredAdfProperties = new List<string>
         {
         };
@@ -94,7 +96,7 @@ namespace FabricUpgradePowerShellModule.Upgraders.LinkedServiceUpgraders
         {
             if (symbolName == Symbol.CommonNames.ExportResolveSteps)
             {
-                return this.BuildExportResolves(parameterAssignments, alerts);
+                return this.BuildExportResolveSteps(parameterAssignments, alerts);
             }
             if (symbolName == Symbol.CommonNames.ExportInstructions)
             {
@@ -182,6 +184,31 @@ namespace FabricUpgradePowerShellModule.Upgraders.LinkedServiceUpgraders
             resolves.Add(userCredentialConnectionResolve);
 
             return Symbol.ReadySymbol(JArray.Parse(UpgradeSerialization.Serialize(resolves)));
+        }
+
+        /// <summary>
+        /// Build the ExportLinks Symbol that will be included in
+        /// the Pipeline of the Activity that references this Linked Service.
+        /// </summary>
+        /// <remarks>
+        /// In the Export phase, we will acquire the Fabric Resource ID for the Connection
+        /// that corresponds to the LinkedService, and _then_ we will insert it into this JSON.
+        /// </remarks>
+        /// <param name="parameterAssignments">The parameters from the caller.</param>
+        /// <param name="alerts">Add any generated alerts to this collector.</param>
+        /// <returns>A Symbol whose value describes the other Fabric Resources upon which this Dataset depends.</returns>
+        protected virtual Symbol BuildExportResolveSteps(
+            Dictionary<string, JToken> parameterAssignments,
+            AlertCollector alerts)
+        {
+            List<FabricExportResolveStep> resolveSteps = new List<FabricExportResolveStep>();
+
+            FabricExportResolveStep linkedServiceLink = FabricExportResolveStep.ForResourceId(
+                $"{FabricUpgradeResourceTypes.Connection}:{this.Name}",
+                FabricConnectionIdPath);
+            resolveSteps.Add(linkedServiceLink);
+
+            return Symbol.ReadySymbol(JArray.Parse(UpgradeSerialization.Serialize(resolveSteps)));
         }
 
         /// <summary>

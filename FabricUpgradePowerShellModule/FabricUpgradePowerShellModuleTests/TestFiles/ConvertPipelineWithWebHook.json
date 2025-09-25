@@ -1,0 +1,77 @@
+﻿{
+  "adfSupportFile": "PipelineWithWebHookActivity_support_live.zip",
+
+  "expectedResponse": {
+    "state": "Succeeded",
+    "alerts": [],
+    "resolutions": [],
+
+    "result": {
+      "exportableFabricResources": [
+        {
+          "resourceName": "PipelineWithWebHookActivity",
+          "resourceType": "DataPipeline",
+          "resolve": [
+            {
+              "type": "UrlHostToConnectionId",
+              "key": "prod-23.northcentralus.logic.azure.com",
+              "targetPath": "properties.activities[0].externalReferences.connection",
+              "hint": {
+                "connectionType": "Web v2",
+                "datasource": "prod-23.northcentralus.logic.azure.com",
+                "template": {
+                  "type": "UrlHostToConnectionId",
+                  "key": "prod-23.northcentralus.logic.azure.com",
+                  "value": "<Fabric Connection ID>"
+                }
+              }
+            }
+          ],
+          "export": {
+            "name": "PipelineWithWebHookActivity",
+            "properties": {
+              "activities": [
+                {
+                  "name": "WebHook1",
+                  "type": "WebHook",
+                  "dependsOn": [],
+                  "description": null,
+                  "policy": {
+                    "secureOutput": true,
+                    "secureInput": true
+                  },
+                  "typeProperties": {
+                    "method": "POST",
+                    "headers": null,
+                    "relativeUrl": "/workflows/1526e6d3e78e47d281907cde17526587/triggers/getWorkspaceUri/paths/invoke?api-version=2016-10-01",
+                    "body": {
+                      "Workspace": "madride2e",
+                      "SubscriptionId": "c3aa3b8q-9b2d-1350-7803-4204tg192221",
+                      "ResourceGroup": "e2etest",
+                      "Environment": "STAGING"
+                    },
+                    "timeout": "00:10:00",
+                    "reportStatusOnCallBack": {
+                      "value": "@equals(dayOfWeek(utcNow()), 1)",
+                      "type": "Expression"
+                    },
+                    "disableCertValidation": {
+                      "value": "@greater(dayOfWeek(utcNow()), 3)",
+                      "type": "Expression"
+                    }
+                  },
+                  "externalReferences": {
+                    "connection": "00000000-0000-0000-0000-000000000000"
+                  }
+                }
+              ],
+              "concurrency": 50
+            },
+            "annotations": []
+          }
+        }
+      ]
+    }
+  }
+
+}
