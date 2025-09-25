@@ -5,10 +5,14 @@
 using FabricUpgradePowerShellModule;
 using FabricUpgradePowerShellModule.Models;
 using FabricUpgradePowerShellModule.Utilities;
-using FabricUpgradePowerShellModuleTests.Utilities;
+
 using FabricUpgradePowerShellModuleTests.TestConfigModels;
-using Newtonsoft.Json.Linq;
+using FabricUpgradePowerShellModuleTests.Utilities;
+
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+
+using System.Net;
 
 namespace FabricUpgradePowerShellModuleTests
 {
@@ -308,6 +312,56 @@ namespace FabricUpgradePowerShellModuleTests
             Assert.IsTrue(result.Alerts.Any(a => a.Details.Contains("SubscriptionId, ResourceGroupName, FactoryName, and AdfToken are all required")));
         }
 
+        /// <summary>
+        /// Test Import-AdfFactory flow with ADF API mock
+        /// </summary>
+        [TestMethod]
+        [DataRow("E2ePipelineWithLookup_Foreach_Copy_AdfFactory")]
+        public async Task EndToEndUpgradePipeline_AdfFactory_TestAsync(string testConfigFilename)
+        {
+            FabricUpgradeProgress initialProgress = new FabricUpgradeProgress()
+            {
+                State = FabricUpgradeProgress.FabricUpgradeState.Succeeded,
+                Alerts = new List<FabricUpgradeAlert>(),
+                Resolutions = new List<FabricUpgradeResolution>()
+            };
+
+            EndToEndTestConfig testConfig = EndToEndTestConfig.LoadFromFile(testConfigFilename);
+
+            TestAdfApiEndpoints adfApiEndpoints = new TestAdfApiEndpoints("https://management.azure.com/");
+            ////adfApiEndpoints.PreLoadArtifacts((JObject)UpgradeSerialization.ToJToken(testConfig.AdfArtifactFile));
+
+            TestHttpClientFactory.RegisterTestHttpClientFactory(adfApiEndpoints);
+
+            // Test missing required parameters
+            FabricUpgradeProgress result = await new FabricUpgradeHandler().ImportAdfFactoryAsync(
+                initialProgress.ToString(),
+                null, // Missing subscriptionId
+                "test-rg",
+                "test-factory",
+                "test-token",
+                null,
+                true,
+                CancellationToken.None).ConfigureAwait(false);
+
+            Assert.AreEqual(FabricUpgradeProgress.FabricUpgradeState.Failed, result.State);
+            Assert.IsTrue(result.Alerts.Any(a => a.Details.Contains("SubscriptionId, ResourceGroupName, FactoryName, and AdfToken are all required")));
+
+            // Test missing factory name
+            result = await new FabricUpgradeHandler().ImportAdfFactoryAsync(
+                initialProgress.ToString(),
+                "test-sub",
+                "test-rg",
+                null, // Missing factoryName
+                "test-token",
+                null,
+                true,
+                CancellationToken.None).ConfigureAwait(false);
+
+            Assert.AreEqual(FabricUpgradeProgress.FabricUpgradeState.Failed, result.State);
+            Assert.IsTrue(result.Alerts.Any(a => a.Details.Contains("SubscriptionId, ResourceGroupName, FactoryName, and AdfToken are all required")));
+        }
+
         private class EndToEndTestConfig
         {
             [JsonProperty(PropertyName = "progress")]
@@ -315,6 +369,11 @@ namespace FabricUpgradePowerShellModuleTests
 
             [JsonProperty(PropertyName = "adfSupportFile")]
             public string AdfSupportFile { get; set; }
+
+            // Before running the test, create these pipelines in the TestAdfApiEndpoints
+            // to test the FabricUpgradeHandler.ImportAdfFactoryAsync flow
+            [JsonProperty(PropertyName = "adfArtifactFile")]
+            public string AdfArtifactFile { get; set; }
 
             [JsonProperty(PropertyName = "resolutions")]
             public List<FabricUpgradeResolution> Resolutions { get; set; } = new List<FabricUpgradeResolution>();

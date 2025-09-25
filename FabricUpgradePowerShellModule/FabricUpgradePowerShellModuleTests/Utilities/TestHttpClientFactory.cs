@@ -9,9 +9,9 @@ namespace FabricUpgradePowerShellModuleTests.Utilities
 {
     internal class TestHttpClientFactory : IHttpClientFactory
     {
-        private TestPublicApiEndpoints endpoints;
+        private TestApiEndpoints endpoints;
 
-        public TestHttpClientFactory(TestPublicApiEndpoints endpoints)
+        public TestHttpClientFactory(TestApiEndpoints endpoints)
         {
             this.endpoints = endpoints;
         }
@@ -21,16 +21,16 @@ namespace FabricUpgradePowerShellModuleTests.Utilities
             return new HttpClient(new Responder(this.endpoints));
         }
 
-        public static void RegisterTestHttpClientFactory(TestPublicApiEndpoints endpoints)
+        public static void RegisterTestHttpClientFactory(TestApiEndpoints endpoints)
         {
             Services.HttpClientFactory = new TestHttpClientFactory(endpoints);
         }
 
         private class Responder : DelegatingHandler
         {
-            private TestPublicApiEndpoints endpoints;
+            private TestApiEndpoints endpoints;
 
-            public Responder(TestPublicApiEndpoints endpoints)
+            public Responder(TestApiEndpoints endpoints)
             {
                 this.endpoints = endpoints;
             }

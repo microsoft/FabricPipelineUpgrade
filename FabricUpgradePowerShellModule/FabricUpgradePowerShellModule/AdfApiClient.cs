@@ -2,10 +2,13 @@
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-using System.Net;
-using System.Text;
+using FabricUpgradePowerShellModule.Utilities;
+
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+
+using System.Net;
+using System.Text;
 
 namespace FabricUpgradePowerShellModule
 {
@@ -34,7 +37,7 @@ namespace FabricUpgradePowerShellModule
             this.factoryName = factoryName;
             this.accessToken = accessToken;
             
-            this.httpClient = new HttpClient();
+            this.httpClient = this.BuildAdfApiHttpClient();
             this.httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {accessToken}");
         }
 
@@ -114,6 +117,8 @@ namespace FabricUpgradePowerShellModule
                 }
 
                 string responseContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                Console.WriteLine("=== GET DATASET ASYNC ===");
+                Console.WriteLine($"{datasetName}: '{responseContent}'");
                 return JObject.Parse(responseContent);
             }
             catch (Exception ex)
@@ -170,6 +175,8 @@ namespace FabricUpgradePowerShellModule
                 }
 
                 string responseContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                Console.WriteLine("=== GET LINKEDSERVICE ASYNC ===");
+                Console.WriteLine($"{linkedServiceName}: '{responseContent}'");
                 return JObject.Parse(responseContent);
             }
             catch (Exception ex)
@@ -226,6 +233,8 @@ namespace FabricUpgradePowerShellModule
                 }
 
                 string responseContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                Console.WriteLine("=== GET TRIGGER ASYNC ===");
+                Console.WriteLine($"{triggerName}: '{responseContent}'");
                 return JObject.Parse(responseContent);
             }
             catch (Exception ex)
@@ -250,9 +259,11 @@ namespace FabricUpgradePowerShellModule
                 if (!response.IsSuccessStatusCode)
                 {
                     throw new Exception($"Failed to get data factory: {response.StatusCode} - {await response.Content.ReadAsStringAsync()}");
-                }
+                }                
 
                 string responseContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                Console.WriteLine("=== GET DATAFACTORY ASYNC ===");
+                Console.WriteLine($"{factoryName}: '{responseContent}'");
                 return JObject.Parse(responseContent);
             }
             catch (Exception ex)
@@ -332,12 +343,26 @@ namespace FabricUpgradePowerShellModule
                 }
 
                 string responseContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                Console.WriteLine("=== GET PIPELINE ASYNC ===");
+                Console.WriteLine($"{pipelineName}: '{responseContent}'");
                 return JObject.Parse(responseContent);
             }
             catch (Exception ex)
             {
                 throw new Exception($"Error retrieving pipeline '{pipelineName}' from ADF: {ex.Message}", ex);
             }
+        }
+
+        /// <summary>
+        /// Build an HTTP client that talks to the Adf API.
+        /// </summary>
+        /// <returns>The HttpClient.</returns>
+        private HttpClient BuildAdfApiHttpClient()
+        {
+            IHttpClientFactory httpClientFactory = Services.HttpClientFactory;
+            HttpClient httpClient = httpClientFactory.CreateHttpClient();
+
+            return httpClient;
         }
     }
 }
