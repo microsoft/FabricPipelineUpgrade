@@ -394,10 +394,7 @@ namespace FabricUpgradePowerShellModule
                         cancellationToken);
 
                     string result = task.GetAwaiter().GetResult().ToString();
-                    if (this.EnableVerboseLogging)
-                    {
-                        WriteObject(result);
-                    }
+                    WriteObject(result);
                 }
                 else
                 {
