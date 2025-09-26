@@ -37,7 +37,7 @@
           "id": 0,
           "type": "DataPipeline",
           "displayName": "LookupForeachThenCopy",
-          "description": "",
+          "description": null,
           "workspaceId": ""
         }
       }
@@ -185,7 +185,7 @@
 
   "expectedEndpointEvents": [
     "LIST DataPipeline",
-    "CREATE DataPipeline 'PipelineWithLookup' => $0"
+    "CREATE DataPipeline 'LookupForeachThenCopy' => $0"
   ]
 
 }

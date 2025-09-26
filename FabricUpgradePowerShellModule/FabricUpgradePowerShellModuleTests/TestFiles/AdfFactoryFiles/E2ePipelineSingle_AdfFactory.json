@@ -200,7 +200,7 @@
       "etag": "af00521f-0000-0700-0000-68ba25b90000"
     }
   ],
-  "linkedServices": [
+  "linkedservices": [
     {
       "id": "/subscriptions/d3bb3b2e-9a7e-4194-9960-5171bd192117/resourceGroups/datafactory-rg704/providers/Microsoft.DataFactory/factories/ajayupgrade/linkedservices/AzureSqlDatabase1",
       "name": "AzureSqlDatabase1",
