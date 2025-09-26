@@ -13,6 +13,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 using System.Net;
+using System.Text;
 
 namespace FabricUpgradePowerShellModuleTests
 {
@@ -330,8 +331,10 @@ namespace FabricUpgradePowerShellModuleTests
 
             EndToEndTestConfig testConfig = EndToEndTestConfig.LoadFromFile(testConfigFilename);
 
-            TestAdfApiEndpoints adfApiEndpoints = new TestAdfApiEndpoints("https://management.azure.com/");
-            ////adfApiEndpoints.PreLoadArtifacts((JObject)UpgradeSerialization.ToJToken(testConfig.AdfArtifactFile));
+            TestAdfApiEndpoints adfApiEndpoints = new TestAdfApiEndpoints("https://management.azure.com/", "2018-06-01");
+
+            string fileContents = File.ReadAllText($"./TestFiles/AdfFactoryFiles/{testConfig.AdfArtifactFile}", Encoding.UTF8);
+            adfApiEndpoints.PreLoadArtifacts(JObject.Parse(fileContents));
 
             TestHttpClientFactory.RegisterTestHttpClientFactory(adfApiEndpoints);
 
