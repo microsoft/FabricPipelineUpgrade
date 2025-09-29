@@ -12,9 +12,7 @@ namespace FabricUpgradePowerShellModuleTests.Utilities
     public class TestAdfApiEndpoints : TestApiEndpoints
     {
         private readonly Regex getFactoryResource;
-        private readonly Regex getPipelines;
-        private readonly Regex getLinkedServices;
-        private readonly Regex getDatasets;
+        private readonly Regex getArtifacts;
         private readonly Regex getArtifact;
         private JObject storedArtifacts; 
 
@@ -24,17 +22,11 @@ namespace FabricUpgradePowerShellModuleTests.Utilities
             this.getFactoryResource = new Regex(
                 $"^GET {adfApiBaseUrl}subscriptions/(?'subscriptionId'[^/]+)/resourceGroups/(?'resourceGroupName'[^/]+)/providers/Microsoft.DataFactory/factories/(?'factoryName'[^/]+)[\\?]api-version={apiVersion}$",
                 RegexOptions.IgnoreCase);
-            this.getPipelines = new Regex(
-                $"^GET {adfApiBaseUrl}subscriptions/(?'subscriptionId'[^/]+)/resourceGroups/(?'resourceGroupName'[^/]+)/providers/Microsoft.DataFactory/factories/(?'factoryName'[^/]+)/pipelines[\\?]api-version={apiVersion}$",
-                RegexOptions.IgnoreCase);
-            this.getDatasets = new Regex(
-                $"^GET {adfApiBaseUrl}subscriptions/(?'subscriptionId'[^/]+)/resourceGroups/(?'resourceGroupName'[^/]+)/providers/Microsoft.DataFactory/factories/(?'factoryName'[^/]+)/datasets[\\?]api-version={apiVersion}$",
-                RegexOptions.IgnoreCase);
-            this.getLinkedServices = new Regex(
-                $"^GET {adfApiBaseUrl}subscriptions/(?'subscriptionId'[^/]+)/resourceGroups/(?'resourceGroupName'[^/]+)/providers/Microsoft.DataFactory/factories/(?'factoryName'[^/]+)/linkedservices[\\?]api-version={apiVersion}$",
+            this.getArtifacts = new Regex(
+                $"^GET {adfApiBaseUrl}subscriptions/(?'subscriptionId'[^/]+)/resourceGroups/(?'resourceGroupName'[^/]+)/providers/Microsoft.DataFactory/factories/(?'factoryName'[^/]+)/(?'artifactType'pipelines|linkedservices|datasets|triggers)[\\?]api-version={apiVersion}$",
                 RegexOptions.IgnoreCase);
             this.getArtifact = new Regex(
-                $"^GET {adfApiBaseUrl}subscriptions/(?'subscriptionId'[^/]+)/resourceGroups/(?'resourceGroupName'[^/]+)/providers/Microsoft.DataFactory/factories/(?'factoryName'[^/]+)/(?'artifactType'pipelines|linkedservices|datasets)/(?'artifactName'[^/]+)[\\?]api-version={apiVersion}$",
+                $"^GET {adfApiBaseUrl}subscriptions/(?'subscriptionId'[^/]+)/resourceGroups/(?'resourceGroupName'[^/]+)/providers/Microsoft.DataFactory/factories/(?'factoryName'[^/]+)/(?'artifactType'pipelines|linkedservices|datasets|triggers)/(?'artifactName'[^/]+)[\\?]api-version={apiVersion}$",
                 RegexOptions.IgnoreCase);
         }
 
@@ -70,22 +62,11 @@ namespace FabricUpgradePowerShellModuleTests.Utilities
             }
 
             string routeKey = $"{request.Method} {request.RequestUri}";
-            var getPipelines = this.getPipelines.Matches(routeKey);
-            if (getPipelines.Count == 1)
+            var getArtifacts = this.getArtifacts.Matches(routeKey);
+            if (getArtifacts.Count == 1)
             {
-                return this.GetArtifactsByType("pipelines");
-            }
-
-            var getDatasets = this.getDatasets.Matches(routeKey);
-            if (getDatasets.Count == 1)
-            {
-                return this.GetArtifactsByType("datasets");
-            }
-
-            var getLinkedServices = this.getLinkedServices.Matches(routeKey);
-            if (getLinkedServices.Count == 1)
-            {
-                return this.GetArtifactsByType("linkedservices");
+                string artifactType = getArtifacts[0].Groups["artifactType"].Value;
+                return this.GetArtifactsByType(artifactType);
             }
 
             var getFactoryResource = this.getFactoryResource.Matches(routeKey);
@@ -116,7 +97,6 @@ namespace FabricUpgradePowerShellModuleTests.Utilities
             IEnumerable<JObject> matchingItems = this.storedArtifacts[artifactType]
                 .Where(p => p["id"].ToString() != null)
                 .Cast<JObject>();
-
             JObject responsePayload = new JObject();
             JArray value = new JArray();
             responsePayload["value"] = value;
@@ -130,7 +110,6 @@ namespace FabricUpgradePowerShellModuleTests.Utilities
             {
                 Content = new StringContent(responsePayload.ToString()),
             };
-
             this.events.Add($"GET {artifactType}");
 
             return response;
@@ -140,15 +119,11 @@ namespace FabricUpgradePowerShellModuleTests.Utilities
         {
             JToken artifact = this.storedArtifacts[artifactType]
                 .Single(p => p.SelectToken("$.name").ToString() == artifactName);
-         
-
             JObject responsePayload = (JObject)artifact;
-
             HttpResponseMessage response = new HttpResponseMessage(HttpStatusCode.OK)
             {
                 Content = new StringContent(responsePayload.ToString()),
             };
-
             this.events.Add($"GET {artifactType} '{artifactName}'");
 
             return response;
@@ -161,7 +136,6 @@ namespace FabricUpgradePowerShellModuleTests.Utilities
             {
                 Content = new StringContent(responsePayload.ToString()),
             };
-
             this.events.Add($"GET Factory");
 
             return response;

@@ -117,8 +117,6 @@ namespace FabricUpgradePowerShellModule
                 }
 
                 string responseContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                Console.WriteLine("=== GET DATASET ASYNC ===");
-                Console.WriteLine($"{datasetName}: '{responseContent}'");
                 return JObject.Parse(responseContent);
             }
             catch (Exception ex)
@@ -175,8 +173,6 @@ namespace FabricUpgradePowerShellModule
                 }
 
                 string responseContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                Console.WriteLine("=== GET LINKEDSERVICE ASYNC ===");
-                Console.WriteLine($"{linkedServiceName}: '{responseContent}'");
                 return JObject.Parse(responseContent);
             }
             catch (Exception ex)
@@ -233,8 +229,6 @@ namespace FabricUpgradePowerShellModule
                 }
 
                 string responseContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                Console.WriteLine("=== GET TRIGGER ASYNC ===");
-                Console.WriteLine($"{triggerName}: '{responseContent}'");
                 return JObject.Parse(responseContent);
             }
             catch (Exception ex)
@@ -262,8 +256,6 @@ namespace FabricUpgradePowerShellModule
                 }                
 
                 string responseContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                Console.WriteLine("=== GET DATAFACTORY ASYNC ===");
-                Console.WriteLine($"{factoryName}: '{responseContent}'");
                 return JObject.Parse(responseContent);
             }
             catch (Exception ex)
@@ -343,8 +335,6 @@ namespace FabricUpgradePowerShellModule
                 }
 
                 string responseContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                Console.WriteLine("=== GET PIPELINE ASYNC ===");
-                Console.WriteLine($"{pipelineName}: '{responseContent}'");
                 return JObject.Parse(responseContent);
             }
             catch (Exception ex)

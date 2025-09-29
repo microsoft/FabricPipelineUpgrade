@@ -1,5 +1,5 @@
 {
-  "adfArtifactFile": "E2ePipelineSingle_AdfFactory.json",
+  "adfArtifactInfo": "PipelineWithLookup_Foreach_Copy.json;LookupForeachThenCopy",
 
   "resolutions": [
     {

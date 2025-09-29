@@ -153,79 +153,15 @@ namespace FabricUpgradePowerShellModuleTests
                 "daily",
                 workspaceId.ToString(),
                 pbiAadToken,
-                CancellationToken.None).ConfigureAwait(false); 
+                CancellationToken.None).ConfigureAwait(false);
 
-            Assert.AreEqual(testConfig.ExpectedResponse.State, runningProgress.State, runningProgress.ToString());
-            Assert.AreEqual(testConfig.ExpectedResponse.Alerts.Count, runningProgress.Alerts.Count, runningProgress.ToString());
-            Assert.AreEqual(testConfig.ExpectedWhatIfResponse.State, whatIfProgress.State, whatIfProgress.ToString());
-            Assert.AreEqual(testConfig.ExpectedWhatIfResponse.Alerts.Count, whatIfProgress.Alerts.Count, whatIfProgress.ToString());
-            for (int nAlert = 0; nAlert < testConfig.ExpectedResponse.Alerts.Count; nAlert++)
-            {
-                var expectedAlert = testConfig.ExpectedResponse.Alerts[nAlert].ToJToken();
-                var actualAlert = runningProgress.Alerts[nAlert].ToJToken();
-                var alertMismatches = JsonUtils.DeepCompare(expectedAlert, actualAlert);
-                Assert.IsNull(
-                    alertMismatches,
-                    $"Alert[{nAlert}] MISMATCHES:\n{alertMismatches?.ToString(Formatting.Indented)}\n\nEXPECTED:\n{expectedAlert}\n\nACTUAL:\n{actualAlert}");
-            }
-
-            Assert.AreEqual(testConfig.ExpectedResponse.Resolutions.Count, runningProgress.Resolutions.Count, runningProgress.ToString());
-            for (int nResolution = 0; nResolution < testConfig.ExpectedResponse.Resolutions.Count; nResolution++)
-            {
-                var expectedResolution = testConfig.ExpectedResponse.Resolutions[nResolution].ToJToken();
-                var actualResolution = runningProgress.Resolutions[nResolution].ToJToken();
-                var alertMismatches = JsonUtils.DeepCompare(expectedResolution, actualResolution);
-                Assert.IsNull(
-                    alertMismatches,
-                    $"Resolution[{nResolution}] MISMATCHES:\n{alertMismatches?.ToString(Formatting.Indented)}\n\nEXPECTED:\n{expectedResolution}\n\nACTUAL:\n{actualResolution}");
-            }
-
-
-            JObject expectedResult = testConfig.ExpectedResponse.Result;
-            JObject actualResult = runningProgress.Result;
-
-            var resultMismatches = JsonUtils.DeepCompare(expectedResult, actualResult);
-            Assert.IsNull(
-                    resultMismatches,
-                    $"MISMATCHES:\n{resultMismatches?.ToString(Formatting.Indented)}\n\nEXPECTED:\n{expectedResult}\n\nACTUAL:\n{actualResult}");
-
-            int expectedNumItems = testConfig.ExpectedItems.Count();
-
-            (int numItems, int numItemDefinitions) = endpoints.CountItems();
-            Assert.AreEqual(expectedNumItems, numItems);
-            Assert.AreEqual(expectedNumItems, numItemDefinitions);
-
-            int nItem = 0;
-            foreach (JToken expectedItemToken in testConfig.ExpectedItems)
-            {
-                JObject expectedItem = JObject.Parse(expectedItemToken.ToString());
-
-                JObject actualItem = endpoints.ReadItemDirectly(workspaceId, expectedGuids[nItem]);
-                string eis = UpgradeSerialization.Serialize(expectedItem);
-                string ais = UpgradeSerialization.Serialize(actualItem);
-
-                JObject mismatches = JsonUtils.DeepCompare(expectedItem, actualItem);
-
-                Assert.IsNull(
-                    mismatches,
-                    $"Item[{nItem}] MISMATCHES:\n{mismatches?.ToString(Formatting.Indented)}\n\nEXPECTED:\n{eis}\n\nACTUAL:\n{ais}");
-
-                nItem++;
-            }
-
-            List<string> actualEndpointEvents = endpoints.FetchEvents();
-
-            Assert.AreEqual(testConfig.ExpectedEndpointEvents.Count, actualEndpointEvents.Count, "\r\n" + string.Join("\r\n", actualEndpointEvents));
-            for (int nEvent = 0; nEvent < testConfig.ExpectedEndpointEvents.Count; nEvent++)
-            {
-                string expectedEvent = testConfig.ExpectedEndpointEvents[nEvent];
-                for (int nGuid = expectedGuids.Count - 1; nGuid >= 0; nGuid--)
-                {
-                    expectedEvent = expectedEvent.Replace($"${nGuid}", expectedGuids[nGuid].ToString());
-                }
-
-                Assert.AreEqual(expectedEvent, actualEndpointEvents[nEvent]);
-            }
+            AssertRunningProgressResult(
+                runningProgress,
+                whatIfProgress,
+                endpoints,
+                workspaceId,
+                expectedGuids,
+                testConfig);
         }
 
         /// <summary>
@@ -320,6 +256,7 @@ namespace FabricUpgradePowerShellModuleTests
         /// </summary>
         [TestMethod]
         [DataRow("E2ePipelineWithLookup_Foreach_Copy_AdfFactory")]
+        [DataRow("E2eAllPipelines_AdfFactory")]
         public async Task EndToEndUpgradePipeline_AdfFactory_TestAsync(string testConfigFilename)
         {
             FabricUpgradeProgress initialProgress = new FabricUpgradeProgress()
@@ -328,26 +265,26 @@ namespace FabricUpgradePowerShellModuleTests
                 Alerts = new List<FabricUpgradeAlert>(),
                 Resolutions = new List<FabricUpgradeResolution>()
             };
-
             
             EndToEndTestConfig testConfig = EndToEndTestConfig.LoadFromFile(testConfigFilename);
-            
 
             TestAdfApiEndpoints adfApiEndpoints = new TestAdfApiEndpoints("https://management.azure.com/", "2018-06-01");
 
-            string fileContents = File.ReadAllText($"./TestFiles/AdfFactoryFiles/{testConfig.AdfArtifactFile}", Encoding.UTF8);
+            string[] adfArtifactInfo = testConfig.AdfArtifactInfo.Split(';');
+
+            string fileContents = File.ReadAllText($"./TestFiles/AdfFactoryFiles/{adfArtifactInfo[0]}", Encoding.UTF8);
             adfApiEndpoints.PreLoadArtifacts(JObject.Parse(fileContents));
 
             TestHttpClientFactory.RegisterTestHttpClientFactory(adfApiEndpoints);
 
-            // Test missing required parameters
+            // Test upgrade using the ImportAdfFactory cmdlet flow
             FabricUpgradeProgress runningProgress = await new FabricUpgradeHandler().ImportAdfFactoryAsync(
                 initialProgress.ToString(),
-                "d3bb3b2e-9a7e-4194-9960-5171bd192117",
-                "datafactory-rg704",
-                "ajayupgrade",
+                "test-subscription",
+                "test-rg",
+                "test-factory",
                 "test-token",
-                "LookupForeachThenCopy",
+                adfArtifactInfo.Length > 1 ? adfArtifactInfo[1] : null,
                 true,
                 CancellationToken.None).ConfigureAwait(false);
 
@@ -355,6 +292,7 @@ namespace FabricUpgradePowerShellModuleTests
             string pbiAadToken = Guid.NewGuid().ToString();
             List<Guid> expectedGuids = new List<Guid>
             {
+                Guid.NewGuid(),
                 Guid.NewGuid(),
                 Guid.NewGuid(),
             };
@@ -392,6 +330,23 @@ namespace FabricUpgradePowerShellModuleTests
                 pbiAadToken,
                 CancellationToken.None).ConfigureAwait(false);
 
+            AssertRunningProgressResult(
+                runningProgress,
+                whatIfProgress,
+                endpoints,
+                workspaceId,
+                expectedGuids,
+                testConfig);
+        }
+
+        private void AssertRunningProgressResult(
+            FabricUpgradeProgress runningProgress,
+            FabricUpgradeProgress whatIfProgress,
+            TestPublicApiEndpoints endpoints,
+            Guid workspaceId,
+            List<Guid> expectedGuids,
+            EndToEndTestConfig testConfig)
+        {
             Assert.AreEqual(testConfig.ExpectedResponse.State, runningProgress.State, runningProgress.ToString());
             Assert.AreEqual(testConfig.ExpectedResponse.Alerts.Count, runningProgress.Alerts.Count, runningProgress.ToString());
             Assert.AreEqual(testConfig.ExpectedWhatIfResponse.State, whatIfProgress.State, whatIfProgress.ToString());
@@ -476,8 +431,8 @@ namespace FabricUpgradePowerShellModuleTests
 
             // Before running the test, create these pipelines in the TestAdfApiEndpoints
             // to test the FabricUpgradeHandler.ImportAdfFactoryAsync flow
-            [JsonProperty(PropertyName = "adfArtifactFile")]
-            public string AdfArtifactFile { get; set; }
+            [JsonProperty(PropertyName = "adfArtifactInfo")]
+            public string AdfArtifactInfo { get; set; }
 
             [JsonProperty(PropertyName = "resolutions")]
             public List<FabricUpgradeResolution> Resolutions { get; set; } = new List<FabricUpgradeResolution>();
