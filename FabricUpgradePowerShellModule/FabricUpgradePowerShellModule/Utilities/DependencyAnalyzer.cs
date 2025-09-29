@@ -95,7 +95,7 @@ namespace FabricUpgradePowerShellModule.Utilities
 
             // Check for dataset references in activity type properties
             string activityType = activity.SelectToken("type")?.ToString();
-            
+
             var typeProperties = activity.SelectToken("typeProperties");
             if (typeProperties != null)
             {
@@ -126,32 +126,26 @@ namespace FabricUpgradePowerShellModule.Utilities
                 // Check for dataset references in source/sink
                 var source = typeProperties.SelectToken("source");
                 var sink = typeProperties.SelectToken("sink");
-                
+
                 CheckForDatasetReferences(source, usedDatasets);
                 CheckForDatasetReferences(sink, usedDatasets);
             }
 
-            // Check for direct linked service references (e.g., in Web activities)
-            if (activityType == "WebActivity" || activityType == "WebHook")
+            // Activity-specific linked service references are handled here
+            // For example, AzureFunctionActivity and AzureDataExplorerCommand
+            string linkedServiceName = activity.SelectToken("linkedServiceName.referenceName")?.ToString();
+            if (!string.IsNullOrEmpty(linkedServiceName))
             {
-                string linkedServiceName = activity.SelectToken("typeProperties.linkedServiceName.referenceName")?.ToString();
-                if (!string.IsNullOrEmpty(linkedServiceName))
-                {
-                    usedLinkedServices.Add(linkedServiceName);
-                }
+                usedLinkedServices.Add(linkedServiceName);
             }
 
-            // Check for Azure Function activities
-            if (activityType == "AzureFunctionActivity")
+            // Check for direct linked service references (e.g., WebActivity, WebHook)
+            linkedServiceName = activity.SelectToken("typeProperties.linkedServiceName.referenceName")?.ToString();
+            if (!string.IsNullOrEmpty(linkedServiceName))
             {
-                string linkedServiceName = activity.SelectToken("typeProperties.functionAppSettings.linkedServiceName.referenceName")?.ToString();
-                if (!string.IsNullOrEmpty(linkedServiceName))
-                {
-                    usedLinkedServices.Add(linkedServiceName);
-                }
+                usedLinkedServices.Add(linkedServiceName);
             }
 
-            // Add more activity-specific linked service checks as needed
         }
 
         /// <summary>
