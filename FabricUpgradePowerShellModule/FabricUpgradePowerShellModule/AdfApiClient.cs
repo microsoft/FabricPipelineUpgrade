@@ -2,17 +2,20 @@
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-using System.Net;
-using System.Text;
+using FabricUpgradePowerShellModule.Utilities;
+
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+
+using System.Net;
+using System.Text;
 
 namespace FabricUpgradePowerShellModule
 {
     /// <summary>
     /// This client interacts with Azure Data Factory REST API endpoints.
     /// </summary>
-    public class AdfApiClient
+    public class AdfApiClient : IApiClient
     {
         private readonly string subscriptionId;
         private readonly string resourceGroupName;
@@ -34,7 +37,7 @@ namespace FabricUpgradePowerShellModule
             this.factoryName = factoryName;
             this.accessToken = accessToken;
             
-            this.httpClient = new HttpClient();
+            this.httpClient = this.BuildAdfApiHttpClient();
             this.httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {accessToken}");
         }
 
@@ -250,7 +253,7 @@ namespace FabricUpgradePowerShellModule
                 if (!response.IsSuccessStatusCode)
                 {
                     throw new Exception($"Failed to get data factory: {response.StatusCode} - {await response.Content.ReadAsStringAsync()}");
-                }
+                }                
 
                 string responseContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                 return JObject.Parse(responseContent);
@@ -338,6 +341,18 @@ namespace FabricUpgradePowerShellModule
             {
                 throw new Exception($"Error retrieving pipeline '{pipelineName}' from ADF: {ex.Message}", ex);
             }
+        }
+
+        /// <summary>
+        /// Build an HTTP client that talks to the Adf API.
+        /// </summary>
+        /// <returns>The HttpClient.</returns>
+        private HttpClient BuildAdfApiHttpClient()
+        {
+            IHttpClientFactory httpClientFactory = Services.HttpClientFactory;
+            HttpClient httpClient = httpClientFactory.CreateHttpClient();
+
+            return httpClient;
         }
     }
 }

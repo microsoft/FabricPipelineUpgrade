@@ -3,6 +3,7 @@
 // </copyright>
 
 using System.Net;
+using System.Net.Http.Headers;
 using System.Text;
 using FabricUpgradePowerShellModule.Exceptions;
 using FabricUpgradePowerShellModule.Utilities;
@@ -484,6 +485,12 @@ namespace FabricUpgradePowerShellModule
             string publicApiBaseUrl = this.ComputePublicApiBaseUrl();
 
             httpClient.BaseAddress = new Uri(publicApiBaseUrl);
+            httpClient.DefaultRequestHeaders.UserAgent.Clear();
+
+            // Prefer structured ProductInfoHeaderValue when possible
+            var version = this.GetType().Assembly.GetName().Version?.ToString() ?? "DefaultVersion";
+            httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("FabricUpgradePowerShellModule", version));
+            httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("(+https://github.com/microsoft/FabricPipelineUpgrade)"));
 
             return httpClient;
         }

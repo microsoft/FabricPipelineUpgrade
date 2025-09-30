@@ -5,10 +5,15 @@
 using FabricUpgradePowerShellModule;
 using FabricUpgradePowerShellModule.Models;
 using FabricUpgradePowerShellModule.Utilities;
-using FabricUpgradePowerShellModuleTests.Utilities;
+
 using FabricUpgradePowerShellModuleTests.TestConfigModels;
-using Newtonsoft.Json.Linq;
+using FabricUpgradePowerShellModuleTests.Utilities;
+
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+
+using System.Net;
+using System.Text;
 
 namespace FabricUpgradePowerShellModuleTests
 {
@@ -94,6 +99,8 @@ namespace FabricUpgradePowerShellModuleTests
         [DataRow("E2ePipelineWithSwitch")]
         [DataRow("E2ePipelineWithForeach")]
         [DataRow("E2eSimpleParentWithDescriptionAndConcurrency")]
+        [DataRow("E2ePipelineWithFail")]
+        [DataRow("E2ePipelineWithWebhook")]
         public async Task EndToEndUpgradePipeline_TestAsync(
             string testConfigFilename)
         {
@@ -146,79 +153,15 @@ namespace FabricUpgradePowerShellModuleTests
                 "daily",
                 workspaceId.ToString(),
                 pbiAadToken,
-                CancellationToken.None).ConfigureAwait(false); 
+                CancellationToken.None).ConfigureAwait(false);
 
-            Assert.AreEqual(testConfig.ExpectedResponse.State, runningProgress.State, runningProgress.ToString());
-            Assert.AreEqual(testConfig.ExpectedResponse.Alerts.Count, runningProgress.Alerts.Count, runningProgress.ToString());
-            Assert.AreEqual(testConfig.ExpectedWhatIfResponse.State, whatIfProgress.State, whatIfProgress.ToString());
-            Assert.AreEqual(testConfig.ExpectedWhatIfResponse.Alerts.Count, whatIfProgress.Alerts.Count, whatIfProgress.ToString());
-            for (int nAlert = 0; nAlert < testConfig.ExpectedResponse.Alerts.Count; nAlert++)
-            {
-                var expectedAlert = testConfig.ExpectedResponse.Alerts[nAlert].ToJToken();
-                var actualAlert = runningProgress.Alerts[nAlert].ToJToken();
-                var alertMismatches = JsonUtils.DeepCompare(expectedAlert, actualAlert);
-                Assert.IsNull(
-                    alertMismatches,
-                    $"Alert[{nAlert}] MISMATCHES:\n{alertMismatches?.ToString(Formatting.Indented)}\n\nEXPECTED:\n{expectedAlert}\n\nACTUAL:\n{actualAlert}");
-            }
-
-            Assert.AreEqual(testConfig.ExpectedResponse.Resolutions.Count, runningProgress.Resolutions.Count, runningProgress.ToString());
-            for (int nResolution = 0; nResolution < testConfig.ExpectedResponse.Resolutions.Count; nResolution++)
-            {
-                var expectedResolution = testConfig.ExpectedResponse.Resolutions[nResolution].ToJToken();
-                var actualResolution = runningProgress.Resolutions[nResolution].ToJToken();
-                var alertMismatches = JsonUtils.DeepCompare(expectedResolution, actualResolution);
-                Assert.IsNull(
-                    alertMismatches,
-                    $"Resolution[{nResolution}] MISMATCHES:\n{alertMismatches?.ToString(Formatting.Indented)}\n\nEXPECTED:\n{expectedResolution}\n\nACTUAL:\n{actualResolution}");
-            }
-
-
-            JObject expectedResult = testConfig.ExpectedResponse.Result;
-            JObject actualResult = runningProgress.Result;
-
-            var resultMismatches = JsonUtils.DeepCompare(expectedResult, actualResult);
-            Assert.IsNull(
-                    resultMismatches,
-                    $"MISMATCHES:\n{resultMismatches?.ToString(Formatting.Indented)}\n\nEXPECTED:\n{expectedResult}\n\nACTUAL:\n{actualResult}");
-
-            int expectedNumItems = testConfig.ExpectedItems.Count();
-
-            (int numItems, int numItemDefinitions) = endpoints.CountItems();
-            Assert.AreEqual(expectedNumItems, numItems);
-            Assert.AreEqual(expectedNumItems, numItemDefinitions);
-
-            int nItem = 0;
-            foreach (JToken expectedItemToken in testConfig.ExpectedItems)
-            {
-                JObject expectedItem = JObject.Parse(expectedItemToken.ToString());
-
-                JObject actualItem = endpoints.ReadItemDirectly(workspaceId, expectedGuids[nItem]);
-                string eis = UpgradeSerialization.Serialize(expectedItem);
-                string ais = UpgradeSerialization.Serialize(actualItem);
-
-                JObject mismatches = JsonUtils.DeepCompare(expectedItem, actualItem);
-
-                Assert.IsNull(
-                    mismatches,
-                    $"Item[{nItem}] MISMATCHES:\n{mismatches?.ToString(Formatting.Indented)}\n\nEXPECTED:\n{eis}\n\nACTUAL:\n{ais}");
-
-                nItem++;
-            }
-
-            List<string> actualEndpointEvents = endpoints.FetchEvents();
-
-            Assert.AreEqual(testConfig.ExpectedEndpointEvents.Count, actualEndpointEvents.Count, "\r\n" + string.Join("\r\n", actualEndpointEvents));
-            for (int nEvent = 0; nEvent < testConfig.ExpectedEndpointEvents.Count; nEvent++)
-            {
-                string expectedEvent = testConfig.ExpectedEndpointEvents[nEvent];
-                for (int nGuid = expectedGuids.Count - 1; nGuid >= 0; nGuid--)
-                {
-                    expectedEvent = expectedEvent.Replace($"${nGuid}", expectedGuids[nGuid].ToString());
-                }
-
-                Assert.AreEqual(expectedEvent, actualEndpointEvents[nEvent]);
-            }
+            AssertRunningProgressResult(
+                runningProgress,
+                whatIfProgress,
+                endpoints,
+                workspaceId,
+                expectedGuids,
+                testConfig);
         }
 
         /// <summary>
@@ -308,6 +251,176 @@ namespace FabricUpgradePowerShellModuleTests
             Assert.IsTrue(result.Alerts.Any(a => a.Details.Contains("SubscriptionId, ResourceGroupName, FactoryName, and AdfToken are all required")));
         }
 
+        /// <summary>
+        /// Test Import-AdfFactory flow with ADF API mock
+        /// </summary>
+        [TestMethod]
+        [DataRow("E2ePipelineWithLookup_Foreach_Copy_AdfFactory")]
+        [DataRow("E2eAllPipelines_AdfFactory")]
+        public async Task EndToEndUpgradePipeline_AdfFactory_TestAsync(string testConfigFilename)
+        {
+            FabricUpgradeProgress initialProgress = new FabricUpgradeProgress()
+            {
+                State = FabricUpgradeProgress.FabricUpgradeState.Succeeded,
+                Alerts = new List<FabricUpgradeAlert>(),
+                Resolutions = new List<FabricUpgradeResolution>()
+            };
+            
+            EndToEndTestConfig testConfig = EndToEndTestConfig.LoadFromFile(testConfigFilename);
+
+            TestAdfApiEndpoints adfApiEndpoints = new TestAdfApiEndpoints("https://management.azure.com/", "2018-06-01");
+
+            string[] adfArtifactInfo = testConfig.AdfArtifactInfo.Split(';');
+
+            string fileContents = File.ReadAllText($"./TestFiles/AdfFactoryFiles/{adfArtifactInfo[0]}", Encoding.UTF8);
+            adfApiEndpoints.PreLoadArtifacts(JObject.Parse(fileContents));
+
+            TestHttpClientFactory.RegisterTestHttpClientFactory(adfApiEndpoints);
+
+            // Test upgrade using the ImportAdfFactory cmdlet flow
+            FabricUpgradeProgress runningProgress = await new FabricUpgradeHandler().ImportAdfFactoryAsync(
+                initialProgress.ToString(),
+                "test-subscription",
+                "test-rg",
+                "test-factory",
+                "test-token",
+                adfArtifactInfo.Length > 1 ? adfArtifactInfo[1] : null,
+                true,
+                CancellationToken.None).ConfigureAwait(false);
+
+            Guid workspaceId = Guid.NewGuid();
+            string pbiAadToken = Guid.NewGuid().ToString();
+            List<Guid> expectedGuids = new List<Guid>
+            {
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+            };
+            testConfig.UpdateItemGuids(workspaceId, expectedGuids);
+
+            TestPublicApiEndpoints endpoints = new TestPublicApiEndpoints("https://dailyapi.fabric.microsoft.com/v1/");
+            // Tell the endpoints which guids to use when creating artifacts, so that we can validate them in tests.
+            endpoints.PrepareGuids(expectedGuids);
+            endpoints.RequireUserToken(pbiAadToken);
+
+            // Pre-create some pipelines to force an update.
+            endpoints.Prestock((JArray)UpgradeSerialization.ToJToken(testConfig.Prestocks));
+
+            // Pretend that the user has recently deleted a pipeline with these display names.
+            // Currently, it takes a little while before display names become re-useable.
+            testConfig.ReservedDisplayNames.ForEach(rdn => endpoints.ReserveDisplayName(rdn));
+
+            TestHttpClientFactory.RegisterTestHttpClientFactory(endpoints);
+
+            runningProgress = new FabricUpgradeHandler().ConvertToFabricResources(runningProgress?.ToString());
+
+            FabricUpgradeProgress whatIfProgress = new FabricUpgradeHandler().SelectWhatIf(runningProgress?.ToString());
+
+            foreach (FabricUpgradeResolution resolution in testConfig.Resolutions)
+            {
+                runningProgress = new FabricUpgradeHandler().AddFabricResolution(
+                    runningProgress?.ToString(),
+                    resolution?.ToString());
+            }
+
+            runningProgress = await new FabricUpgradeHandler().ExportFabricResourcesAsync(
+                runningProgress?.ToString(),
+                "daily",
+                workspaceId.ToString(),
+                pbiAadToken,
+                CancellationToken.None).ConfigureAwait(false);
+
+            AssertRunningProgressResult(
+                runningProgress,
+                whatIfProgress,
+                endpoints,
+                workspaceId,
+                expectedGuids,
+                testConfig);
+        }
+
+        private void AssertRunningProgressResult(
+            FabricUpgradeProgress runningProgress,
+            FabricUpgradeProgress whatIfProgress,
+            TestPublicApiEndpoints endpoints,
+            Guid workspaceId,
+            List<Guid> expectedGuids,
+            EndToEndTestConfig testConfig)
+        {
+            Assert.AreEqual(testConfig.ExpectedResponse.State, runningProgress.State, runningProgress.ToString());
+            Assert.AreEqual(testConfig.ExpectedResponse.Alerts.Count, runningProgress.Alerts.Count, runningProgress.ToString());
+            Assert.AreEqual(testConfig.ExpectedWhatIfResponse.State, whatIfProgress.State, whatIfProgress.ToString());
+            Assert.AreEqual(testConfig.ExpectedWhatIfResponse.Alerts.Count, whatIfProgress.Alerts.Count, whatIfProgress.ToString());
+
+            for (int nAlert = 0; nAlert < testConfig.ExpectedResponse.Alerts.Count; nAlert++)
+            {
+                var expectedAlert = testConfig.ExpectedResponse.Alerts[nAlert].ToJToken();
+                var actualAlert = runningProgress.Alerts[nAlert].ToJToken();
+                var alertMismatches = JsonUtils.DeepCompare(expectedAlert, actualAlert);
+                Assert.IsNull(
+                    alertMismatches,
+                    $"Alert[{nAlert}] MISMATCHES:\n{alertMismatches?.ToString(Formatting.Indented)}\n\nEXPECTED:\n{expectedAlert}\n\nACTUAL:\n{actualAlert}");
+            }
+
+            Assert.AreEqual(testConfig.ExpectedResponse.Resolutions.Count, runningProgress.Resolutions.Count, runningProgress.ToString());
+            for (int nResolution = 0; nResolution < testConfig.ExpectedResponse.Resolutions.Count; nResolution++)
+            {
+                var expectedResolution = testConfig.ExpectedResponse.Resolutions[nResolution].ToJToken();
+                var actualResolution = runningProgress.Resolutions[nResolution].ToJToken();
+                var alertMismatches = JsonUtils.DeepCompare(expectedResolution, actualResolution);
+                Assert.IsNull(
+                    alertMismatches,
+                    $"Resolution[{nResolution}] MISMATCHES:\n{alertMismatches?.ToString(Formatting.Indented)}\n\nEXPECTED:\n{expectedResolution}\n\nACTUAL:\n{actualResolution}");
+            }
+
+
+            JObject expectedResult = testConfig.ExpectedResponse.Result;
+            JObject actualResult = runningProgress.Result;
+
+            var resultMismatches = JsonUtils.DeepCompare(expectedResult, actualResult);
+            Assert.IsNull(
+                    resultMismatches,
+                    $"MISMATCHES:\n{resultMismatches?.ToString(Formatting.Indented)}\n\nEXPECTED:\n{expectedResult}\n\nACTUAL:\n{actualResult}");
+
+            int expectedNumItems = testConfig.ExpectedItems.Count();
+
+            (int numItems, int numItemDefinitions) = endpoints.CountItems();
+            Assert.AreEqual(expectedNumItems, numItems);
+            Assert.AreEqual(expectedNumItems, numItemDefinitions);
+
+            int nItem = 0;
+            foreach (JToken expectedItemToken in testConfig.ExpectedItems)
+            {
+                JObject expectedItem = JObject.Parse(expectedItemToken.ToString());
+
+                JObject actualItem = endpoints.ReadItemDirectly(workspaceId, expectedGuids[nItem]);
+                string eis = UpgradeSerialization.Serialize(expectedItem);
+                string ais = UpgradeSerialization.Serialize(actualItem);
+
+                JObject mismatches = JsonUtils.DeepCompare(expectedItem, actualItem);
+
+                Assert.IsNull(
+                    mismatches,
+                    $"Item[{nItem}] MISMATCHES:\n{mismatches?.ToString(Formatting.Indented)}\n\nEXPECTED:\n{eis}\n\nACTUAL:\n{ais}");
+
+                nItem++;
+            }
+
+            List<string> actualEndpointEvents = endpoints.FetchEvents();
+
+            Assert.AreEqual(testConfig.ExpectedEndpointEvents.Count, actualEndpointEvents.Count, "\r\n" + string.Join("\r\n", actualEndpointEvents));
+            for (int nEvent = 0; nEvent < testConfig.ExpectedEndpointEvents.Count; nEvent++)
+            {
+                string expectedEvent = testConfig.ExpectedEndpointEvents[nEvent];
+                for (int nGuid = expectedGuids.Count - 1; nGuid >= 0; nGuid--)
+                {
+                    expectedEvent = expectedEvent.Replace($"${nGuid}", expectedGuids[nGuid].ToString());
+                }
+
+                Assert.AreEqual(expectedEvent, actualEndpointEvents[nEvent]);
+            }
+        }
+
         private class EndToEndTestConfig
         {
             [JsonProperty(PropertyName = "progress")]
@@ -315,6 +428,11 @@ namespace FabricUpgradePowerShellModuleTests
 
             [JsonProperty(PropertyName = "adfSupportFile")]
             public string AdfSupportFile { get; set; }
+
+            // Before running the test, create these pipelines in the TestAdfApiEndpoints
+            // to test the FabricUpgradeHandler.ImportAdfFactoryAsync flow
+            [JsonProperty(PropertyName = "adfArtifactInfo")]
+            public string AdfArtifactInfo { get; set; }
 
             [JsonProperty(PropertyName = "resolutions")]
             public List<FabricUpgradeResolution> Resolutions { get; set; } = new List<FabricUpgradeResolution>();
