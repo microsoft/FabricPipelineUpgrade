@@ -77,6 +77,8 @@
               "typeProperties": {
                 "source": {
                   "type": "AzureSqlSource",
+                  "queryTimeout": "02:00:00",
+                  "partitionOption": "None",
                   "datasetSettings": {
                     "annotations": [],
                     "type": "AzureSqlTable",
@@ -94,6 +96,7 @@
                 "sink": {
                   "type": "AzureSqlSink",
                   "writeBehavior": "insert",
+                  "sqlWriterUseTableLock": false,
                   "datasetSettings": {
                     "annotations": [],
                     "type": "AzureSqlTable",

@@ -67,6 +67,8 @@
                     "source": {
                       "type": "CosmosDbSqlApiSource",
                       "preferredRegions": ["Central US"],
+                      "pageSize": 1,
+                      "detectDatetime": true,
                       "datasetSettings": {
                         "annotations": [],
                         "type": "CosmosDbSqlApiCollection",
@@ -95,8 +97,11 @@
                     },
                     "sink": {
                       "type": "CosmosDbSqlApiSink",
+                      "writeBatchTimeout": "10.23:55:55",
+                      "writeBatchSize": 1,
                       "writeBehavior": "upsert",
                       "disableMetricsCollection": true,
+                      "maxConcurrentConnections": 1,
                       "datasetSettings": {
                         "annotations": [],
                         "type": "CosmosDbSqlApiCollection",
