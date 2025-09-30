@@ -97,6 +97,7 @@
                 },
                 "sink": {
                   "type": "AzureSqlSink",
+                  "writeBehavior": "insert",
                   "datasetSettings": {
                     "annotations": [],
                     "type": "AzureSqlTable",
@@ -133,5 +134,4 @@
     "LIST DataPipeline",
     "CREATE DataPipeline 'PipelineWithCopy_SqlToSql_DatasetConstLinkedServiceParams' => $0"
   ]
-
 }

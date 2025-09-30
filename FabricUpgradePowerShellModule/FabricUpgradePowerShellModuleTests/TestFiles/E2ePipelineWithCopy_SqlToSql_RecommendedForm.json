@@ -72,6 +72,8 @@
                 },
                 "sink": {
                   "type": "AzureSqlSink",
+                  "writeBehavior": "insert",
+                  "disableMetricsCollection": true,
                   "datasetSettings": {
                     "annotations": [],
                     "type": "AzureSqlTable",

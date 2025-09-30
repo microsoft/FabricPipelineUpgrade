@@ -113,6 +113,7 @@
                 },
                 "sink": {
                   "type": "AzureSqlSink",
+                  "writeBehavior": "insert",
                   "datasetSettings": {
                     "annotations": [],
                     "type": "AzureSqlTable",

@@ -1,0 +1,138 @@
+{
+  "adfSupportFile": "PipelineWithCopy_CosmosNoSqlToCosmosNoSql_support_live.zip",
+
+  "expectedResponse": {
+    "state": "Succeeded",
+    "alerts": [],
+    "resolutions": [],
+
+    "result": {
+      "exportableFabricResources": [
+        {
+          "resourceName": "CosmosDbNoSql",
+          "resourceType": "Connection",
+          "resolve": [
+            {
+              "type": "LinkedServiceToConnectionId",
+              "key": "CosmosDbNoSql",
+              "targetPath": "id",
+              "hint": {
+                "linkedServiceName": "CosmosDbNoSql",
+                "connectionType": "CosmosDb",
+                "datasource": "unknown",
+                "template": {
+                  "type": "LinkedServiceToConnectionId",
+                  "key": "CosmosDbNoSql",
+                  "value": "<Fabric Connection ID>"
+                }
+              }
+            }
+          ],
+          "export": {
+            "id": "00000000-0000-0000-0000-000000000000"
+          }
+        },
+        {
+          "resourceName": "PipelineWithCopy_CosmosNoSqlToCosmosNoSql1",
+          "resourceType": "DataPipeline",
+          "resolve": [
+            {
+              "type": "AdfResourceNameToFabricResourceId",
+              "key": "Connection:CosmosDbNoSql",
+              "targetPath": "properties.activities[0].typeProperties.source.datasetSettings.externalReferences.connection"
+            },
+            {
+              "type": "AdfResourceNameToFabricResourceId",
+              "key": "Connection:CosmosDbNoSql",
+              "targetPath": "properties.activities[0].typeProperties.sink.datasetSettings.externalReferences.connection"
+            }
+          ],
+          "export": {
+            "name": "PipelineWithCopy_CosmosNoSqlToCosmosNoSql1",
+            "properties": {
+              "activities": [
+                {
+                  "name": "Copy data1",
+                  "type": "Copy",
+                  "dependsOn": [],
+                  "description": null,
+                  "policy": {
+                    "timeout": "0.12:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                  },
+                  "typeProperties": {
+                    "source": {
+                      "type": "CosmosDbSqlApiSource",
+                      "preferredRegions": ["Central US"],
+                      "datasetSettings": {
+                        "annotations": [],
+                        "type": "CosmosDbSqlApiCollection",
+                        "schema": {
+                          "type": "object",
+                          "properties": {
+                            "name": { "type": "string" },
+                            "age": { "type": "integer" },
+                            "is_active": { "type": "boolean" },
+                            "email": { "type": "string" },
+                            "skills": { "type": "array", "items": { "type": "string" } },
+                            "address": { "type": "object", "properties": { "street": { "type": "string" }, "city": { "type": "string" }, "postal_code": { "type": "string" } } },
+                            "projects": { "type": "array", "items": { "type": "object", "properties": { "name": { "type": "string" }, "completed": { "type": "boolean" }, "budget": { "type": "integer" } } } },
+                            "rating": { "type": "number" },
+                            "notes": { "type": "null" }
+                          }
+                        },
+                        "typeProperties": {
+                          "collectionName": "cosmosfornosqlcontainerid",
+                          "database": "cosmosfornosqldbid"
+                        },
+                        "externalReferences": {
+                          "connection": "00000000-0000-0000-0000-000000000000"
+                        }
+                      }
+                    },
+                    "sink": {
+                      "type": "CosmosDbSqlApiSink",
+                      "writeBehavior": "upsert",
+                      "disableMetricsCollection": true,
+                      "datasetSettings": {
+                        "annotations": [],
+                        "type": "CosmosDbSqlApiCollection",
+                        "schema": {
+                          "type": "object",
+                          "properties": {
+                            "name": { "type": "string" },
+                            "age": { "type": "integer" },
+                            "is_active": { "type": "boolean" },
+                            "email": { "type": "string" },
+                            "skills": { "type": "array", "items": { "type": "string" } },
+                            "address": { "type": "object", "properties": { "street": { "type": "string" }, "city": { "type": "string" }, "postal_code": { "type": "string" } } },
+                            "projects": { "type": "array", "items": { "type": "object", "properties": { "name": { "type": "string" }, "completed": { "type": "boolean" }, "budget": { "type": "integer" } } } },
+                            "rating": { "type": "number" },
+                            "notes": { "type": "null" }
+                          }
+                        },
+                        "typeProperties": {
+                          "collectionName": "cosmosfornosqlcontainerid",
+                          "database": "cosmosfornosqldbid"
+                        },
+                        "externalReferences": {
+                          "connection": "00000000-0000-0000-0000-000000000000"
+                        }
+                      }
+                    },
+                    "enableStaging": false
+                  }
+                }
+              ]
+            },
+            "annotations": []
+          }
+        }
+      ]
+    }
+  }
+
+}

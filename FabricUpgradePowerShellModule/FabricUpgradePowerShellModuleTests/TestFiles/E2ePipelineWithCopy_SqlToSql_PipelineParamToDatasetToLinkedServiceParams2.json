@@ -1,9 +1,7 @@
 {
   "comments": [
     "The LinkedService has one parameter, InitialCatalog, whose default value is rodenkew1.",
-    "The SourceDataset has two parameters:",
-    "   databaseName, whose default value is alfalfa, and",
-    "   databaseTable, whose default value is alpaca.",
+    "The SourceDataset has one parameter, databaseName, whose default value is alfalfa.",
     "The SinkDataset has no parameters.",
 
     "The CopyActivity sends SourceDataset.databaseName = @pipeline().parameters.FromDatabase.",
@@ -107,6 +105,7 @@
                 },
                 "sink": {
                   "type": "AzureSqlSink",
+                  "writeBehavior": "insert",
                   "datasetSettings": {
                     "annotations": [],
                     "type": "AzureSqlTable",
