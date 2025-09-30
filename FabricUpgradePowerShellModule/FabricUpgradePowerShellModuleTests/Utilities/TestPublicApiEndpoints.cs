@@ -10,13 +10,8 @@ using System.Text.RegularExpressions;
 
 namespace FabricUpgradePowerShellModuleTests.Utilities
 {
-    public class TestPublicApiEndpoints
+    public class TestPublicApiEndpoints : TestApiEndpoints
     {
-        private List<string> events = new List<string>();
-
-        private readonly Dictionary<string, HttpStatusCode> responseStatusCodes = new Dictionary<string, HttpStatusCode>();
-        private readonly Dictionary<string, string> responsePayloads = new Dictionary<string, string>();
-
         private readonly Regex listItemsRoute;
         private readonly Regex createItemRoute;
         private readonly Regex updateItemRoute;
@@ -28,10 +23,6 @@ namespace FabricUpgradePowerShellModuleTests.Utilities
         private readonly List<string> reservedDisplayNames = new List<string>();
 
         private List<Guid> guids = new List<Guid>();
-
-        // If this is not null, then requests to PublicAPI endpoints
-        // must include this token. It is set in RequireUserToken().
-        private string requiredUserToken = null;
 
         // If true, then the PublicAPI writes the CreateItem payload
         // to a file for manual validation.
@@ -53,37 +44,11 @@ namespace FabricUpgradePowerShellModuleTests.Utilities
                 $"^POST {publicApiBaseUrl}workspaces/(?'workspaceId'[^/]+)/items/(?'itemId'[^/]+)/updateDefinition(\\?|$)");
         }
 
-        public List<Tuple<HttpRequestMessage, string>> Requests { get; private set; } = new List<Tuple<HttpRequestMessage, string>>();
-
-        /// <summary>
-        /// All requests to PublicAPI endpoints must include this Bearer user token.
-        /// This requirement verifies that the PublicAPI endpoints are invoked with
-        /// the user's AAD token.
-        /// </summary>
-        /// <param name="userToken">The user's AAD token.</param>
-        /// <returns>this, for chaining.</returns>
-        public TestPublicApiEndpoints RequireUserToken(string userToken)
-        {
-            this.requiredUserToken = userToken;
-            return this;
-        }
+        
 
         public TestPublicApiEndpoints WriteCreateFile(bool doWrite = true)
         {
             this.writeCreateFile = doWrite;
-            return this;
-        }
-
-        public TestPublicApiEndpoints PrepareResponse(
-            HttpMethod method,
-            string requestUrl,
-            HttpStatusCode statusCode,
-            string responsePayload)
-        {
-            string routeKey = $"{method} {requestUrl}";
-            this.responseStatusCodes[routeKey] = statusCode;
-            this.responsePayloads[routeKey] = responsePayload;
-
             return this;
         }
 
@@ -169,12 +134,7 @@ namespace FabricUpgradePowerShellModuleTests.Utilities
             return itemObject;
         }
 
-        public List<string> FetchEvents()
-        {
-            return new List<string>(this.events);
-        }
-
-        public async Task<HttpResponseMessage> HandleRequestAsync(HttpRequestMessage request)
+        public override async Task<HttpResponseMessage> HandleRequestAsync(HttpRequestMessage request)
         {
             string requestPayload = null;
             if (request.Content != null)

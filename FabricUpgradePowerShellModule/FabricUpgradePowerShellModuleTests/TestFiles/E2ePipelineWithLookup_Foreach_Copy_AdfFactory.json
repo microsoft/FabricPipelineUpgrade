@@ -1,0 +1,191 @@
+{
+  "adfArtifactInfo": "PipelineWithLookup_Foreach_Copy.json;LookupForeachThenCopy",
+
+  "resolutions": [
+    {
+      "type": "LinkedServiceToConnectionId",
+      "key": "AzureSqlDatabase1",
+      "value": "ef40e5a5-81c7-4f11-b498-9778892c7587"
+    },
+    {
+      "type": "LinkedServiceToConnectionId",
+      "key": "AzureBlobStorage1",
+      "value": "41c01544-7743-4fa1-8335-7de1ae400ec4"
+    },
+    {
+      "type": "LinkedServiceToConnectionId",
+      "key": "AzureDataLakeStorage1",
+      "value": "9c47556b-07c2-41ea-8105-20ebcedc0d13"
+    }
+  ],
+
+  "expectedResponse": {
+    "state": "Succeeded",
+    "alerts": [],
+    "result": {
+      "exportedFabricResources": {
+        "AzureSqlDatabase1": {
+          "id": "ef40e5a5-81c7-4f11-b498-9778892c7587"
+        },
+        "AzureBlobStorage1": {
+          "id": "41c01544-7743-4fa1-8335-7de1ae400ec4"
+        },
+        "AzureDataLakeStorage1": {
+          "id": "9c47556b-07c2-41ea-8105-20ebcedc0d13"
+        },
+        "LookupForeachThenCopy": {
+          "id": 0,
+          "type": "DataPipeline",
+          "displayName": "LookupForeachThenCopy",
+          "description": null,
+          "workspaceId": ""
+        }
+      }
+    }
+  },
+
+  "expectedItems": [
+    {
+      "item": {
+        "workspaceId": "",
+        "id": 0,
+        "type": "DataPipeline",
+        "displayName": "LookupForeachThenCopy",
+        "description": null
+      },
+      "definition": {
+        "name": "LookupForeachThenCopy",
+        "properties": {
+          "activities": [
+            {
+              "name": "Lookup1",
+              "type": "Lookup",
+              "dependsOn": [],
+              "policy": {
+                "timeout": "0.12:00:00",
+                "retry": 0,
+                "retryIntervalInSeconds": 30,
+                "secureOutput": false,
+                "secureInput": false
+              },
+              "description": null,
+              "typeProperties": {
+                "source": {
+                  "type": "AzureSqlSource",
+                  "queryTimeout": "02:00:00",
+                  "partitionOption": "None"
+                },
+                "firstRowOnly": null,
+                "datasetId": "AzureSqlTable1",
+                "datasetSettings": {
+                  "annotations": [],
+                  "type": "AzureSqlTable",
+                  "externalReferences": {
+                    "connection": "ef40e5a5-81c7-4f11-b498-9778892c7587"
+                  },
+                  "typeProperties": {
+                    "schema": "master",
+                    "table": "myTable1",
+                    "database": "ajay-db"
+                  },
+                  "schema": []
+                },
+                "operationType": "Lookup"
+              }
+            },
+            {
+              "name": "ForEach1",
+              "type": "ForEach",
+              "dependsOn": [
+                {
+                  "activity": "Lookup1",
+                  "dependencyConditions": [
+                    "Succeeded"
+                  ]
+                }
+              ],
+              "description": null,
+              "typeProperties": {
+                "items": {
+                  "value": "@activity('Lookup1').output.firstRow",
+                  "type": "Expression"
+                },
+                "isSequential": null,
+                "activities": [
+                  {
+                    "name": "Copy data1",
+                    "type": "Copy",
+                    "dependsOn": [],
+                    "policy": {
+                      "timeout": "0.12:00:00",
+                      "retry": 0,
+                      "retryIntervalInSeconds": 30,
+                      "secureOutput": false,
+                      "secureInput": false
+                    },
+                    "description": null,
+                    "typeProperties": {
+                      "source": {
+                        "type": "BinarySource",
+                        "storeSettings": {
+                          "type": "AzureBlobStorageReadSettings",
+                          "recursive": true
+                        },
+                        "formatSettings": {
+                          "type": "BinaryReadSettings"
+                        },
+                        "datasetSettings": {
+                          "annotations": [],
+                          "type": "Binary",
+                          "externalReferences": {
+                            "connection": "41c01544-7743-4fa1-8335-7de1ae400ec4"
+                          },
+                          "typeProperties": {
+                            "location": {
+                              "type": "AzureBlobStorageLocation",
+                              "fileName": "myFile",
+                              "folderPath": "mydir/mysubDir",
+                              "container": "365demo"
+                            }
+                          }
+                        }
+                      },
+                      "sink": {
+                        "type": "BinarySink",
+                        "storeSettings": {
+                          "type": "AzureBlobFSWriteSettings"
+                        },
+                        "datasetSettings": {
+                          "annotations": [],
+                          "type": "Binary",
+                          "externalReferences": {
+                            "connection": "9c47556b-07c2-41ea-8105-20ebcedc0d13"
+                          },
+                          "typeProperties": {
+                            "location": {
+                              "type": "AzureBlobFSLocation",
+                              "folderPath": "newDir",
+                              "fileSystem": "newTarget"
+                            }
+                          }
+                        }
+                      },
+                      "enableStaging": false
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "annotations": []
+      }
+    }
+  ],
+
+  "expectedEndpointEvents": [
+    "LIST DataPipeline",
+    "CREATE DataPipeline 'LookupForeachThenCopy' => $0"
+  ]
+
+}

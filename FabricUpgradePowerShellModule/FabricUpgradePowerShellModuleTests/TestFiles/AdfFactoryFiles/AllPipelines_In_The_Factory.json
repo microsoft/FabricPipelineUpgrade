@@ -1,0 +1,242 @@
+{
+  "factory": {
+    "name": "fabric-migration-df",
+    "id": "/subscriptions/1e42591f-1f0c-4c5a-b7f2-a268f6105ec5/resourceGroups/datafactory-rg902/providers/Microsoft.DataFactory/factories/fabric-migration-df",
+    "type": "Microsoft.DataFactory/factories",
+    "properties": {
+      "provisioningState": "Succeeded",
+      "createTime": "2025-09-05T18:04:40.7890555Z",
+      "version": "2018-06-01",
+      "factoryStatistics": {
+        "totalResourceCount": 0,
+        "maxAllowedResourceCount": 0,
+        "factorySizeInGbUnits": 0,
+        "maxAllowedFactorySizeInGbUnits": 0
+      },
+      "globalConfigurations": {
+        "mountedConfiguration": [
+          {
+            "workspaceId": "d3008ced-21f3-4831-aa7c-41c2f2678033",
+            "artifactId": "2f66783b-0cbd-45a0-9264-beda06fe9b1b"
+          },
+          {
+            "workspaceId": "b94dc649-7abe-45b0-bffa-c8fa31d428cf",
+            "artifactId": "1f659da3-0e46-4636-90b0-4a6c33d457d8"
+          }
+        ]
+      },
+      "trustModeClaimForMi": {
+        "value": "Enabled",
+        "editable": true
+      }
+    },
+    "eTag": "\"ec01d751-0000-0200-0000-68d320c80000\"",
+    "location": "eastus2",
+    "identity": {
+      "type": "SystemAssigned",
+      "principalId": "20fe0c46-d466-471f-b4e3-ab46d39ef31a",
+      "tenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47"
+    },
+    "tags": {}
+  },
+  "pipelines": [
+    {
+      "id": "/subscriptions/1e42591f-1f0c-4c5a-b7f2-a268f6105ec5/resourceGroups/datafactory-rg902/providers/Microsoft.DataFactory/factories/fabric-migration-df/pipelines/p_conditional_execute",
+      "name": "p_conditional_execute",
+      "type": "Microsoft.DataFactory/factories/pipelines",
+      "properties": {
+        "activities": [
+          {
+            "name": "If Condition1",
+            "type": "IfCondition",
+            "dependsOn": [],
+            "userProperties": [],
+            "typeProperties": {
+              "expression": {
+                "value": "@equals(mod(rand(0,10),2),0)",
+                "type": "Expression"
+              },
+              "ifFalseActivities": [
+                {
+                  "name": "Execute_p_wait",
+                  "type": "ExecutePipeline",
+                  "dependsOn": [],
+                  "policy": {
+                    "secureInput": true
+                  },
+                  "userProperties": [],
+                  "typeProperties": {
+                    "pipeline": {
+                      "referenceName": "p_wait",
+                      "type": "PipelineReference"
+                    },
+                    "waitOnCompletion": true,
+                    "parameters": {}
+                  }
+                }
+              ],
+              "ifTrueActivities": [
+                {
+                  "name": "Wait60Sec",
+                  "type": "Wait",
+                  "dependsOn": [],
+                  "userProperties": [],
+                  "typeProperties": {
+                    "waitTimeInSeconds": 60
+                  }
+                },
+                {
+                  "name": "Fail1",
+                  "type": "Fail",
+                  "dependsOn": [
+                    {
+                      "activity": "Wait60Sec",
+                      "dependencyConditions": [
+                        "Succeeded"
+                      ]
+                    }
+                  ],
+                  "userProperties": [],
+                  "typeProperties": {
+                    "message": "RandomFailureWithEvenNumber",
+                    "errorCode": "400"
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "policy": {
+          "elapsedTimeMetric": {}
+        },
+        "annotations": [],
+        "lastPublishTime": "2025-09-08T21:11:47Z"
+      },
+      "etag": "b101b306-0000-0200-0000-68bf46930000"
+    },
+    {
+      "id": "/subscriptions/1e42591f-1f0c-4c5a-b7f2-a268f6105ec5/resourceGroups/datafactory-rg902/providers/Microsoft.DataFactory/factories/fabric-migration-df/pipelines/p_wait",
+      "name": "p_wait",
+      "type": "Microsoft.DataFactory/factories/pipelines",
+      "properties": {
+        "activities": [
+          {
+            "name": "Wait60sec",
+            "type": "Wait",
+            "dependsOn": [],
+            "userProperties": [],
+            "typeProperties": {
+              "waitTimeInSeconds": 150
+            }
+          }
+        ],
+        "policy": {
+          "elapsedTimeMetric": {
+            "duration": "0.00:20:00"
+          }
+        },
+        "annotations": [],
+        "lastPublishTime": "2025-09-08T21:11:13Z"
+      },
+      "etag": "b001b9fb-0000-0200-0000-68bf46710000"
+    },
+    {
+      "id": "/subscriptions/1e42591f-1f0c-4c5a-b7f2-a268f6105ec5/resourceGroups/datafactory-rg902/providers/Microsoft.DataFactory/factories/fabric-migration-df/pipelines/p_storedproc",
+      "name": "p_storedproc",
+      "type": "Microsoft.DataFactory/factories/pipelines",
+      "properties": {
+        "description": "test-pipe",
+        "activities": [
+          {
+            "name": "Stored procedure activity",
+            "description": "test-act",
+            "type": "SqlServerStoredProcedure",
+            "dependsOn": [
+              {
+                "activity": "Wait100",
+                "dependencyConditions": [
+                  "Succeeded"
+                ]
+              }
+            ],
+            "policy": {
+              "timeout": "00:10:00",
+              "retry": 5,
+              "retryIntervalInSeconds": 45,
+              "secureOutput": true,
+              "secureInput": true
+            },
+            "userProperties": [],
+            "typeProperties": {
+              "storedProcedureName": "[golden].validate",
+              "storedProcedureParameters": {
+                "param1": {
+                  "value": "tst",
+                  "type": "String"
+                },
+                "param2": {
+                  "value": {
+                    "value": "@float('10.098')",
+                    "type": "Expression"
+                  },
+                  "type": "Double"
+                }
+              }
+            },
+            "linkedServiceName": {
+              "referenceName": "AzSQLDatabase",
+              "type": "LinkedServiceReference"
+            }
+          },
+          {
+            "name": "Wait100",
+            "type": "Wait",
+            "dependsOn": [],
+            "userProperties": [],
+            "typeProperties": {
+              "waitTimeInSeconds": 100
+            }
+          }
+        ],
+        "concurrency": 10,
+        "policy": {
+          "elapsedTimeMetric": {
+            "duration": "0.2:00:00"
+          }
+        },
+        "parameters": {
+          "testpipeparam": {
+            "type": "float",
+            "defaultValue": 59.99
+          }
+        },
+        "variables": {
+          "testVariable": {
+            "type": "String",
+            "defaultValue": "variablevalue"
+          }
+        },
+        "annotations": [],
+        "lastPublishTime": "2025-09-12T01:15:56Z"
+      },
+      "etag": "3900dca1-0000-0200-0000-68c3744c0000"
+    }
+  ],
+  "datasets": [],
+  "linkedservices": [
+    {
+      "id": "/subscriptions/1e42591f-1f0c-4c5a-b7f2-a268f6105ec5/resourceGroups/datafactory-rg902/providers/Microsoft.DataFactory/factories/fabric-migration-df/linkedservices/AzSQLDatabase",
+      "name": "AzSQLDatabase",
+      "type": "Microsoft.DataFactory/factories/linkedservices",
+      "properties": {
+        "annotations": [],
+        "type": "AzureSqlDatabase",
+        "typeProperties": {
+          "connectionString": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=vekandib-testsql.database.windows.net;Initial Catalog=AdventureWorksLT"
+        }
+      },
+      "etag": "ab010cdb-0000-0200-0000-68bf29450000"
+    }
+  ],
+  "triggers": []
+}
