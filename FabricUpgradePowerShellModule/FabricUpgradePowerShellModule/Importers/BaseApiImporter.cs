@@ -364,13 +364,23 @@ namespace FabricUpgradePowerShellModule.Importers
             // Examples: AzureFunctionActivity, SqlServerStoredProcedure
             if (activityType == "AzureFunctionActivity"
                 || activityType == "SqlServerStoredProcedure"
-                || activityType == "AzureDataExplorerCommand")
+                || activityType == "AzureDataExplorerCommand"
+                || activityType == "DataLakeAnalyticsScope")
             {
                 string linkedServiceName = activity.SelectToken("linkedServiceName.referenceName")?.ToString();
                 if (!string.IsNullOrEmpty(linkedServiceName))
                 {
-                    Console.WriteLine($"Activity of type {activityType} references linked service: {linkedServiceName}");
                     await ImportLinkedServiceAsync(client, linkedServiceName, importedLinkedServices, cancellationToken).ConfigureAwait(false);
+
+                    if (activityType == "DataLakeAnalyticsScope")
+                    {
+                        // DataLakeAnalyticsScope activity will have script linked service
+                        string scriptLinkedServiceName = activity.SelectToken("typeProperties.scriptLinkedService.referenceName")?.ToString();
+                        if (!string.IsNullOrEmpty(scriptLinkedServiceName))
+                        {
+                            await ImportLinkedServiceAsync(client, scriptLinkedServiceName, importedLinkedServices, cancellationToken).ConfigureAwait(false);
+                        }
+                    }
                 }
             }
         }

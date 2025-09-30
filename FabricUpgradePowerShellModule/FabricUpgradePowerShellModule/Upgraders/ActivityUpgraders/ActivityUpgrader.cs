@@ -33,6 +33,7 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
             public const string Fail = "Fail";
             public const string WebHook = "WebHook";
             public const string AzureDataExplorerCommand = "AzureDataExplorerCommand";
+            public const string DataLakeAnalyticsScope = "DataLakeAnalyticsScope";
 
             // The ADF ADXCommand becomes a Fabric KQL.
             public const string KustoQueryLanguage = "KustoQueryLanguage";
@@ -87,6 +88,7 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
                 ActivityTypes.Fail => new FailActivityUpgarder(parentPath, adfActivityToken, machine),
                 ActivityTypes.WebHook => new WebHookActivityUpgrader(parentPath, adfActivityToken, machine),
                 ActivityTypes.AzureDataExplorerCommand => new AzureDataExplorerCommandActivityUpgrader(parentPath, adfActivityToken, machine),
+                ActivityTypes.DataLakeAnalyticsScope => new DataLakeAnalyticsScopeActivityUpgrader(parentPath, adfActivityToken, machine),
                 _ => new UnsupportedActivityUpgrader(parentPath, adfActivityToken, machine),
             };
         }

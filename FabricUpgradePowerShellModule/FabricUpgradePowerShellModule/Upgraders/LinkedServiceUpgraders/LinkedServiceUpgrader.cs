@@ -21,6 +21,8 @@ namespace FabricUpgradePowerShellModule.Upgraders.LinkedServiceUpgraders
             public const string AzureBlobFS = "AzureBlobFS";
             public const string AzureFunction = "AzureFunction";
             public const string AzureDataExplorer = "AzureDataExplorer";
+            public const string AzureDataLakeAnalytics = "AzureDataLakeAnalytics";
+            public const string AzureDataLakeStore = "AzureDataLakeStore";
         }
 
         protected const string AdfLinkedServiceTypePath = "properties.type";
@@ -72,6 +74,8 @@ namespace FabricUpgradePowerShellModule.Upgraders.LinkedServiceUpgraders
                 LinkedServiceTypes.AzureSqlDatabase => new AzureSqlDatabaseLinkedServiceUpgrader(linkedServiceToken, machine),
                 LinkedServiceTypes.AzureFunction => new AzureFunctionLinkedServiceUpgrader(linkedServiceToken, machine),
                 LinkedServiceTypes.AzureDataExplorer => new AzureDataExplorerLinkedServiceUpgrader(linkedServiceToken, machine),
+                LinkedServiceTypes.AzureDataLakeAnalytics => new AzureDataLakeAnalyticsLinkedServiceUpgrader(linkedServiceToken, machine),
+                LinkedServiceTypes.AzureDataLakeStore => new AzureDataLakeStoreLinkedServiceUpgrader(linkedServiceToken, machine),
                 _ => new UnsupportedLinkedServiceUpgrader(linkedServiceToken, machine),
             };
         }

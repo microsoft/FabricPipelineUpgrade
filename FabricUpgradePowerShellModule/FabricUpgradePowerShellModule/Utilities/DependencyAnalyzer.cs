@@ -146,6 +146,13 @@ namespace FabricUpgradePowerShellModule.Utilities
                 usedLinkedServices.Add(linkedServiceName);
             }
 
+            // Check for script linked service references in the activity (e.g., ScopeActivity)
+            linkedServiceName = activity.SelectToken("typeProperties.scriptLinkedService.referenceName")?.ToString();
+            if (!string.IsNullOrEmpty(linkedServiceName))
+            {
+                usedLinkedServices.Add(linkedServiceName);
+            }
+
         }
 
         /// <summary>

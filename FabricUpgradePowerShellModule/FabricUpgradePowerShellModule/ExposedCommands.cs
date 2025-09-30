@@ -2,14 +2,13 @@
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-using System;
+using FabricUpgradePowerShellModule.Models;
+using FabricUpgradePowerShellModule.Utilities;
+
 using System.Management.Automation;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security;
-using System.Threading;
-using System.Reflection;
-using System.Threading.Tasks;
-using FabricUpgradePowerShellModule.Utilities;
 
 namespace FabricUpgradePowerShellModule
 {
@@ -393,8 +392,11 @@ namespace FabricUpgradePowerShellModule
                         plainFabricToken,
                         cancellationToken);
 
-                    string result = task.GetAwaiter().GetResult().ToString();
-                    WriteObject(result);
+                    FabricUpgradeProgress finalProgress = task.GetAwaiter().GetResult();
+                    if (this.EnableVerboseLogging || finalProgress.State != FabricUpgradeProgress.FabricUpgradeState.Succeeded)
+                    {
+                        WriteObject(finalProgress.ToString());
+                    }
                 }
                 else
                 {
@@ -450,8 +452,11 @@ namespace FabricUpgradePowerShellModule
                         this.AdminMembers?.ToList(),
                         cancellationToken);
 
-                    string result = task.GetAwaiter().GetResult().ToString();
-                    WriteObject(result);
+                    FabricUpgradeProgress finalProgress = task.GetAwaiter().GetResult();
+                    if (this.EnableVerboseLogging || finalProgress.State != FabricUpgradeProgress.FabricUpgradeState.Succeeded)
+                    {
+                        WriteObject(finalProgress.ToString());
+                    }
                 }
             }
             catch (OperationCanceledException)
