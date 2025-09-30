@@ -1,0 +1,84 @@
+﻿{
+  "adfSupportFile": "PipelineWithADXCommandActivity_support_live.zip",
+
+  "expectedResponse": {
+    "state": "Succeeded",
+    "alerts": [],
+    "resolutions": [],
+
+    "result": {
+      "exportableFabricResources": [
+        {
+          "resourceType": "Connection",
+          "resourceName": "ADX_Sami",
+          "resolve": [
+            {
+              "type": "LinkedServiceToConnectionId",
+              "key": "ADX_Sami",
+              "targetPath": "id",
+              "hint": {
+                "linkedServiceName": "ADX_Sami",
+                "connectionType": "AzureDataExplorer",
+                "datasource": "adfadxdataflowserver.westus.kusto.windows.net",
+                "template": {
+                  "type": "LinkedServiceToConnectionId",
+                  "key": "ADX_Sami",
+                  "value": "<Fabric Connection ID>"
+                }
+              }
+            }
+          ],
+          "export": {
+            "id": "00000000-0000-0000-0000-000000000000"
+          }
+        },
+        {
+          "resourceType": "DataPipeline",
+          "resourceName": "PipelineWithADXCommandActivity",
+          "resolve": [
+            {
+              "type": "AdfResourceNameToFabricResourceId",
+              "key": "Connection:ADX_Sami",
+              "targetPath": "properties.activities[0].externalReferences.connection"
+            }
+          ],
+          "export": {
+            "name": "PipelineWithADXCommandActivity",
+            "properties": {
+              "activities": [
+                {
+                  "name": "ADXCommandActivity",
+                  "description": null,
+                  "type": "KustoQueryLanguage",
+                  "dependsOn": [],
+                  "policy": {
+                    "timeout": "0.12:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                  },
+                  "typeProperties": {
+                    "command": {
+                      "value": "@concat('.create table EAADXTestTable (CustomerNo:string,Item:string,Material:string,PurchaseDate:datetime,Description:string,QtyShip:string,Cost:real)')",
+                      "type": "Expression"
+                    },
+                    "commandTimeout": {
+                      "value": "@concat('00', ':', '20', ':', '00')",
+                      "type": "Expression"
+                    },
+                    "database": "adfe2edemodb"
+                  },
+                  "externalReferences": {
+                    "connection": "00000000-0000-0000-0000-000000000000"
+                  }
+                }
+              ]
+            },
+            "annotations": []
+          }
+        }
+      ]
+    }
+  }
+}

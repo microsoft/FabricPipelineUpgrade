@@ -61,47 +61,12 @@ namespace FabricUpgradePowerShellModule.Upgraders.LinkedServiceUpgraders
 
             if (functionAppUrlToken?.Type == JTokenType.String)
             {
-                (functionAppHostName, _) = this.ProcessUrl(functionAppUrlToken.ToString());
+                (functionAppHostName, _) = UrlHelper.ProcessUrl(functionAppUrlToken.ToString());
             }
             
             return base.BuildFabricConnectionHint()
                 .WithConnectionType(this.LinkedServiceType)
                 .WithDatasource(functionAppHostName ?? this.Name);
-        }
-
-        /// <summary>
-        /// Break the URL into its components.
-        /// </summary>
-        /// <returns>The host name and the relative URL.</returns>
-        private (string HostName, string RelativeUrl) ProcessUrl(string url)
-        {
-            url = this.EnsureHttpSchemeIsPresent(url, "http");
-
-            // Note: We might want to support Connections that have a HostName and a path "prefix".
-            // For example, the Connection has the URL "http://abc.com/orders" and we convert
-            // "http://abc.com/orders/1234" into <connectionId>, "/1234".
-            // This is a little bit complicated, so, for now, we'll just support Connections that
-            // point at the Host.
-            Uri uri = new Uri(url);
-
-            string hostname = uri.Authority;
-            string pathAndQuery = uri.PathAndQuery;
-
-            return (hostname, pathAndQuery);
-        }
-
-        // The constructor for System.Uri will fail if the URL does
-        // not include a schema. Make sure that there is one.
-        private string EnsureHttpSchemeIsPresent(
-            string url,
-            string defaultHttpScheme)
-        {
-            if (url.StartsWith("http://") || url.StartsWith("https://"))
-            {
-                return url;
-            }
-
-            return defaultHttpScheme + "://" + url;
         }
     }
 }

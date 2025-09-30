@@ -66,11 +66,12 @@ namespace FabricUpgradePowerShellModule.Upgraders.LinkedServiceUpgraders
             if (kustoAppEndpointToken?.Type == JTokenType.String)
             {
                 kustoEndpoint = kustoAppEndpointToken.ToString();
+                (kustoEndpoint, _) = UrlHelper.ProcessUrl(kustoEndpoint);
             }
 
             return base.BuildFabricConnectionHint()
                 .WithConnectionType(this.LinkedServiceType)
-                .WithDatasource(kustoEndpointPath ?? this.Name);
+                .WithDatasource(kustoEndpoint ?? this.Name);
         }
 
         /// <summary>
