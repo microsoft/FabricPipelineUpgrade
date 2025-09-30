@@ -1,0 +1,259 @@
+﻿{
+  "adfArtifactInfo": "AllPipelines_In_The_Factory.json",
+
+  "resolutions": [
+    {
+      "type": "CredentialConnectionId",
+      "key": "user",
+      "value": "d9c82ff5-bb3e-46d6-9e35-a84872ad550f"
+    },
+    {
+      "type": "LinkedServiceToConnectionId",
+      "key": "AzSQLDatabase",
+      "value": "ef40e5a5-81c7-4f11-b498-9778892c7587"
+    }
+  ],
+
+  "guidSubstitutions": [
+    {
+      "comment": "Set the pipelineId of the ExecutePipeline activity to the Guid assigned to the WaitPipeline.",
+      "path": "[1].definition.properties.activities[0].typeProperties.ifFalseActivities[0].typeProperties.pipelineId",
+      "guidIndex": 0
+    },
+    {
+      "comment": "Set the workspaceId of the ExecutePipeline activity to the workspaceId (-1 means 'workspaceId').",
+      "path": "[1].definition.properties.activities[0].typeProperties.ifFalseActivities[0].typeProperties.workspaceId",
+      "guidIndex": -1
+    }
+  ],
+
+  "expectedResponse": {
+    "state": "Succeeded",
+    "alerts": [],
+    "result": {
+      "exportedFabricResources": {
+        "p_wait": {
+          "type": "DataPipeline",
+          "workspaceId": "",
+          "id": 0,
+          "displayName": "p_wait",
+          "description": null
+        },
+        "p_conditional_execute": {
+          "type": "DataPipeline",
+          "workspaceId": "",
+          "id": 1,
+          "displayName": "p_conditional_execute",
+          "description": null
+        },
+        "p_storedproc": {
+          "type": "DataPipeline",
+          "workspaceId": "",
+          "id": 2,
+          "displayName": "p_storedproc",
+          "description": "test-pipe"
+        },
+        "AzSQLDatabase": {
+          "id": "ef40e5a5-81c7-4f11-b498-9778892c7587"
+        }
+      }
+    }
+  },
+
+  "expectedItems": [
+    {
+      "item": {
+        "type": "DataPipeline",
+        "workspaceId": "",
+        "id": 0,
+        "displayName": "p_wait",
+        "description": null
+      },
+      "definition": {
+        "name": "p_wait",
+        "properties": {
+          "activities": [
+            {
+              "name": "Wait60sec",
+              "type": "Wait",
+              "dependsOn": [],
+              "description": null,
+              "typeProperties": {
+                "waitTimeInSeconds": 150
+              }
+            }
+          ]
+        },
+        "annotations": []
+      }
+    },
+    {
+      "item": {
+        "type": "DataPipeline",
+        "workspaceId": "",
+        "id": 1,
+        "displayName": "p_conditional_execute",
+        "description": null
+      },
+      "definition": {
+        "name": "p_conditional_execute",
+        "properties": {
+          "activities": [
+            {
+              "name": "If Condition1",
+              "type": "IfCondition",
+              "dependsOn": [],
+              "description": null,
+              "typeProperties": {
+                "expression": {
+                  "value": "@equals(mod(rand(0, 10), 2), 0)",
+                  "type": "Expression"
+                },
+                "ifFalseActivities": [
+                  {
+                    "name": "Execute_p_wait",
+                    "type": "InvokePipeline",
+                    "dependsOn": [],
+                    "policy": {
+                      "secureInput": true
+                    },
+                    "description": null,
+                    "typeProperties": {
+                      "waitOnCompletion": true,
+                      "parameters": {},
+                      "operationType": "InvokeFabricPipeline",
+                      "pipelineId": "00000000-0000-0000-0000-000000000000",
+                      "workspaceId": "00000000-0000-0000-0000-000000000000"
+                    },
+                    "externalReferences": {
+                      "connection": "d9c82ff5-bb3e-46d6-9e35-a84872ad550f"
+                    }
+                  }
+                ],
+                "ifTrueActivities": [
+                  {
+                    "name": "Wait60Sec",
+                    "type": "Wait",
+                    "dependsOn": [],
+                    "description": null,
+                    "typeProperties": {
+                      "waitTimeInSeconds": 60
+                    }
+                  },
+                  {
+                    "name": "Fail1",
+                    "type": "Fail",
+                    "dependsOn": [
+                      {
+                        "activity": "Wait60Sec",
+                        "dependencyConditions": [
+                          "Succeeded"
+                        ]
+                      }
+                    ],
+                    "description": null,
+                    "typeProperties": {
+                      "message": "RandomFailureWithEvenNumber",
+                      "errorCode": "400"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "annotations": []
+      }
+    },
+    {
+      "item": {
+        "type": "DataPipeline",
+        "workspaceId": "",
+        "id": 2,
+        "displayName": "p_storedproc",
+        "description": "test-pipe"
+      },
+      "definition": {
+        "name": "p_storedproc",
+        "properties": {
+          "activities": [
+            {
+              "name": "Stored procedure activity",
+              "type": "SqlServerStoredProcedure",
+              "description": "test-act",
+              "dependsOn": [
+                {
+                  "activity": "Wait100",
+                  "dependencyConditions": [
+                    "Succeeded"
+                  ]
+                }
+              ],
+              "policy": {
+                "timeout": "00:10:00",
+                "retry": 5,
+                "retryIntervalInSeconds": 45,
+                "secureOutput": true,
+                "secureInput": true
+              },
+              "typeProperties": {
+                "storedProcedureName": "[golden].validate",
+                "database": "AdventureWorksLT",
+                "storedProcedureParameters": {
+                  "param1": {
+                    "value": "tst",
+                    "type": "String"
+                  },
+                  "param2": {
+                    "value": {
+                      "value": "@float('10.098')",
+                      "type": "Expression"
+                    },
+                    "type": "Double"
+                  }
+                },
+                "operationType": "SqlServerStoredProcedure"
+              },
+              "externalReferences": {
+                "connection": "ef40e5a5-81c7-4f11-b498-9778892c7587"
+              }
+            },
+            {
+              "name": "Wait100",
+              "type": "Wait",
+              "dependsOn": [],
+              "description": null,
+              "typeProperties": {
+                "waitTimeInSeconds": 100
+              }
+            }
+          ],
+          "concurrency": 10,
+          "parameters": {
+            "testpipeparam": {
+              "type": "float",
+              "defaultValue": 59.99
+            }
+          },
+          "variables": {
+            "testVariable": {
+              "type": "String",
+              "defaultValue": "variablevalue"
+            }
+          }
+        },
+        "annotations": []
+      }
+    }
+  ],
+
+  "expectedEndpointEvents": [
+    "LIST DataPipeline",
+    "CREATE DataPipeline 'p_wait' => $0",
+    "LIST DataPipeline",
+    "CREATE DataPipeline 'p_conditional_execute' => $1",
+    "LIST DataPipeline",
+    "CREATE DataPipeline 'p_storedproc' => $2"
+  ]
+
+}
