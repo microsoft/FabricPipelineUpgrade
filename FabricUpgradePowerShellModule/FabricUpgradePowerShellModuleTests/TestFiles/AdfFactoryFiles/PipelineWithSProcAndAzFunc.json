@@ -1,0 +1,175 @@
+{
+  "factory": {
+    "name": "fabric-migration-df",
+    "id": "/subscriptions/1e42591f-1f0c-4c5a-b7f2-a268f6105ec5/resourceGroups/datafactory-rg902/providers/Microsoft.DataFactory/factories/fabric-migration-df",
+    "type": "Microsoft.DataFactory/factories",
+    "properties": {
+      "provisioningState": "Succeeded",
+      "createTime": "2025-09-05T18:04:40.7890555Z",
+      "version": "2018-06-01",
+      "factoryStatistics": {
+        "totalResourceCount": 0,
+        "maxAllowedResourceCount": 0,
+        "factorySizeInGbUnits": 0,
+        "maxAllowedFactorySizeInGbUnits": 0
+      },
+      "globalParameters": {
+        "ADFScopeSupport": {
+          "type": "bool",
+          "value": true
+        }
+      },
+      "globalConfigurations": {
+        "mountedConfiguration": [
+          {
+            "workspaceId": "d3008ced-21f3-4831-aa7c-41c2f2678033",
+            "artifactId": "2f66783b-0cbd-45a0-9264-beda06fe9b1b"
+          },
+          {
+            "workspaceId": "b94dc649-7abe-45b0-bffa-c8fa31d428cf",
+            "artifactId": "1f659da3-0e46-4636-90b0-4a6c33d457d8"
+          }
+        ]
+      },
+      "trustModeClaimForMi": {
+        "value": "Enabled",
+        "editable": true
+      }
+    },
+    "eTag": "\"1300e588-0000-0200-0000-68daf0970000\"",
+    "location": "eastus2",
+    "identity": {
+      "type": "SystemAssigned",
+      "principalId": "20fe0c46-d466-471f-b4e3-ab46d39ef31a",
+      "tenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47"
+    },
+    "tags": {}
+  },
+  "pipelines": [
+    {
+      "id": "/subscriptions/1e42591f-1f0c-4c5a-b7f2-a268f6105ec5/resourceGroups/datafactory-rg902/providers/Microsoft.DataFactory/factories/fabric-migration-df/pipelines/PipelineWithAzFuncAndStoredProc",
+      "name": "PipelineWithAzFuncAndStoredProc",
+      "type": "Microsoft.DataFactory/factories/pipelines",
+      "properties": {
+        "activities": [
+          {
+            "name": "AzFuncActivity",
+            "type": "AzureFunctionActivity",
+            "dependsOn": [],
+            "policy": {
+              "timeout": "0.12:00:00",
+              "retry": 0,
+              "retryIntervalInSeconds": 30,
+              "secureOutput": false,
+              "secureInput": false
+            },
+            "userProperties": [],
+            "typeProperties": {
+              "functionName": {
+                "value": "@concat('Reflection')",
+                "type": "Expression"
+              },
+              "headers": {
+                "content-type": {
+                  "value": "@concat('application','/','json')",
+                  "type": "Expression"
+                }
+              },
+              "method": "GET"
+            },
+            "linkedServiceName": {
+              "referenceName": "AzureFunctionLS",
+              "type": "LinkedServiceReference"
+            }
+          },
+          {
+            "name": "StoredProcActivity",
+            "description": "test-act",
+            "type": "SqlServerStoredProcedure",
+            "dependsOn": [
+              {
+                "activity": "AzFuncActivity",
+                "dependencyConditions": [
+                  "Succeeded"
+                ]
+              }
+            ],
+            "policy": {
+              "timeout": "00:10:00",
+              "retry": 5,
+              "retryIntervalInSeconds": 45,
+              "secureOutput": true,
+              "secureInput": true
+            },
+            "userProperties": [],
+            "typeProperties": {
+              "storedProcedureName": "test-sp",
+              "storedProcedureParameters": {
+                "param1": {
+                  "value": "tst",
+                  "type": "String"
+                },
+                "param2": {
+                  "value": {
+                    "value": "@float('10.098')",
+                    "type": "Expression"
+                  },
+                  "type": "Double"
+                }
+              }
+            },
+            "linkedServiceName": {
+              "referenceName": "AzSQLDatabase",
+              "type": "LinkedServiceReference"
+            }
+          }
+        ],
+        "policy": {
+          "elapsedTimeMetric": {}
+        },
+        "annotations": [],
+        "lastPublishTime": "2025-09-30T23:27:54Z"
+      },
+      "etag": "22004954-0000-0200-0000-68dc677a0000"
+    }
+  ],
+  "datasets": [],
+  "linkedservices": [
+    {
+      "id": "/subscriptions/1e42591f-1f0c-4c5a-b7f2-a268f6105ec5/resourceGroups/datafactory-rg902/providers/Microsoft.DataFactory/factories/fabric-migration-df/linkedservices/AzureFunctionLS",
+      "name": "AzureFunctionLS",
+      "type": "Microsoft.DataFactory/factories/linkedservices",
+      "properties": {
+        "annotations": [],
+        "type": "AzureFunction",
+        "typeProperties": {
+          "functionAppUrl": "https://webactivity-afv4-testsnew.azurewebsites.net",
+          "authentication": "Service principal",
+          "servicePrincipalId": "72f988bf-86f1-41af-91ab-2d7cd011db47",
+          "servicePrincipalKey": {
+            "type": "SecureString",
+            "value": "**********"
+          },
+          "tenant": "72f988bf-86f1-41af-91ab-2d7cd011db47",
+          "resourceId": "72f988bf-86f1-41af-91ab-2d7cd011db47",
+          "encryptedCredential": "ew0KICAiVmVyc2lvbiI6ICIyMDE3LTExLTMwIiwNCiAgIlByb3RlY3Rpb25Nb2RlIjogIktleSIsDQogICJTZWNyZXRDb250ZW50VHlwZSI6ICJQbGFpbnRleHQiLA0KICAiQ3JlZGVudGlhbElkIjogIkRBVEFGQUNUT1JZQEU5MjUwOTRBLTZFM0MtNEM5NC1BNjk4LTc1NTA4RURCOEVBMV9mMjI1ZjRiNy1lZDU4LTQ2YmUtYWM5OC0yMjYxZWMxZmQ5ZTUiDQp9"
+        }
+      },
+      "etag": "570037bf-0000-0200-0000-68c4639d0000"
+    },
+    {
+      "id": "/subscriptions/1e42591f-1f0c-4c5a-b7f2-a268f6105ec5/resourceGroups/datafactory-rg902/providers/Microsoft.DataFactory/factories/fabric-migration-df/linkedservices/AzSQLDatabase",
+      "name": "AzSQLDatabase",
+      "type": "Microsoft.DataFactory/factories/linkedservices",
+      "properties": {
+        "annotations": [],
+        "type": "AzureSqlDatabase",
+        "typeProperties": {
+          "connectionString": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=vekandib-testsql.database.windows.net;Initial Catalog=AdventureWorksLT"
+        }
+      },
+      "etag": "ab010cdb-0000-0200-0000-68bf29450000"
+    }
+  ],
+  "triggers": []
+}

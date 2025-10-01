@@ -60,7 +60,7 @@ namespace FabricUpgradePowerShellModule.Upgraders.LinkedServiceUpgraders
             JToken adlaSubscriptionToken = this.AdfResourceToken.SelectToken(subscriptionIdPath);
             JToken adlaResourceGroupToken = this.AdfResourceToken.SelectToken(resourceGroupPath); 
 
-            string datasource = $"{adlaAccountToken}-{adlaSubscriptionToken}-{adlaResourceGroupToken}";
+            string datasource = $"{adlaAccountToken}--{adlaSubscriptionToken}--{adlaResourceGroupToken}";
 
             return base.BuildFabricConnectionHint()
                 .WithConnectionType(this.LinkedServiceType)

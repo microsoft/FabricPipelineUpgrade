@@ -54,12 +54,13 @@ namespace FabricUpgradePowerShellModule.Upgraders.LinkedServiceUpgraders
         /// <inheritdoc/>
         protected override FabricUpgradeConnectionHint BuildFabricConnectionHint()
         {
-            string dataLakeEndpoint = null;
+            string dataLakeEndpoint = "<dataLakeStoreUri-dynamic-expression>";
             JToken dataLakeAccountUriToken = this.AdfResourceToken.SelectToken(dataLakeStoreUriPath);
 
             if (dataLakeAccountUriToken?.Type == JTokenType.String)
             {
                 dataLakeEndpoint = dataLakeAccountUriToken.ToString();
+                (dataLakeEndpoint, _) = UrlHelper.ProcessUrl(dataLakeEndpoint);
             }
 
             return base.BuildFabricConnectionHint()

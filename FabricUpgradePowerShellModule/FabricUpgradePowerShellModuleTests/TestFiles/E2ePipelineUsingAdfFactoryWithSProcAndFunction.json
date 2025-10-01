@@ -1,0 +1,134 @@
+{
+  "adfArtifactInfo": "PipelineWithSProcAndAzFunc.json;PipelineWithAzFuncAndStoredProc",
+
+  "resolutions": [
+    {
+      "type": "LinkedServiceToConnectionId",
+      "key": "AzureFunctionLS",
+      "value": "48b3e9da-e4d0-42e8-9843-6d4fdf313ce7"
+    },
+    {
+      "type": "LinkedServiceToConnectionId",
+      "key": "AzSQLDatabase",
+      "value": "ef40e5a5-81c7-4f11-b498-9778892c7587"
+    }
+  ],
+
+  "expectedResponse": {
+    "state": "Succeeded",
+    "alerts": [],
+    "result": {
+      "exportedFabricResources": {
+        "AzureFunctionLS": {
+          "id": "48b3e9da-e4d0-42e8-9843-6d4fdf313ce7"
+        },
+        "AzSQLDatabase": {
+          "id": "ef40e5a5-81c7-4f11-b498-9778892c7587"
+        },
+        "PipelineWithAzFuncAndStoredProc": {
+          "id": 0,
+          "type": "DataPipeline",
+          "displayName": "PipelineWithAzFuncAndStoredProc",
+          "description": null,
+          "workspaceId": ""
+        }
+      }
+    }
+  },
+
+  "expectedItems": [
+    {
+      "item": {
+        "workspaceId": "",
+        "id": 0,
+        "type": "DataPipeline",
+        "displayName": "PipelineWithAzFuncAndStoredProc",
+        "description": null
+      },
+      "definition": {
+        "name": "PipelineWithAzFuncAndStoredProc",
+        "properties": {
+          "activities": [
+            {
+              "name": "AzFuncActivity",
+              "description": null,
+              "type": "AzureFunctionActivity",
+              "dependsOn": [],
+              "policy": {
+                "timeout": "0.12:00:00",
+                "retry": 0,
+                "retryIntervalInSeconds": 30,
+                "secureOutput": false,
+                "secureInput": false
+              },
+              "typeProperties": {
+                "functionName": {
+                  "value": "@concat('Reflection')",
+                  "type": "Expression"
+                },
+                "headers": {
+                  "content-type": {
+                    "value": "@concat('application', '/', 'json')",
+                    "type": "Expression"
+                  }
+                },
+                "method": "GET"
+              },
+              "externalReferences": {
+                "connection": "48b3e9da-e4d0-42e8-9843-6d4fdf313ce7"
+              }
+            },
+            {
+              "name": "StoredProcActivity",
+              "description": "test-act",
+              "type": "SqlServerStoredProcedure",
+              "dependsOn": [
+                {
+                  "activity": "AzFuncActivity",
+                  "dependencyConditions": [
+                    "Succeeded"
+                  ]
+                }
+              ],
+              "policy": {
+                "timeout": "00:10:00",
+                "retry": 5,
+                "retryIntervalInSeconds": 45,
+                "secureOutput": true,
+                "secureInput": true
+              },
+              "typeProperties": {
+                "storedProcedureName": "test-sp",
+                "database": "AdventureWorksLT",
+                "storedProcedureParameters": {
+                  "param1": {
+                    "value": "tst",
+                    "type": "String"
+                  },
+                  "param2": {
+                    "value": {
+                      "value": "@float('10.098')",
+                      "type": "Expression"
+                    },
+                    "type": "Double"
+                  }
+                },
+                "operationType": "SqlServerStoredProcedure"
+              },
+              "externalReferences": {
+                "connection": "ef40e5a5-81c7-4f11-b498-9778892c7587"
+              }
+            }
+          ]
+        },
+        "annotations": []
+      }
+    }
+  ],
+
+  "expectedEndpointEvents": [
+    "LIST DataPipeline",
+    "CREATE DataPipeline 'PipelineWithAzFuncAndStoredProc' => $0"
+  ]
+
+}

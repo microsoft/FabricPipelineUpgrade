@@ -43,10 +43,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="TestFiles\AdfFactoryFiles\AllPipelines_In_The_Factory.json">
+    <None Update="TestFiles\AdfFactoryFiles\PipelinesWithConditionalExecute.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="TestFiles\AdfFactoryFiles\PipelineWithLookup_Foreach_Copy.json">
+    <None Update="TestFiles\AdfFactoryFiles\PipelineWithADxAndScope.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="TestFiles\AdfFactoryFiles\PipelineWithLookupForeachCopy.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="TestFiles\AdfFactoryFiles\PipelineWithSProcAndAzFunc.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

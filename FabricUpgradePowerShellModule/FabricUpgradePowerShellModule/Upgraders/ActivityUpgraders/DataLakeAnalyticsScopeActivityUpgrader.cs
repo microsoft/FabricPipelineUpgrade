@@ -89,7 +89,7 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
             }
 
             PropertyCopier copier = new PropertyCopier(this.Path, this.AdfResourceToken, fabricActivity, alerts);
-            copier.Copy("description", copyIfNull:false);
+            copier.Copy("description");
 
             JToken scriptLinkedService = this.AdfResourceToken.SelectToken(scriptLinkedServicePath);
             if (scriptLinkedService != null && scriptLinkedService.Parent is JProperty property && property.Parent is JObject typePropertiesObject)

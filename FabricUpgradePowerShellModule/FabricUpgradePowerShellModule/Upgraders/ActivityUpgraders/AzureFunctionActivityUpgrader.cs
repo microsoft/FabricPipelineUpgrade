@@ -38,7 +38,7 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
             string parentPath,
             JToken activityToken,
             IFabricUpgradeMachine machine)
-            : base("AzureFunctionActivity", parentPath, activityToken, machine)
+            : base(ActivityTypes.AzureFunction, parentPath, activityToken, machine)
         {
         }
 

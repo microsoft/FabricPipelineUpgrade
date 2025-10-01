@@ -1,0 +1,149 @@
+{
+  "adfArtifactInfo": "PipelineWithADxAndScope.json;PipelineWithADXAndScope",
+
+  "resolutions": [
+    {
+      "type": "LinkedServiceToConnectionId",
+      "key": "ADX_Sami",
+      "value": "ef40e5a5-81c7-4f11-b498-9778892c7587"
+    },
+    {
+      "type": "LinkedServiceToConnectionId",
+      "key": "adlascope_sdip_c11_spn",
+      "value": "41c01544-7743-4fa1-8335-7de1ae400ec4"
+    },
+    {
+      "type": "LinkedServiceToConnectionId",
+      "key": "adlsgen1_sdip_spn",
+      "value": "9c47556b-07c2-41ea-8105-20ebcedc0d13"
+    }
+  ],
+
+  "expectedResponse": {
+    "state": "Succeeded",
+    "alerts": [],
+    "result": {
+      "exportedFabricResources": {
+        "ADX_Sami": {
+          "id": "ef40e5a5-81c7-4f11-b498-9778892c7587"
+        },
+        "adlascope_sdip_c11_spn": {
+          "id": "41c01544-7743-4fa1-8335-7de1ae400ec4"
+        },
+        "adlsgen1_sdip_spn": {
+          "id": "9c47556b-07c2-41ea-8105-20ebcedc0d13"
+        },
+        "PipelineWithADXAndScope": {
+          "id": 0,
+          "type": "DataPipeline",
+          "displayName": "PipelineWithADXAndScope",
+          "description": null,
+          "workspaceId": ""
+        }
+      }
+    }
+  },
+
+  "expectedItems": [
+    {
+      "item": {
+        "workspaceId": "",
+        "id": 0,
+        "type": "DataPipeline",
+        "displayName": "PipelineWithADXAndScope",
+        "description": null
+      },
+      "definition": {
+        "name": "PipelineWithADXAndScope",
+        "properties": {
+          "activities": [
+            {
+              "name": "ADXCommandActivity",
+              "type": "KustoQueryLanguage",
+              "dependsOn": [],
+              "policy": {
+                "timeout": "0.12:00:00",
+                "retry": 0,
+                "retryIntervalInSeconds": 30,
+                "secureOutput": false,
+                "secureInput": false
+              },
+              "description": null,
+              "typeProperties": {
+                "command": {
+                  "value": "@concat('.create table EAADXTestTable (CustomerNo:string,Item:string,Material:string,PurchaseDate:datetime,Description:string,QtyShip:string,Cost:real)')",
+                  "type": "Expression"
+                },
+                "commandTimeout": {
+                  "value": "@concat('00', ':', '20', ':', '00')",
+                  "type": "Expression"
+                },
+                "database": "adfe2edemodb"
+              },
+              "externalReferences": {
+                "connection": "ef40e5a5-81c7-4f11-b498-9778892c7587"
+              }
+            },
+            {
+              "name": "ScopeActivity",
+              "description": "Scope activity will have CORP IP restrictions",
+              "type": "DataLakeAnalyticsScope",
+              "dependsOn": [
+                {
+                  "activity": "ADXCommandActivity",
+                  "dependencyConditions": [
+                    "Succeeded",
+                    "Failed",
+                    "Completed",
+                    "Skipped"
+                  ]
+                }
+              ],
+              "policy": {
+                "timeout": "0.12:00:00",
+                "retry": 0,
+                "retryIntervalInSeconds": 30,
+                "secureOutput": true,
+                "secureInput": false
+              },
+              "typeProperties": {
+                "scriptFolderPath": {
+                  "value": "@concat('adla', 'scope')",
+                  "type": "Expression"
+                },
+                "scriptFileName": "rando.script",
+                "degreeOfParallelism": 20,
+                "jobOwner": "vekandib",
+                "jobName": {
+                  "value": "@{pipeline().DataFactory}-{pipeline().Pipeline}",
+                  "type": "Expression"
+                },
+                "notifier": "vekandib@microsoft.com",
+                "scopeScriptInclusionSet": ".dll;.script;.module",
+                "priority": {
+                  "value": "@string(rand(200, 1000))",
+                  "type": "Expression"
+                },
+                "runtimeVersion": "default_soy",
+                "externalReferences": {
+                  "connection": "9c47556b-07c2-41ea-8105-20ebcedc0d13"
+                },
+                "nebulaArguments": "-disableBonusTokens"
+              },
+              "externalReferences": {
+                "connection": "41c01544-7743-4fa1-8335-7de1ae400ec4"
+              }
+            }
+          ]
+        },
+        "annotations": []
+      }
+    }
+  ],
+
+  "expectedEndpointEvents": [
+    "LIST DataPipeline",
+    "CREATE DataPipeline 'PipelineWithADXAndScope' => $0"
+  ]
+
+}

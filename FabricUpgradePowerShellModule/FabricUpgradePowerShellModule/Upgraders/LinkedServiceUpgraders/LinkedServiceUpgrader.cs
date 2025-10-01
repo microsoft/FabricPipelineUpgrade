@@ -23,6 +23,7 @@ namespace FabricUpgradePowerShellModule.Upgraders.LinkedServiceUpgraders
             public const string AzureDataExplorer = "AzureDataExplorer";
             public const string AzureDataLakeAnalytics = "AzureDataLakeAnalytics";
             public const string AzureDataLakeStore = "AzureDataLakeStore";
+            public const string AzureKeyVault = "AzureKeyVault";
         }
 
         protected const string AdfLinkedServiceTypePath = "properties.type";
