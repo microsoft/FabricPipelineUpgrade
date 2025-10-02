@@ -21,7 +21,7 @@ namespace FabricUpgradePowerShellModule
         public static CancellationToken CreateCancellationToken(PSCmdlet cmdlet)
         {
             var cancellationTokenSource = new CancellationTokenSource();
-
+            
             // Check for stopping periodically using a timer
             var timer = new System.Threading.Timer(_ =>
             {
@@ -40,7 +40,7 @@ namespace FabricUpgradePowerShellModule
 
             // Register cleanup when cancellation is requested
             cancellationTokenSource.Token.Register(() => timer?.Dispose());
-
+            
             return cancellationTokenSource.Token;
         }
     }
@@ -280,7 +280,7 @@ namespace FabricUpgradePowerShellModule
         protected override void ProcessRecord()
         {
             Console.WriteLine($"Importing resolutions from file: {this.ResolutionsFilename}");
-
+            
             string result = new FabricUpgradeHandler(this.EnableVerboseLogging).ImportFabricResolutions(
                 this.Progress,
                 this.ResolutionsFilename).ToString();
@@ -344,10 +344,10 @@ namespace FabricUpgradePowerShellModule
             Console.WriteLine("Exporting pipeline definitions into Fabric workspace...");
 
             string plainFabricToken = TokenUnwrapper.Unwrap(Token, nameof(Token));
-
+            
             // Check if workspace is a GUID (existing workspace) or name (new/existing workspace)
             bool isWorkspaceGuid = !string.IsNullOrEmpty(Workspace) && FabricUpgradeHandler.IsValidGuid(Workspace);
-            bool hasCapacityInfo = !string.IsNullOrEmpty(CapacityName) ||
+            bool hasCapacityInfo = !string.IsNullOrEmpty(CapacityName) || 
                                    !string.IsNullOrEmpty(FactoryResourceId) ||
                                    AzureToken != null;
 
@@ -361,7 +361,7 @@ namespace FabricUpgradePowerShellModule
                     this));
                 return;
             }
-
+            
             if (EnableVerboseLogging)
             {
                 if (isWorkspaceGuid)
@@ -377,7 +377,7 @@ namespace FabricUpgradePowerShellModule
                     Console.WriteLine($"Creating new workspace with auto-generated name in region: {this.Region}");
                 }
             }
-
+            
             try
             {
                 var cancellationToken = PowerShellCancellationHelper.CreateCancellationToken(this);
@@ -412,7 +412,7 @@ namespace FabricUpgradePowerShellModule
 
                     // Determine capacity strategy
                     bool hasCapacityName = !string.IsNullOrEmpty(CapacityName);
-
+                    
                     if (EnableVerboseLogging)
                     {
                         if (hasCapacityName)
