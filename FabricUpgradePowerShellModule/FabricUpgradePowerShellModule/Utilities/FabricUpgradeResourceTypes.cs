@@ -35,5 +35,8 @@ namespace FabricUpgradePowerShellModule.Utilities
 
         //A Fabric SQL Stored Procedure resource
         StoredProcedure = 7,
+
+        // A Fabric Notebook resource
+        Notebook = 8,
     }
 }

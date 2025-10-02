@@ -33,10 +33,14 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
             public const string Fail = "Fail";
             public const string WebHook = "WebHook";
             public const string AzureDataExplorerCommand = "AzureDataExplorerCommand";
-            public const string DataLakeAnalyticsScope = "DataLakeAnalyticsScope";
-
+            
             // The ADF ADXCommand becomes a Fabric KQL.
             public const string KustoQueryLanguage = "KustoQueryLanguage";
+            public const string DataLakeAnalyticsScope = "DataLakeAnalyticsScope";
+            public const string SynapseNotebook = "SynapseNotebook";
+
+            // The ADF SynapseNotebook becomes a Fabric TridentNotebook
+            public const string TridentNotebook = "TridentNotebook";
         }
 
         protected ActivityUpgrader(
@@ -89,6 +93,7 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
                 ActivityTypes.WebHook => new WebHookActivityUpgrader(parentPath, adfActivityToken, machine),
                 ActivityTypes.AzureDataExplorerCommand => new AzureDataExplorerCommandActivityUpgrader(parentPath, adfActivityToken, machine),
                 ActivityTypes.DataLakeAnalyticsScope => new DataLakeAnalyticsScopeActivityUpgrader(parentPath, adfActivityToken, machine),
+                ActivityTypes.SynapseNotebook => new SynapseNotebookActivityUpgrader(parentPath, adfActivityToken, machine),
                 _ => new UnsupportedActivityUpgrader(parentPath, adfActivityToken, machine),
             };
         }
@@ -198,6 +203,10 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
             else if (this.ActivityType == ActivityTypes.AzureDataExplorerCommand)
             {
                 return ActivityTypes.KustoQueryLanguage;
+            }
+            else if (this.ActivityType == ActivityTypes.SynapseNotebook)
+            {
+                return ActivityTypes.TridentNotebook;
             }
             else
             {

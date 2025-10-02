@@ -24,6 +24,7 @@ namespace FabricUpgradePowerShellModule.Upgraders.LinkedServiceUpgraders
             public const string AzureDataLakeAnalytics = "AzureDataLakeAnalytics";
             public const string AzureDataLakeStore = "AzureDataLakeStore";
             public const string AzureKeyVault = "AzureKeyVault";
+            public const string AzureSynapseArtifacts = "AzureSynapseArtifacts";
         }
 
         protected const string AdfLinkedServiceTypePath = "properties.type";
@@ -77,6 +78,7 @@ namespace FabricUpgradePowerShellModule.Upgraders.LinkedServiceUpgraders
                 LinkedServiceTypes.AzureDataExplorer => new AzureDataExplorerLinkedServiceUpgrader(linkedServiceToken, machine),
                 LinkedServiceTypes.AzureDataLakeAnalytics => new AzureDataLakeAnalyticsLinkedServiceUpgrader(linkedServiceToken, machine),
                 LinkedServiceTypes.AzureDataLakeStore => new AzureDataLakeStoreLinkedServiceUpgrader(linkedServiceToken, machine),
+                LinkedServiceTypes.AzureSynapseArtifacts => new AzureSynapseArtifactsLinkedServiceUpgrader(linkedServiceToken, machine),
                 _ => new UnsupportedLinkedServiceUpgrader(linkedServiceToken, machine),
             };
         }

@@ -365,7 +365,8 @@ namespace FabricUpgradePowerShellModule.Importers
             if (activityType == "AzureFunctionActivity"
                 || activityType == "SqlServerStoredProcedure"
                 || activityType == "AzureDataExplorerCommand"
-                || activityType == "DataLakeAnalyticsScope")
+                || activityType == "DataLakeAnalyticsScope"
+                || activityType == "SynapseNotebook")
             {
                 string linkedServiceName = activity.SelectToken("linkedServiceName.referenceName")?.ToString();
                 if (!string.IsNullOrEmpty(linkedServiceName))

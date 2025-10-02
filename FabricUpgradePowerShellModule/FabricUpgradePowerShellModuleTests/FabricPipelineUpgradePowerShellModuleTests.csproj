@@ -55,6 +55,9 @@
     <None Update="TestFiles\AdfFactoryFiles\PipelineWithSProcAndAzFunc.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="TestFiles\AdfFactoryFiles\PipelineWithSynapseNotebook.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 	
 </Project>
