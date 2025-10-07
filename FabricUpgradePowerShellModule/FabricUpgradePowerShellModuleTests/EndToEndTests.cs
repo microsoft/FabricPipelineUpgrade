@@ -260,6 +260,8 @@ namespace FabricUpgradePowerShellModuleTests
         [DataRow("E2ePipelineUsingAdfFactoryWithSProcAndFunction")]
         [DataRow("E2ePipelineUsingAdfFactoryWithADxAndScope")]
         [DataRow("E2ePipelineUsingAdfFactoryWithSynapseNotebook")]
+        [DataRow("E2ePipelineWithCopy_CosmosNoSqlToCosmosNoSql")]
+        [DataRow("E2ePipelineWithCopy_CosmosNoSqlToCosmosNoSql1")]
         public async Task EndToEndUpgradePipeline_AdfFactory_TestAsync(string testConfigFilename)
         {
             FabricUpgradeProgress initialProgress = new FabricUpgradeProgress()

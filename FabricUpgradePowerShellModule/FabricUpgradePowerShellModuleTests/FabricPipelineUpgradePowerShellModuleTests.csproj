@@ -43,19 +43,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="TestFiles\AdfFactoryFiles\PipelinesWithConditionalExecute.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="TestFiles\AdfFactoryFiles\PipelineWithADxAndScope.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="TestFiles\AdfFactoryFiles\PipelineWithLookupForeachCopy.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="TestFiles\AdfFactoryFiles\PipelineWithSProcAndAzFunc.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="TestFiles\AdfFactoryFiles\PipelineWithSynapseNotebook.json">
+    <None Update="TestFiles\AdfFactoryFiles\*.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

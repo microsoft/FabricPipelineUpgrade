@@ -25,6 +25,7 @@ namespace FabricUpgradePowerShellModule.Upgraders.LinkedServiceUpgraders
             public const string AzureDataLakeStore = "AzureDataLakeStore";
             public const string AzureKeyVault = "AzureKeyVault";
             public const string AzureSynapseArtifacts = "AzureSynapseArtifacts";
+            public const string AzureCosmosDatabase = "CosmosDb";
         }
 
         protected const string AdfLinkedServiceTypePath = "properties.type";
@@ -79,6 +80,7 @@ namespace FabricUpgradePowerShellModule.Upgraders.LinkedServiceUpgraders
                 LinkedServiceTypes.AzureDataLakeAnalytics => new AzureDataLakeAnalyticsLinkedServiceUpgrader(linkedServiceToken, machine),
                 LinkedServiceTypes.AzureDataLakeStore => new AzureDataLakeStoreLinkedServiceUpgrader(linkedServiceToken, machine),
                 LinkedServiceTypes.AzureSynapseArtifacts => new AzureSynapseArtifactsLinkedServiceUpgrader(linkedServiceToken, machine),
+                LinkedServiceTypes.AzureCosmosDatabase => new AzureCosmosDatabaseLinkedServiceUpgrader(linkedServiceToken, machine),
                 _ => new UnsupportedLinkedServiceUpgrader(linkedServiceToken, machine),
             };
         }
