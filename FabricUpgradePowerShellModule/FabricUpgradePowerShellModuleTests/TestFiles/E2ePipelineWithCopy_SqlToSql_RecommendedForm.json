@@ -56,6 +56,9 @@
               "typeProperties": {
                 "source": {
                   "type": "AzureSqlSource",
+                  "queryTimeout": "02:01:00",
+                  "isolationLevel": "ReadCommitted",
+                  "partitionOption": "None",
                   "datasetSettings": {
                     "annotations": [],
                     "type": "AzureSqlTable",
@@ -72,6 +75,11 @@
                 },
                 "sink": {
                   "type": "AzureSqlSink",
+                  "writeBatchSize": 2,
+                  "maxConcurrentConnections": 4,
+                  "writeBehavior": "insert",
+                  "sqlWriterUseTableLock": false,
+                  "disableMetricsCollection": true,
                   "datasetSettings": {
                     "annotations": [],
                     "type": "AzureSqlTable",

@@ -1,0 +1,189 @@
+{
+  "factory": {
+    "eTag": "\"0d00ff93-0000-0300-0000-68da18710000\"",
+    "extendedLocation": null,
+    "id": "/subscriptions/1e42591f-1f0c-4c5a-b7f2-a268f6105ec5/resourceGroups/e2epwshmigrationtesting/providers/Microsoft.DataFactory/factories/e2epwshmigrationtestingadf",
+    "identity": {
+      "principalId": "d6685feb-0c01-4c09-866f-8f8d04cb045a",
+      "tenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47",
+      "type": "SystemAssigned",
+      "userAssignedIdentities": null
+    },
+    "kind": null,
+    "location": "centralus",
+    "managedBy": null,
+    "name": "E2EPwshMigrationTestingADF",
+    "plan": null,
+    "properties": {
+      "createTime": "2025-09-29T05:26:09.5306359Z",
+      "factoryStatistics": {
+        "factorySizeInGbUnits": 0,
+        "maxAllowedFactorySizeInGbUnits": 0,
+        "maxAllowedResourceCount": 0,
+        "totalResourceCount": 0
+      },
+      "provisioningState": "Succeeded",
+      "publicNetworkAccess": "Enabled",
+      "trustModeClaimForMi": {
+        "editable": true,
+        "value": "Enabled"
+      },
+      "version": "2018-06-01"
+    },
+    "resourceGroup": "e2epwshmigrationtesting",
+    "sku": null,
+    "tags": {},
+    "type": "Microsoft.DataFactory/factories"
+  },
+  "pipelines": [
+    {
+      "id": "/subscriptions/1e42591f-1f0c-4c5a-b7f2-a268f6105ec5/resourceGroups/e2epwshmigrationtesting/providers/Microsoft.DataFactory/factories/e2epwshmigrationtestingadf/pipelines/PipelineWithCopy_CosmosNoSqlToCosmosNoSql1",
+      "name": "PipelineWithCopy_CosmosNoSqlToCosmosNoSql1",
+      "properties": {
+        "activities": [
+          {
+            "name": "Copy data1",
+            "type": "Copy",
+            "dependsOn": [],
+            "policy": {
+              "timeout": "0.12:00:00",
+              "retry": 0,
+              "retryIntervalInSeconds": 30,
+              "secureOutput": false,
+              "secureInput": false
+            },
+            "userProperties": [],
+            "typeProperties": {
+              "source": {
+                "type": "CosmosDbSqlApiSource",
+                "preferredRegions": [
+                  "Central US"
+                ],
+                "pageSize": 1,
+                "detectDatetime": true
+              },
+              "sink": {
+                "type": "CosmosDbSqlApiSink",
+                "writeBatchTimeout": "10.23:55:55",
+                "writeBatchSize": 1,
+                "writeBehavior": "upsert",
+                "disableMetricsCollection": true,
+                "maxConcurrentConnections": 1
+              },
+              "enableStaging": false
+            },
+            "inputs": [
+              {
+                "referenceName": "CosmosDbNoSqlContainer1",
+                "type": "DatasetReference"
+              }
+            ],
+            "outputs": [
+              {
+                "referenceName": "CosmosDbNoSqlContainer1",
+                "type": "DatasetReference"
+              }
+            ]
+          }
+        ],
+        "annotations": [],
+        "lastPublishTime": "2025-09-29T06:12:13Z"
+      },
+      "type": "Microsoft.DataFactory/factories/pipelines"
+    }
+  ],
+  "datasets": [
+    {
+      "id": "/subscriptions/1e42591f-1f0c-4c5a-b7f2-a268f6105ec5/resourceGroups/e2epwshmigrationtesting/providers/Microsoft.DataFactory/factories/e2epwshmigrationtestingadf/datasets/CosmosDbNoSqlContainer1",
+      "name": "CosmosDbNoSqlContainer1",
+      "properties": {
+        "linkedServiceName": {
+          "referenceName": "CosmosDbNoSql",
+          "type": "LinkedServiceReference"
+        },
+        "annotations": [],
+        "type": "CosmosDbSqlApiCollection",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "age": {
+              "type": "integer"
+            },
+            "is_active": {
+              "type": "boolean"
+            },
+            "email": {
+              "type": "string"
+            },
+            "skills": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "address": {
+              "type": "object",
+              "properties": {
+                "street": {
+                  "type": "string"
+                },
+                "city": {
+                  "type": "string"
+                },
+                "postal_code": {
+                  "type": "string"
+                }
+              }
+            },
+            "projects": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "completed": {
+                    "type": "boolean"
+                  },
+                  "budget": {
+                    "type": "integer"
+                  }
+                }
+              }
+            },
+            "rating": {
+              "type": "number"
+            },
+            "notes": {
+              "type": "null"
+            }
+          }
+        },
+        "typeProperties": {
+          "collectionName": "cosmosfornosqlcontainerid"
+        }
+      },
+      "type": "Microsoft.DataFactory/factories/datasets"
+    }
+  ],
+  "linkedservices": [
+    {
+      "id": "/subscriptions/1e42591f-1f0c-4c5a-b7f2-a268f6105ec5/resourceGroups/e2epwshmigrationtesting/providers/Microsoft.DataFactory/factories/e2epwshmigrationtestingadf/linkedservices/CosmosDbNoSql",
+      "name": "CosmosDbNoSql",
+      "type": "Microsoft.DataFactory/factories/linkedservices",
+      "properties": {
+        "annotations": [],
+        "type": "CosmosDb",
+        "typeProperties": {
+          "connectionString": "AccountEndpoint=https://cosmosdbfornosql-account.documents.azure.com:443/;Database=cosmosfornosqldbid;",
+          "encryptedCredential": "ew0KICAiVmVyc2lvbiI6ICIyMDE3LTExLTMwIiwNCiAgIlByb3RlY3Rpb25Nb2RlIjogIktleSIsDQogICJTZWNyZXRDb250ZW50VHlwZSI6ICJQbGFpbnRleHQiLA0KICAiQ3JlZGVudGlhbElkIjogIkRBVEFGQUNUT1JZQEE5QjhGOTcxLTVCNTctNEUzMy1BQzM3LUY2RTJDOERDRjJERF82MTBkYjEyNC1iNWNhLTRiMjctOTU5OC1lNzYzZjE1ODM0NTgiDQp9"
+        }
+      }
+    }
+  ],
+  "triggers": []
+}

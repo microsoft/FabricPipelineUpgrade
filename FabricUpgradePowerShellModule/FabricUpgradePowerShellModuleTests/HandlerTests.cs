@@ -65,6 +65,7 @@ namespace FabricUpgradePowerShellModuleTests
         [DataRow("ConvertPipelineWithCopy_JsonToJson")]
         [DataRow("ConvertPipelineWithCopy_StagingAndLogging")]
         [DataRow("ConvertPipelineWithCopy_SqlToSql")]
+        [DataRow("ConvertPipelineWithCopy_CosmosNoSqlToCosmosNoSql")]
 
         [DataRow("ConvertPipelineWithAzureFunction")]
         [DataRow("ConvertPipelineWithSproc")]

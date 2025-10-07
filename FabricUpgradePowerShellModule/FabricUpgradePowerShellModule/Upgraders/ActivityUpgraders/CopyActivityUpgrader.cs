@@ -171,24 +171,17 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
             PropertyCopier copier = new PropertyCopier(this.Path, this.AdfResourceToken, fabricActivityObject, alerts);
 
             copier.Copy("description");
-            copier.Copy("typeProperties.parallelCopies", copyIfNull: false);
-            copier.Copy("typeProperties.dataIntegrationUnits", copyIfNull: false);
 
-            foreach (string dataset in new List<string> { "source", "sink" })
-            {
-                copier.Copy($"typeProperties.{dataset}.type");
-                copier.Copy($"typeProperties.{dataset}.storeSettings", copyIfNull: false);
-                copier.Copy($"typeProperties.{dataset}.formatSettings", copyIfNull: false);
-            }
+            // Copy the entire typeProperties block with validation to ensure GlobalParameters 
+            // and other invalid expressions are detected, while preserving connector-specific fields
+            copier.Copy("typeProperties");
 
+            // Now inline datasetSettings and convert staging/log subtrees that must be Fabric-specific.
             this.AddDatasetSettings(copier, "inputs", this.inputDatasetUpgrader, sourceDatasetSettingsPath, alerts);
             this.AddDatasetSettings(copier, "outputs", this.outputDatasetUpgrader, sinkDatasetSettingsPath, alerts);
 
             this.AddStagingSettings(copier, alerts);
             this.AddLogSettings(copier, alerts);
-
-            copier.Copy("typeProperties.translator", copyIfNull: false);
-
             return Symbol.ReadySymbol(fabricActivityObject);
         }
 
