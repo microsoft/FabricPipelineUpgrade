@@ -75,6 +75,9 @@ namespace FabricUpgradePowerShellModuleTests
         [DataRow("ConvertSimpleParentWithDescriptionAndConcurrency")]
         [DataRow("ConvertPipelineWithFail")]
         [DataRow("ConvertPipelineWithWebHook")]
+        [DataRow("ConvertPipelineWithADXCommand")]
+        [DataRow("ConvertPipelineWithScope")]
+        [DataRow("ConvertPipelineWithSynapseNotebook")]
         public void ConvertToFabricPipeline_Test(
             string testConfigFilename,
             string workspaceId = null) // we can set ws in param or in progress.

@@ -1,4 +1,4 @@
-﻿// <copyright file="AzureFunctionActivityUpgrader.cs" company="Microsoft">
+﻿// <copyright file="SynapseNotebookActivityUpgrader.cs" company="Microsoft">
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
@@ -12,33 +12,25 @@ using Newtonsoft.Json.Linq;
 namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
 {
     /// <summary>
-    /// Upgrades an ADF Azure Function activity to a Fabric InvokeAzureFunction activity.
-    /// Supports anonymous access if typeProperties.azureFunctionConnection is null.
+    /// This class Upgrades an ADF SynapseNotebook Activity to a Fabric Notebook Activity.
     /// </summary>
-    public class AzureFunctionActivityUpgrader : ActivityUpgrader
+    /// <remarks>
+    /// Note the name change!
+    /// </remarks>
+    public class SynapseNotebookActivityUpgrader : ActivityUpgrader
     {
-        // JSON paths for key properties in the ADF Azure Function activity.
-        private const string adfFunctionNamePath = "typeProperties.functionName";
-        private const string adfFunctionMethodPath = "typeProperties.method";
-        private const string adfFunctionHeadersPath = "typeProperties.headers";
+        private const string adfNotebookToExecutePath = "typeProperties.notebook.referenceName";
         private const string adfLinkedServiceReferencePath = "linkedServiceName.referenceName";
 
-        // Required properties for a valid Azure Function activity.
-        private readonly List<string> requiredAzureFunctionProperties = new List<string>
-        {
-            adfFunctionNamePath,
-            adfFunctionMethodPath,
-            adfLinkedServiceReferencePath
-        };
-
-        // Reference to the linked service upgrader.
         private LinkedServiceUpgrader linkedServiceUpgrader { get; set; }
 
-        public AzureFunctionActivityUpgrader(
-            string parentPath,
-            JToken activityToken,
-            IFabricUpgradeMachine machine)
-            : base(ActivityTypes.AzureFunction, parentPath, activityToken, machine)
+        private readonly List<string> requiredAdfProperties = new List<string>
+        {
+            adfNotebookToExecutePath
+        };
+
+        public SynapseNotebookActivityUpgrader(string parentPath, JToken activityToken, IFabricUpgradeMachine machine) 
+            : base(ActivityTypes.SynapseNotebook, parentPath, activityToken, machine)
         {
         }
 
@@ -46,8 +38,8 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
         public override void Compile(AlertCollector alerts)
         {
             base.Compile(alerts);
-            // Ensure required properties exist.
-            this.CheckRequiredAdfProperties(this.requiredAzureFunctionProperties, alerts);
+
+            this.CheckRequiredAdfProperties(this.requiredAdfProperties, alerts);
         }
 
         /// <inheritdoc/>
@@ -106,6 +98,34 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
                 }
             }
 
+            // The workspaceId will be included in the ExportFabricPipeline phase (from resolution file).
+            FabricExportResolveStep workspaceIdResolve = new FabricExportResolveStep(
+                FabricUpgradeResolution.ResolutionType.WorkspaceId,
+                null,
+                "typeProperties.workspaceId");
+            resolves.Add(workspaceIdResolve);
+
+            // We need to update the id of the notebook to execute
+            // user should have premtively have Fabric resources.
+            string notebookName = null;
+            JToken referencedNotebookToken = this.AdfResourceToken.SelectToken(adfNotebookToExecutePath);
+
+            if (referencedNotebookToken?.Type == JTokenType.String)
+            {
+                notebookName = referencedNotebookToken.ToString();
+            }
+            else
+            {
+                notebookName = $"{this.ActivityType}--{this.Name}";
+            }
+
+            FabricExportResolveStep referencedNotebookLink = new FabricExportResolveStep(
+                FabricUpgradeResolution.ResolutionType.AdfResourceNameToFabricResourceId,
+                $"{FabricUpgradeResourceTypes.Notebook}:{notebookName}",
+                "typeProperties.notebookId");
+
+            resolves.Add(referencedNotebookLink);
+
             return Symbol.ReadySymbol(JArray.Parse(UpgradeSerialization.Serialize(resolves)));
         }
 
@@ -128,9 +148,13 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
 
             PropertyCopier copier = new PropertyCopier(this.Path, this.AdfResourceToken, fabricActivity, alerts);
             copier.Copy("description");
-            copier.Copy(adfFunctionNamePath, allowNull: false);
-            copier.Copy(adfFunctionMethodPath, allowNull: false);
-            copier.Copy(adfFunctionHeadersPath, copyIfNull: false);
+
+            // These properties cannot be set until the Export operation phase.
+            // We include these properties in the ExportLinks symbol.
+            copier.Set("typeProperties.notebookId", Guid.Empty.ToString());
+            copier.Set("typeProperties.workspaceId", Guid.Empty.ToString());
+            
+            copier.Copy("typeProperties.parameters", copyIfNull: false);
 
             // This property cannot be set until the Export operation phase.
             // We include this property in the "exportResolve" symbol.

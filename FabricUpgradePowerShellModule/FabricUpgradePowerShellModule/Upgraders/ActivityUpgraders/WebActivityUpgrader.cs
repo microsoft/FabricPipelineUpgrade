@@ -82,8 +82,8 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
 
             // The ADF WebActivity directly declares its URL, but the Fabric WebActivity uses a Connection instead.
             // Therefore, the client must provide a UrlHostToConnectionId Resolution to help us out.
-
-            (string hostName, _) = this.ProcessUrl();
+            string url = this.AdfResourceToken.SelectToken(adfUrlPath).ToString();
+            (string hostName, _) = UrlHelper.ProcessUrl(url);
 
             FabricUpgradeResolution.ResolutionType resolutionType = FabricUpgradeResolution.ResolutionType.UrlHostToConnectionId;
             FabricExportResolveStep userCredentialConnectionResolve = new FabricExportResolveStep(
@@ -123,7 +123,8 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
 
             JObject fabricActivityObject = (JObject)activitySymbol.Value;
 
-            (_, string relativeUrl) = this.ProcessUrl();
+            string url = this.AdfResourceToken.SelectToken(adfUrlPath).ToString();
+            (_, string relativeUrl) = UrlHelper.ProcessUrl(url);
 
             PropertyCopier copier = new PropertyCopier(this.Path, this.AdfResourceToken, fabricActivityObject, alerts);
             copier.Copy("description");
@@ -158,7 +159,7 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
             // The ADF WebActivity directly declares its URL, but the Fabric WebActivity uses a Connection instead.
             // If the ADF WebActivity's URL is a String, then we can make this work with a special UrlHostToConnection Resolution.
             JToken urlToken = this.AdfResourceToken.SelectToken("typeProperties.url");
-            
+
             if (urlToken == null)
             {
                 // We have already generated an alert for this.
@@ -174,51 +175,11 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
             }
 
             // Validate that the URL is properly formatted.
-            try
-            {
-                this.ProcessUrl();
-            }
-            catch (UriFormatException)
+            (string hostName, _) = UrlHelper.ProcessUrl(urlToken.ToString());
+            if (string.IsNullOrWhiteSpace(hostName))
             {
                 alerts.AddPermanentError($"Cannot upgrade Web Activity '{this.Path}' because its URL is improperly formatted.");
             }
-        }
-
-        /// <summary>
-        /// Break the URL into its components.
-        /// </summary>
-        /// <returns>The host name and the relative URL.</returns>
-        private (string HostName, string RelativeUrl) ProcessUrl()
-        {
-            // We already verified that this property exists!
-            string url = this.AdfResourceToken.SelectToken(adfUrlPath).ToString();
-            url = this.EnsureHttpSchemeIsPresent(url, "http");
-
-            // Note: We might want to support Connections that have a HostName and a path "prefix".
-            // For example, the Connection has the URL "http://abc.com/orders" and we convert
-            // "http://abc.com/orders/1234" into <connectionId>, "/1234".
-            // This is a little bit complicated, so, for now, we'll just support Connections that
-            // point at the Host.
-            Uri uri = new Uri(url);
-
-            string hostname = uri.Authority;
-            string pathAndQuery = uri.PathAndQuery;
-
-            return (hostname, pathAndQuery);
-        }
-
-        // The constructor for System.Uri will fail if the URL does
-        // not include a schema. Make sure that there is one.
-        private string EnsureHttpSchemeIsPresent(
-            string url,
-            string defaultHttpScheme)
-        {
-            if (url.StartsWith("http://") || url.StartsWith("https://"))
-            {
-                return url;
-            }
-
-            return defaultHttpScheme + "://" + url;
         }
     }
 }

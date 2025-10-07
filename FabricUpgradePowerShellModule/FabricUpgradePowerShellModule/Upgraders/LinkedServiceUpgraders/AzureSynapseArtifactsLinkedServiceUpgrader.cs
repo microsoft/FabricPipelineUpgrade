@@ -1,34 +1,30 @@
-﻿// <copyright file="AzureFunctionLinkedServiceUpgrader.cs" company="Microsoft">
+﻿// <copyright file="AzureSynapseArtifactsLinkedServiceUpgrader.cs" company="Microsoft">
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
 using FabricUpgradePowerShellModule.Models;
 using FabricUpgradePowerShellModule.UpgradeMachines;
 using FabricUpgradePowerShellModule.Utilities;
+
 using Newtonsoft.Json.Linq;
 
 namespace FabricUpgradePowerShellModule.Upgraders.LinkedServiceUpgraders
 {
-    /// <summary>
-    /// This class handles the Upgrade for an Azure Function LinkedService
-    /// </summary>
-    public class AzureFunctionLinkedServiceUpgrader : LinkedServiceUpgrader
+    public class AzureSynapseArtifactsLinkedServiceUpgrader : LinkedServiceUpgrader
     {
-        private const string functionAppUrlPath = "properties.typeProperties.functionAppUrl";
+        private const string endpointPath = "properties.typeProperties.endpoint";
 
         private readonly List<string> requiredAdfProperties = new List<string>
         {
-            functionAppUrlPath
+            endpointPath
         };
-
-        public AzureFunctionLinkedServiceUpgrader(
+        public AzureSynapseArtifactsLinkedServiceUpgrader(
             JToken adfLinkedServiceToken,
             IFabricUpgradeMachine machine)
             : base(adfLinkedServiceToken, machine)
         {
         }
 
-        /// <inheritdoc/>
         public override void Compile(AlertCollector alerts)
         {
             base.Compile(alerts);
@@ -56,17 +52,17 @@ namespace FabricUpgradePowerShellModule.Upgraders.LinkedServiceUpgraders
         /// <inheritdoc/>
         protected override FabricUpgradeConnectionHint BuildFabricConnectionHint()
         {
-            string functionAppHostName = null;
-            JToken functionAppUrlToken = this.AdfResourceToken.SelectToken(functionAppUrlPath);
+            string synapseWorkspaceUrl = null;
+            JToken synapseWorkspaceEndpointToken = this.AdfResourceToken.SelectToken(endpointPath);
 
-            if (functionAppUrlToken?.Type == JTokenType.String)
+            if (synapseWorkspaceEndpointToken?.Type == JTokenType.String)
             {
-                (functionAppHostName, _) = UrlHelper.ProcessUrl(functionAppUrlToken.ToString());
+                (synapseWorkspaceUrl, _) = UrlHelper.ProcessUrl(synapseWorkspaceEndpointToken.ToString());
             }
-            
+
             return base.BuildFabricConnectionHint()
                 .WithConnectionType(this.LinkedServiceType)
-                .WithDatasource(functionAppHostName ?? this.Name);
+                .WithDatasource(synapseWorkspaceUrl ?? "<unresolved-synapse-workspace-url>");
         }
     }
 }

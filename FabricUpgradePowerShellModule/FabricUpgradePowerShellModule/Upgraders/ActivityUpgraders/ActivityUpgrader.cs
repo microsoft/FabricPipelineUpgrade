@@ -32,6 +32,15 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
             public const string Switch = "Switch";
             public const string Fail = "Fail";
             public const string WebHook = "WebHook";
+            public const string AzureDataExplorerCommand = "AzureDataExplorerCommand";
+            
+            // The ADF ADXCommand becomes a Fabric KQL.
+            public const string KustoQueryLanguage = "KustoQueryLanguage";
+            public const string DataLakeAnalyticsScope = "DataLakeAnalyticsScope";
+            public const string SynapseNotebook = "SynapseNotebook";
+
+            // The ADF SynapseNotebook becomes a Fabric TridentNotebook
+            public const string TridentNotebook = "TridentNotebook";
         }
 
         protected ActivityUpgrader(
@@ -82,6 +91,9 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
                 ActivityTypes.Switch => new SwitchActivityUpgrader(parentPath, adfActivityToken, machine),
                 ActivityTypes.Fail => new FailActivityUpgarder(parentPath, adfActivityToken, machine),
                 ActivityTypes.WebHook => new WebHookActivityUpgrader(parentPath, adfActivityToken, machine),
+                ActivityTypes.AzureDataExplorerCommand => new AzureDataExplorerCommandActivityUpgrader(parentPath, adfActivityToken, machine),
+                ActivityTypes.DataLakeAnalyticsScope => new DataLakeAnalyticsScopeActivityUpgrader(parentPath, adfActivityToken, machine),
+                ActivityTypes.SynapseNotebook => new SynapseNotebookActivityUpgrader(parentPath, adfActivityToken, machine),
                 _ => new UnsupportedActivityUpgrader(parentPath, adfActivityToken, machine),
             };
         }
@@ -130,7 +142,7 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
             FabricBaseActivityModel fabricModel = new FabricBaseActivityModel()
             {
                 Name = this.Name,
-                ActivityType = this.ActivityType,
+                ActivityType = this.GetFabricActivityType(),
                 Description = this.AdfBaseModel.Description,
                 DependsOn = this.AdfBaseModel.DependsOn,
                 State = this.AdfBaseModel.State,
@@ -180,6 +192,26 @@ namespace FabricUpgradePowerShellModule.Upgraders.ActivityUpgraders
             AlertCollector alerts)
         {
             return Symbol.ReadySymbol(null);
+        }
+
+        private string GetFabricActivityType()
+        {
+            if (this.ActivityType == ActivityTypes.ExecutePipeline)
+            {
+                return ActivityTypes.InvokePipeline;
+            } 
+            else if (this.ActivityType == ActivityTypes.AzureDataExplorerCommand)
+            {
+                return ActivityTypes.KustoQueryLanguage;
+            }
+            else if (this.ActivityType == ActivityTypes.SynapseNotebook)
+            {
+                return ActivityTypes.TridentNotebook;
+            }
+            else
+            {
+                return this.ActivityType;
+            }
         }
 
         /// <summary>

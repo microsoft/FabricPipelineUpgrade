@@ -1,27 +1,25 @@
-﻿// <copyright file="AzureFunctionLinkedServiceUpgrader.cs" company="Microsoft">
+﻿// <copyright file="AzureDataLakeStoreLinkedServiceUpgrader.cs" company="Microsoft">
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
 using FabricUpgradePowerShellModule.Models;
 using FabricUpgradePowerShellModule.UpgradeMachines;
 using FabricUpgradePowerShellModule.Utilities;
+
 using Newtonsoft.Json.Linq;
 
 namespace FabricUpgradePowerShellModule.Upgraders.LinkedServiceUpgraders
 {
-    /// <summary>
-    /// This class handles the Upgrade for an Azure Function LinkedService
-    /// </summary>
-    public class AzureFunctionLinkedServiceUpgrader : LinkedServiceUpgrader
+    public class AzureDataLakeStoreLinkedServiceUpgrader : LinkedServiceUpgrader
     {
-        private const string functionAppUrlPath = "properties.typeProperties.functionAppUrl";
+        private const string dataLakeStoreUriPath = "properties.typeProperties.dataLakeStoreUri";
 
         private readonly List<string> requiredAdfProperties = new List<string>
         {
-            functionAppUrlPath
+            dataLakeStoreUriPath
         };
 
-        public AzureFunctionLinkedServiceUpgrader(
+        public AzureDataLakeStoreLinkedServiceUpgrader(
             JToken adfLinkedServiceToken,
             IFabricUpgradeMachine machine)
             : base(adfLinkedServiceToken, machine)
@@ -56,17 +54,18 @@ namespace FabricUpgradePowerShellModule.Upgraders.LinkedServiceUpgraders
         /// <inheritdoc/>
         protected override FabricUpgradeConnectionHint BuildFabricConnectionHint()
         {
-            string functionAppHostName = null;
-            JToken functionAppUrlToken = this.AdfResourceToken.SelectToken(functionAppUrlPath);
+            string dataLakeEndpoint = "<dataLakeStoreUri-dynamic-expression>";
+            JToken dataLakeAccountUriToken = this.AdfResourceToken.SelectToken(dataLakeStoreUriPath);
 
-            if (functionAppUrlToken?.Type == JTokenType.String)
+            if (dataLakeAccountUriToken?.Type == JTokenType.String)
             {
-                (functionAppHostName, _) = UrlHelper.ProcessUrl(functionAppUrlToken.ToString());
+                dataLakeEndpoint = dataLakeAccountUriToken.ToString();
+                (dataLakeEndpoint, _) = UrlHelper.ProcessUrl(dataLakeEndpoint);
             }
-            
+
             return base.BuildFabricConnectionHint()
                 .WithConnectionType(this.LinkedServiceType)
-                .WithDatasource(functionAppHostName ?? this.Name);
+                .WithDatasource(dataLakeEndpoint ?? this.Name);
         }
     }
 }

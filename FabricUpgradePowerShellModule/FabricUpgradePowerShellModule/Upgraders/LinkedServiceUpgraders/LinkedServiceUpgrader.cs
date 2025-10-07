@@ -20,6 +20,11 @@ namespace FabricUpgradePowerShellModule.Upgraders.LinkedServiceUpgraders
             public const string AzureSqlDatabase = "AzureSqlDatabase";
             public const string AzureBlobFS = "AzureBlobFS";
             public const string AzureFunction = "AzureFunction";
+            public const string AzureDataExplorer = "AzureDataExplorer";
+            public const string AzureDataLakeAnalytics = "AzureDataLakeAnalytics";
+            public const string AzureDataLakeStore = "AzureDataLakeStore";
+            public const string AzureKeyVault = "AzureKeyVault";
+            public const string AzureSynapseArtifacts = "AzureSynapseArtifacts";
             public const string AzureCosmosDatabase = "CosmosDb";
         }
 
@@ -71,6 +76,10 @@ namespace FabricUpgradePowerShellModule.Upgraders.LinkedServiceUpgraders
                 LinkedServiceTypes.AzureBlobFS => new AzureDataLakeStorageGen2LinkedServiceUpgrader(linkedServiceToken, machine),
                 LinkedServiceTypes.AzureSqlDatabase => new AzureSqlDatabaseLinkedServiceUpgrader(linkedServiceToken, machine),
                 LinkedServiceTypes.AzureFunction => new AzureFunctionLinkedServiceUpgrader(linkedServiceToken, machine),
+                LinkedServiceTypes.AzureDataExplorer => new AzureDataExplorerLinkedServiceUpgrader(linkedServiceToken, machine),
+                LinkedServiceTypes.AzureDataLakeAnalytics => new AzureDataLakeAnalyticsLinkedServiceUpgrader(linkedServiceToken, machine),
+                LinkedServiceTypes.AzureDataLakeStore => new AzureDataLakeStoreLinkedServiceUpgrader(linkedServiceToken, machine),
+                LinkedServiceTypes.AzureSynapseArtifacts => new AzureSynapseArtifactsLinkedServiceUpgrader(linkedServiceToken, machine),
                 LinkedServiceTypes.AzureCosmosDatabase => new AzureCosmosDatabaseLinkedServiceUpgrader(linkedServiceToken, machine),
                 _ => new UnsupportedLinkedServiceUpgrader(linkedServiceToken, machine),
             };

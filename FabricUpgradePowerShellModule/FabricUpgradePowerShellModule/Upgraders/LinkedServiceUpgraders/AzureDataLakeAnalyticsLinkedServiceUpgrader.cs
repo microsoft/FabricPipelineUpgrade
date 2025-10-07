@@ -1,34 +1,34 @@
-﻿// <copyright file="AzureFunctionLinkedServiceUpgrader.cs" company="Microsoft">
+﻿// <copyright file="AzureDataLakeAnalyticsLinkedServiceUpgrader.cs" company="Microsoft">
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
 using FabricUpgradePowerShellModule.Models;
 using FabricUpgradePowerShellModule.UpgradeMachines;
 using FabricUpgradePowerShellModule.Utilities;
+
 using Newtonsoft.Json.Linq;
 
 namespace FabricUpgradePowerShellModule.Upgraders.LinkedServiceUpgraders
 {
-    /// <summary>
-    /// This class handles the Upgrade for an Azure Function LinkedService
-    /// </summary>
-    public class AzureFunctionLinkedServiceUpgrader : LinkedServiceUpgrader
+    public class AzureDataLakeAnalyticsLinkedServiceUpgrader : LinkedServiceUpgrader
     {
-        private const string functionAppUrlPath = "properties.typeProperties.functionAppUrl";
+        private const string accountNamePath = "properties.typeProperties.accountName";
+        private const string subscriptionIdPath = "properties.typeProperties.subscriptionId";
+        private const string resourceGroupPath = "properties.typeProperties.resourceGroupName";
 
         private readonly List<string> requiredAdfProperties = new List<string>
         {
-            functionAppUrlPath
+            accountNamePath,
+            subscriptionIdPath,
+            resourceGroupPath
         };
-
-        public AzureFunctionLinkedServiceUpgrader(
+        public AzureDataLakeAnalyticsLinkedServiceUpgrader(
             JToken adfLinkedServiceToken,
             IFabricUpgradeMachine machine)
             : base(adfLinkedServiceToken, machine)
         {
         }
 
-        /// <inheritdoc/>
         public override void Compile(AlertCollector alerts)
         {
             base.Compile(alerts);
@@ -56,17 +56,15 @@ namespace FabricUpgradePowerShellModule.Upgraders.LinkedServiceUpgraders
         /// <inheritdoc/>
         protected override FabricUpgradeConnectionHint BuildFabricConnectionHint()
         {
-            string functionAppHostName = null;
-            JToken functionAppUrlToken = this.AdfResourceToken.SelectToken(functionAppUrlPath);
+            JToken adlaAccountToken = this.AdfResourceToken.SelectToken(accountNamePath);
+            JToken adlaSubscriptionToken = this.AdfResourceToken.SelectToken(subscriptionIdPath);
+            JToken adlaResourceGroupToken = this.AdfResourceToken.SelectToken(resourceGroupPath); 
 
-            if (functionAppUrlToken?.Type == JTokenType.String)
-            {
-                (functionAppHostName, _) = UrlHelper.ProcessUrl(functionAppUrlToken.ToString());
-            }
-            
+            string datasource = $"{adlaAccountToken}--{adlaSubscriptionToken}--{adlaResourceGroupToken}";
+
             return base.BuildFabricConnectionHint()
                 .WithConnectionType(this.LinkedServiceType)
-                .WithDatasource(functionAppHostName ?? this.Name);
+                .WithDatasource(datasource ?? this.Name);
         }
     }
 }

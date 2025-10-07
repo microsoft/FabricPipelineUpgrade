@@ -1,0 +1,126 @@
+﻿{
+  "adfSupportFile": "PipelineWithScopeActivity_support_live.zip",
+
+  "expectedResponse": {
+    "state": "Succeeded",
+    "alerts": [],
+    "resolutions": [],
+
+    "result": {
+      "exportableFabricResources": [
+        {
+          "resourceType": "Connection",
+          "resourceName": "adlascope_sdip_c11_spn",
+          "resolve": [
+            {
+              "type": "LinkedServiceToConnectionId",
+              "key": "adlascope_sdip_c11_spn",
+              "targetPath": "id",
+              "hint": {
+                "linkedServiceName": "adlascope_sdip_c11_spn",
+                "connectionType": "AzureDataLakeAnalytics",
+                "datasource": "sdip-c11--60cff122-894c-469d-b25e-e2a5e7f1a209--conv",
+                "template": {
+                  "type": "LinkedServiceToConnectionId",
+                  "key": "adlascope_sdip_c11_spn",
+                  "value": "<Fabric Connection ID>"
+                }
+              }
+            }
+          ],
+          "export": {
+            "id": "00000000-0000-0000-0000-000000000000"
+          }
+        },
+        {
+          "resourceType": "Connection",
+          "resourceName": "adlsgen1_sdip_spn",
+          "resolve": [
+            {
+              "type": "LinkedServiceToConnectionId",
+              "key": "adlsgen1_sdip_spn",
+              "targetPath": "id",
+              "hint": {
+                "linkedServiceName": "adlsgen1_sdip_spn",
+                "connectionType": "AzureDataLakeStore",
+                "datasource": "sdip-c11.azuredatalakestore.net",
+                "template": {
+                  "type": "LinkedServiceToConnectionId",
+                  "key": "adlsgen1_sdip_spn",
+                  "value": "<Fabric Connection ID>"
+                }
+              }
+            }
+          ],
+          "export": {
+            "id": "00000000-0000-0000-0000-000000000000"
+          }
+        },
+        {
+          "resourceType": "DataPipeline",
+          "resourceName": "PipelineWithScopeActivity",
+          "resolve": [
+            {
+              "type": "AdfResourceNameToFabricResourceId",
+              "key": "Connection:adlascope_sdip_c11_spn",
+              "targetPath": "properties.activities[0].externalReferences.connection"
+            },
+            {
+              "type": "AdfResourceNameToFabricResourceId",
+              "key": "Connection:adlsgen1_sdip_spn",
+              "targetPath": "properties.activities[0].typeProperties.externalReferences.connection"
+            }
+          ],
+          "export": {
+            "name": "PipelineWithScopeActivity",
+            "properties": {
+              "activities": [
+                {
+                  "name": "ScopeActivity",
+                  "description": "Scope activity will have CORP IP restrictions",
+                  "type": "DataLakeAnalyticsScope",
+                  "dependsOn": [],
+                  "policy": {
+                    "timeout": "0.12:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": true,
+                    "secureInput": false
+                  },
+                  "typeProperties": {
+                    "scriptFolderPath": {
+                      "value": "@concat('adla', 'scope')",
+                      "type": "Expression"
+                    },
+                    "scriptFileName": "rando.script",
+                    "degreeOfParallelism": 20,
+                    "jobOwner": "vekandib",
+                    "jobName": {
+                      "value": "@{pipeline().DataFactory}-{pipeline().Pipeline}",
+                      "type": "Expression"
+                    },
+                    "notifier": "vekandib@microsoft.com",
+                    "scopeScriptInclusionSet": ".dll;.script;.module",
+                    "priority": {
+                      "value": "@string(rand(200, 1000))",
+                      "type": "Expression"
+                    },
+                    "runtimeVersion": "default_soy",
+                    "externalReferences": {
+                      "connection": "00000000-0000-0000-0000-000000000000"
+                    },
+                    "nebulaArguments": "-disableBonusTokens"
+                  },
+                  "externalReferences": {
+                    "connection": "00000000-0000-0000-0000-000000000000"
+                  }
+                }
+              ]
+            },
+            "annotations": []
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,226 @@
+{
+  "factory": {
+    "name": "fabric-migration-df",
+    "id": "/subscriptions/1e42591f-1f0c-4c5a-b7f2-a268f6105ec5/resourceGroups/datafactory-rg902/providers/Microsoft.DataFactory/factories/fabric-migration-df",
+    "type": "Microsoft.DataFactory/factories",
+    "properties": {
+      "provisioningState": "Succeeded",
+      "createTime": "2025-09-05T18:04:40.7890555Z",
+      "version": "2018-06-01",
+      "factoryStatistics": {
+        "totalResourceCount": 0,
+        "maxAllowedResourceCount": 0,
+        "factorySizeInGbUnits": 0,
+        "maxAllowedFactorySizeInGbUnits": 0
+      },
+      "globalParameters": {
+        "ADFScopeSupport": {
+          "type": "bool",
+          "value": true
+        }
+      },
+      "globalConfigurations": {
+        "mountedConfiguration": [
+          {
+            "workspaceId": "d3008ced-21f3-4831-aa7c-41c2f2678033",
+            "artifactId": "2f66783b-0cbd-45a0-9264-beda06fe9b1b"
+          },
+          {
+            "workspaceId": "b94dc649-7abe-45b0-bffa-c8fa31d428cf",
+            "artifactId": "1f659da3-0e46-4636-90b0-4a6c33d457d8"
+          }
+        ]
+      },
+      "trustModeClaimForMi": {
+        "value": "Enabled",
+        "editable": true
+      }
+    },
+    "eTag": "\"1300e588-0000-0200-0000-68daf0970000\"",
+    "location": "eastus2",
+    "identity": {
+      "type": "SystemAssigned",
+      "principalId": "20fe0c46-d466-471f-b4e3-ab46d39ef31a",
+      "tenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47"
+    },
+    "tags": {}
+  },
+  "pipelines": [
+    {
+      "id": "/subscriptions/1e42591f-1f0c-4c5a-b7f2-a268f6105ec5/resourceGroups/datafactory-rg902/providers/Microsoft.DataFactory/factories/fabric-migration-df/pipelines/PipelineWithADXAndScope",
+      "name": "PipelineWithADXAndScope",
+      "type": "Microsoft.DataFactory/factories/pipelines",
+      "properties": {
+        "activities": [
+          {
+            "name": "ADXCommandActivity",
+            "type": "AzureDataExplorerCommand",
+            "dependsOn": [],
+            "policy": {
+              "timeout": "0.12:00:00",
+              "retry": 0,
+              "retryIntervalInSeconds": 30,
+              "secureOutput": false,
+              "secureInput": false
+            },
+            "userProperties": [],
+            "typeProperties": {
+              "command": {
+                "value": "@concat('.create table EAADXTestTable (CustomerNo:string,Item:string,Material:string,PurchaseDate:datetime,Description:string,QtyShip:string,Cost:real)')",
+                "type": "Expression"
+              },
+              "commandTimeout": {
+                "value": "@concat('00',':', '20', ':', '00')",
+                "type": "Expression"
+              }
+            },
+            "linkedServiceName": {
+              "referenceName": "ADX_Sami",
+              "type": "LinkedServiceReference"
+            }
+          },
+          {
+            "name": "ScopeActivity",
+            "description": "Scope activity will have CORP IP restrictions",
+            "type": "DataLakeAnalyticsScope",
+            "dependsOn": [
+              {
+                "activity": "ADXCommandActivity",
+                "dependencyConditions": [
+                  "Succeeded",
+                  "Failed",
+                  "Completed",
+                  "Skipped"
+                ]
+              }
+            ],
+            "policy": {
+              "timeout": "0.12:00:00",
+              "retry": 0,
+              "retryIntervalInSeconds": 30,
+              "secureOutput": true,
+              "secureInput": false
+            },
+            "userProperties": [],
+            "typeProperties": {
+              "scriptFolderPath": {
+                "value": "@concat('adla', 'scope')",
+                "type": "Expression"
+              },
+              "scriptFileName": "rando.script",
+              "degreeOfParallelism": 20,
+              "jobOwner": "vekandib",
+              "jobName": {
+                "value": "@{pipeline().DataFactory}-{pipeline().Pipeline}",
+                "type": "Expression"
+              },
+              "notifier": "vekandib@microsoft.com",
+              "scopeScriptInclusionSet": ".dll;.script;.module",
+              "priority": {
+                "value": "@string(rand(200,1000))",
+                "type": "Expression"
+              },
+              "runtimeVersion": "default_soy",
+              "scriptLinkedService": {
+                "referenceName": "adlsgen1_sdip_spn",
+                "type": "LinkedServiceReference"
+              },
+              "nebulaArguments": "-disableBonusTokens"
+            },
+            "linkedServiceName": {
+              "referenceName": "adlascope_sdip_c11_spn",
+              "type": "LinkedServiceReference"
+            }
+          }
+        ],
+        "policy": {
+          "elapsedTimeMetric": {}
+        },
+        "annotations": [],
+        "lastPublishTime": "2025-09-30T22:15:17Z"
+      },
+      "etag": "2100fc9b-0000-0200-0000-68dc56750000"
+    }
+  ],
+  "datasets": [],
+  "linkedservices": [
+    {
+      "id": "/subscriptions/1e42591f-1f0c-4c5a-b7f2-a268f6105ec5/resourceGroups/datafactory-rg902/providers/Microsoft.DataFactory/factories/fabric-migration-df/linkedservices/ADX_Sami",
+      "name": "ADX_Sami",
+      "type": "Microsoft.DataFactory/factories/linkedservices",
+      "properties": {
+        "annotations": [],
+        "type": "AzureDataExplorer",
+        "typeProperties": {
+          "endpoint": "https://adfadxdataflowserver.westus.kusto.windows.net",
+          "database": "adfe2edemodb"
+        }
+      },
+      "etag": "bd002d84-0000-0200-0000-68d6e0750000"
+    },
+    {
+      "id": "/subscriptions/1e42591f-1f0c-4c5a-b7f2-a268f6105ec5/resourceGroups/datafactory-rg902/providers/Microsoft.DataFactory/factories/fabric-migration-df/linkedservices/adlascope_sdip_c11_spn",
+      "name": "adlascope_sdip_c11_spn",
+      "type": "Microsoft.DataFactory/factories/linkedservices",
+      "properties": {
+        "annotations": [],
+        "type": "AzureDataLakeAnalytics",
+        "typeProperties": {
+          "accountName": "sdip-c11",
+          "servicePrincipalId": "4c22e9d1-dbb7-4c2a-ad8f-4a98e32656ba",
+          "servicePrincipalKey": {
+            "type": "AzureKeyVaultSecret",
+            "store": {
+              "referenceName": "MyKeyVaultLS",
+              "type": "LinkedServiceReference"
+            },
+            "secretName": "AdfMaestroSpnClientCert"
+          },
+          "tenant": "72f988bf-86f1-41af-91ab-2d7cd011db47",
+          "subscriptionId": "60cff122-894c-469d-b25e-e2a5e7f1a209",
+          "resourceGroupName": "conv"
+        }
+      },
+      "etag": "14004bdf-0000-0200-0000-68daf09c0000"
+    },
+    {
+      "id": "/subscriptions/1e42591f-1f0c-4c5a-b7f2-a268f6105ec5/resourceGroups/datafactory-rg902/providers/Microsoft.DataFactory/factories/fabric-migration-df/linkedservices/adlsgen1_sdip_spn",
+      "name": "adlsgen1_sdip_spn",
+      "type": "Microsoft.DataFactory/factories/linkedservices",
+      "properties": {
+        "annotations": [],
+        "type": "AzureDataLakeStore",
+        "typeProperties": {
+          "dataLakeStoreUri": "https://sdip-c11.azuredatalakestore.net/webhdfs/v1",
+          "servicePrincipalId": " 4c22e9d1-dbb7-4c2a-ad8f-4a98e32656ba",
+          "servicePrincipalKey": {
+            "type": "AzureKeyVaultSecret",
+            "store": {
+              "referenceName": "MyKeyVaultLS",
+              "type": "LinkedServiceReference"
+            },
+            "secretName": "AdfMaestroSpnClientCert"
+          },
+          "tenant": "72f988bf-86f1-41af-91ab-2d7cd011db47",
+          "subscriptionId": "60cff122-894c-469d-b25e-e2a5e7f1a209",
+          "resourceGroupName": "conv"
+        }
+      },
+      "etag": "140049df-0000-0200-0000-68daf09c0000"
+    },
+    {
+      "id": "/subscriptions/1e42591f-1f0c-4c5a-b7f2-a268f6105ec5/resourceGroups/datafactory-rg902/providers/Microsoft.DataFactory/factories/fabric-migration-df/linkedservices/MyKeyVaultLS",
+      "name": "MyKeyVaultLS",
+      "type": "Microsoft.DataFactory/factories/linkedservices",
+      "properties": {
+        "annotations": [],
+        "type": "AzureKeyVault",
+        "typeProperties": {
+          "baseUrl": "https://vekandib-test-kv.vault.azure.net/"
+        }
+      },
+      "etag": "140047df-0000-0200-0000-68daf09b0000"
+    }
+  ],
+  "triggers": []
+}

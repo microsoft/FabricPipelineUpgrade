@@ -363,12 +363,25 @@ namespace FabricUpgradePowerShellModule.Importers
             // Most of external activities reference linked services directly
             // Examples: AzureFunctionActivity, SqlServerStoredProcedure
             if (activityType == "AzureFunctionActivity"
-                || activityType == "SqlServerStoredProcedure")
+                || activityType == "SqlServerStoredProcedure"
+                || activityType == "AzureDataExplorerCommand"
+                || activityType == "DataLakeAnalyticsScope"
+                || activityType == "SynapseNotebook")
             {
                 string linkedServiceName = activity.SelectToken("linkedServiceName.referenceName")?.ToString();
                 if (!string.IsNullOrEmpty(linkedServiceName))
                 {
                     await ImportLinkedServiceAsync(client, linkedServiceName, importedLinkedServices, cancellationToken).ConfigureAwait(false);
+
+                    if (activityType == "DataLakeAnalyticsScope")
+                    {
+                        // DataLakeAnalyticsScope activity will have script linked service
+                        string scriptLinkedServiceName = activity.SelectToken("typeProperties.scriptLinkedService.referenceName")?.ToString();
+                        if (!string.IsNullOrEmpty(scriptLinkedServiceName))
+                        {
+                            await ImportLinkedServiceAsync(client, scriptLinkedServiceName, importedLinkedServices, cancellationToken).ConfigureAwait(false);
+                        }
+                    }
                 }
             }
         }
@@ -426,6 +439,7 @@ namespace FabricUpgradePowerShellModule.Importers
                 JObject linkedService = await client.GetLinkedServiceAsync(linkedServiceName, cancellationToken).ConfigureAwait(false);
                 this.upgradePackage.LinkedServices[linkedServiceName] = linkedService;
                 importedLinkedServices.Add(linkedServiceName);
+                Console.WriteLine($"Imported linked service: {linkedServiceName}" );
             }
             catch (Exception ex)
             {

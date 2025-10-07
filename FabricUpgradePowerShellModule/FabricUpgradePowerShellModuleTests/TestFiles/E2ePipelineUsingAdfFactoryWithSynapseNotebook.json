@@ -1,0 +1,95 @@
+{
+  "adfArtifactInfo": "PipelineWithSynapseNotebook.json",
+
+  "resolutions": [
+    {
+      "type": "LinkedServiceToConnectionId",
+      "key": "AzureSynapseArtifactsLS",
+      "value": "19b1fc19-969f-4183-befc-c85edc4ff834"
+    },
+    {
+      "type": "AdfResourceNameToFabricResourceId",
+      "key": "Notebook:SynapseNotebook--SynpaseNBActivity",
+      "value": "54912657-72a1-4c92-97a6-852a0bb53788"
+    }
+  ],
+
+  "guidSubstitutions": [
+    {
+      "comment": "Set the workspaceId of the ExecutePipeline activity to the workspaceId (-1 means 'workspaceId').",
+      "path": "[0].definition.properties.activities[0].typeProperties.workspaceId",
+      "guidIndex": -1
+    }
+  ],
+
+  "expectedResponse": {
+    "state": "Succeeded",
+    "alerts": [],
+    "result": {
+      "exportedFabricResources": {
+        "PipelineWithSynapseNotebook": {
+          "id": 0,
+          "type": "DataPipeline",
+          "displayName": "PipelineWithSynapseNotebook",
+          "description": null,
+          "workspaceId": ""
+        },
+        "AzureSynapseArtifactsLS": {
+          "id": "19b1fc19-969f-4183-befc-c85edc4ff834"
+        }
+      }
+    }
+  },
+
+  "expectedItems": [
+    {
+      "item": {
+        "workspaceId": "",
+        "id": 0,
+        "type": "DataPipeline",
+        "displayName": "PipelineWithSynapseNotebook",
+        "description": null
+      },
+      "definition": {
+        "name": "PipelineWithSynapseNotebook",
+        "properties": {
+          "activities": [
+            {
+              "name": "SynpaseNBActivity",
+              "type": "TridentNotebook",
+              "dependsOn": [],
+              "policy": {
+                "timeout": "0.00:20:00",
+                "retry": 2,
+                "retryIntervalInSeconds": 90,
+                "secureOutput": false,
+                "secureInput": false
+              },
+              "description": null,
+              "typeProperties": {
+                "notebookId": "54912657-72a1-4c92-97a6-852a0bb53788",
+                "workspaceId": "00000000-0000-0000-0000-000000000000",
+                "parameters": {
+                  "testInt": {
+                    "value": "10",
+                    "type": "int"
+                  }
+                }
+              },
+              "externalReferences": {
+                "connection": "19b1fc19-969f-4183-befc-c85edc4ff834"
+              }
+            }
+          ]
+        },
+        "annotations": []
+      }
+    }
+  ],
+
+  "expectedEndpointEvents": [
+    "LIST DataPipeline",
+    "CREATE DataPipeline 'PipelineWithSynapseNotebook' => $0"
+  ]
+
+}

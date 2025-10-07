@@ -255,8 +255,11 @@ namespace FabricUpgradePowerShellModuleTests
         /// Test Import-AdfFactory flow with ADF API mock
         /// </summary>
         [TestMethod]
-        [DataRow("E2ePipelineWithLookup_Foreach_Copy_AdfFactory")]
-        [DataRow("E2eAllPipelines_AdfFactory")]
+        [DataRow("E2ePipelineUsingAdfFactoryWithConditionalExecute")]
+        [DataRow("E2ePipelineUsingAdfFactoryWithLookupForeachCopy")]
+        [DataRow("E2ePipelineUsingAdfFactoryWithSProcAndFunction")]
+        [DataRow("E2ePipelineUsingAdfFactoryWithADxAndScope")]
+        [DataRow("E2ePipelineUsingAdfFactoryWithSynapseNotebook")]
         [DataRow("E2ePipelineWithCopy_CosmosNoSqlToCosmosNoSql")]
         [DataRow("E2ePipelineWithCopy_CosmosNoSqlToCosmosNoSql1")]
         public async Task EndToEndUpgradePipeline_AdfFactory_TestAsync(string testConfigFilename)

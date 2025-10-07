@@ -1,0 +1,91 @@
+﻿{
+  "adfSupportFile": "PipelineWithSynapseNotebook_support_live.zip",
+
+  "expectedResponse": {
+    "state": "Succeeded",
+    "alerts": [],
+    "result": {
+      "exportableFabricResources": [
+        {
+          "resourceType": "Connection",
+          "resourceName": "AzureSynapseArtifactsLS",
+          "resolve": [
+            {
+              "type": "LinkedServiceToConnectionId",
+              "key": "AzureSynapseArtifactsLS",
+              "targetPath": "id",
+              "hint": {
+                "linkedServiceName": "AzureSynapseArtifactsLS",
+                "connectionType": "AzureSynapseArtifacts",
+                "datasource": "vekandibworkspace.dev.azuresynapse.net",
+                "template": {
+                  "type": "LinkedServiceToConnectionId",
+                  "key": "AzureSynapseArtifactsLS",
+                  "value": "<Fabric Connection ID>"
+                }
+              }
+            }
+          ],
+          "export": {
+            "id": "00000000-0000-0000-0000-000000000000"
+          }
+        },
+        {
+          "resourceType": "DataPipeline",
+          "resourceName": "PipelineWithSynapseNotebook",
+          "resolve": [
+            {
+              "type": "AdfResourceNameToFabricResourceId",
+              "key": "Connection:AzureSynapseArtifactsLS",
+              "targetPath": "properties.activities[0].externalReferences.connection"
+            },
+            {
+              "type": "WorkspaceId",
+              "targetPath": "properties.activities[0].typeProperties.workspaceId"
+            },
+            {
+              "type": "AdfResourceNameToFabricResourceId",
+              "key": "Notebook:SynapseNotebook--SynpaseNBActivity",
+              "targetPath": "properties.activities[0].typeProperties.notebookId"
+            }
+          ],
+          "export": {
+            "name": "PipelineWithSynapseNotebook",
+            "properties": {
+              "activities": [
+                {
+                  "name": "SynpaseNBActivity",
+                  "type": "TridentNotebook",
+                  "dependsOn": [],
+                  "policy": {
+                    "timeout": "0.00:20:00",
+                    "retry": 2,
+                    "retryIntervalInSeconds": 90,
+                    "secureOutput": false,
+                    "secureInput": false
+                  },
+                  "description": null,
+                  "typeProperties": {
+                    "notebookId": "00000000-0000-0000-0000-000000000000",
+                    "workspaceId": "00000000-0000-0000-0000-000000000000",
+                    "parameters": {
+                      "testInt": {
+                        "value": "10",
+                        "type": "int"
+                      }
+                    }
+                  },
+                  "externalReferences": {
+                    "connection": "00000000-0000-0000-0000-000000000000"
+                  }
+                }
+              ]
+            },
+            "annotations": []
+          }
+        }
+      ]
+    },
+    "resolutions": []
+  }
+}

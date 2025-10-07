@@ -1,0 +1,121 @@
+{
+  "factory": {
+    "name": "fabric-migration-df",
+    "id": "/subscriptions/1e42591f-1f0c-4c5a-b7f2-a268f6105ec5/resourceGroups/datafactory-rg902/providers/Microsoft.DataFactory/factories/fabric-migration-df",
+    "type": "Microsoft.DataFactory/factories",
+    "properties": {
+      "provisioningState": "Succeeded",
+      "createTime": "2025-09-05T18:04:40.7890555Z",
+      "version": "2018-06-01",
+      "factoryStatistics": {
+        "totalResourceCount": 0,
+        "maxAllowedResourceCount": 0,
+        "factorySizeInGbUnits": 0,
+        "maxAllowedFactorySizeInGbUnits": 0
+      },
+      "globalParameters": {
+        "ADFScopeSupport": {
+          "type": "bool",
+          "value": true
+        }
+      },
+      "globalConfigurations": {},
+      "trustModeClaimForMi": {
+        "value": "Enabled",
+        "editable": true
+      }
+    },
+    "eTag": "\"1300e588-0000-0200-0000-68daf0970000\"",
+    "location": "eastus2",
+    "identity": {
+      "type": "SystemAssigned",
+      "principalId": "20fe0c46-d466-471f-b4e3-ab46d39ef31a",
+      "tenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47"
+    },
+    "tags": {}
+  },
+  "pipelines": [
+    {
+      "id": "/subscriptions/1e42591f-1f0c-4c5a-b7f2-a268f6105ec5/resourceGroups/datafactory-rg902/providers/Microsoft.DataFactory/factories/fabric-migration-df/pipelines/PipelineWithSynapseNotebook",
+      "name": "PipelineWithSynapseNotebook",
+      "type": "Microsoft.DataFactory/factories/pipelines",
+      "properties": {
+        "activities": [
+          {
+            "name": "SynpaseNBActivity",
+            "type": "SynapseNotebook",
+            "dependsOn": [],
+            "policy": {
+              "timeout": "0.00:20:00",
+              "retry": 2,
+              "retryIntervalInSeconds": 90,
+              "secureOutput": false,
+              "secureInput": false
+            },
+            "userProperties": [],
+            "typeProperties": {
+              "notebook": {
+                "referenceName": {
+                  "value": "testnotebook",
+                  "type": "Expression"
+                },
+                "type": "NotebookReference"
+              },
+              "parameters": {
+                "testInt": {
+                  "value": "10",
+                  "type": "int"
+                }
+              },
+              "snapshot": true,
+              "sparkPool": {
+                "referenceName": {
+                  "value": "testsparkpool",
+                  "type": "Expression"
+                },
+                "type": "BigDataPoolReference"
+              },
+              "executorSize": "Small",
+              "conf": {
+                "spark.dynamicAllocation.enabled": true,
+                "spark.dynamicAllocation.minExecutors": 2,
+                "spark.dynamicAllocation.maxExecutors": 4
+              },
+              "driverSize": "Small",
+              "numExecutors": 2
+            },
+            "linkedServiceName": {
+              "referenceName": "AzureSynapseArtifactsLS",
+              "type": "LinkedServiceReference"
+            }
+          }
+        ],
+        "policy": {
+          "elapsedTimeMetric": {}
+        },
+        "annotations": [],
+        "lastPublishTime": "2025-10-01T23:56:31Z"
+      },
+      "etag": "2f0094c2-0000-0200-0000-68ddbfaf0000"
+    }
+  ],
+  "datasets": [],
+  "linkedservices": [
+    {
+      "id": "/subscriptions/1e42591f-1f0c-4c5a-b7f2-a268f6105ec5/resourceGroups/datafactory-rg902/providers/Microsoft.DataFactory/factories/fabric-migration-df/linkedservices/AzureSynapseArtifactsLS",
+      "name": "AzureSynapseArtifactsLS",
+      "type": "Microsoft.DataFactory/factories/linkedservices",
+      "properties": {
+        "annotations": [],
+        "type": "AzureSynapseArtifacts",
+        "typeProperties": {
+          "endpoint": "https://vekandibworkspace.dev.azuresynapse.net",
+          "authentication": "MSI",
+          "workspaceResourceId": ""
+        }
+      },
+      "etag": "2f000f17-0000-0200-0000-68ddad370000"
+    }
+  ],
+  "triggers": []
+}
