@@ -12,7 +12,7 @@
 RootModule = 'FabricPipelineUpgrade.dll'
 
 # Version number of this module.
-ModuleVersion = '0.0.3'
+ModuleVersion = '1.0.0'
 
 # Supported PSEditions
 # CompatiblePSEditions = @()
@@ -78,7 +78,8 @@ CmdletsToExport = @(
     "ConvertTo-FabricResources",
     "Import-FabricResolutions",
     "Export-FabricResources",
-    "Select-WhatIf"
+    "Select-WhatIf",
+    "Import-SynapseWorkspace"
 )
 
 # Variables to export from this module
